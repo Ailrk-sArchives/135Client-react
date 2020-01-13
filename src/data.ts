@@ -1,0 +1,276 @@
+import axios from 'axios';
+import { apiBaseUrl } from './config';
+
+
+const makeApi =
+  <T>(url: string, api_func: ((url: string, params?: T) => any),
+    params?: T) => {
+    if (!params) return api_func(url);
+    return api_func(url, params);
+  };
+
+const concatPath = (base: string, path: string) => {
+  // handel with back slashFunction
+  if (base.slice(-1) === '/') { base = base.slice(0, -1) };
+  if (path.slice(0, 1) !== '/') { path = '/' + path };
+  return base + path;
+};
+
+export interface Spot {
+  project_id?: number;
+  project_name?: string;
+  spot_id?: number;
+  spot_name?: string;
+  spot_type?: string;
+};
+
+export interface Device {
+  create_time?: string;
+  device_id?: number;
+  device_name?: string;
+  device_type?: string;
+  modify_time?: string;
+  online?: boolean;
+  spot_id?: number;
+};
+
+export interface ClimateArea {
+  area_name: string
+};
+
+export interface Location {
+  city?: string;
+  climate_area?: ClimateArea;
+  province?: string;
+};
+
+
+export interface Company {
+  company_name: string;
+};
+
+export interface Project {
+ area?: number;
+ building_height?: string;
+ building_type?: string;
+ construction_company?: Company;
+ demo_area?: string;
+ description?: string;
+ district?: string;
+ finished_time?: string;
+ floor?: string;
+ latitude: number;
+ location?: Location;
+ longitude: number;
+ outdoor_spot?: string;
+ project_company?: Company;
+ project_id?: string;
+ project_name?: string;
+ record_started_from?: string;
+ started_time?: string;
+ tech_support_company?: Company;
+};
+
+export interface SpotRecord {
+  ac_power?: number;
+  co2?: number;
+  device_id?: number;
+  humidity?: number;
+  pm25?: number;
+  spot_record_id?: number;
+  spot_record_time?: number;
+  temperature?: number;
+  window_opened?: boolean;
+};
+
+export interface ApiResponse {
+  status: number;
+  data: any;
+  message: string;
+};
+
+export interface ApiRequest<T> {
+  request: T;
+};
+
+export interface PaginationRequest {
+  size: number;
+  pageNo: number;
+};
+
+export interface ProjectDetail {
+  project_id?: number;
+  image?: string;
+  image_description?: string;
+};
+
+const makeRequest = <T>(params: T) => {
+  return { "request": params };
+}
+
+const makeJsonRequestHeader = () => ({ headers: {"Content-Type": "application/json"}});
+
+const good_response = (response: any): boolean => response.data.status === 0;
+
+export const makePaginationRequest =
+  (pageNo: number, size: number): PaginationRequest => {
+  const paginationRequest: PaginationRequest = {
+    size: size,
+    pageNo: pageNo
+  };
+  return paginationRequest;
+}
+
+/* Server Response is wrapped in http response json
+    it has structure like
+   {
+      status: 200,
+      statusText: 'OK',
+      data: {
+        status: 0,
+        message: ...,
+        data: {
+          ...    // data from the server
+        }
+      }
+      ...
+   }
+  TODO: if return value is not 0, return message instead.
+*/
+export type Message = string;
+
+/*
+ * project_view
+ */
+export const projectViewGet = (): Promise<Array<Project>> =>
+  makeApi(concatPath(apiBaseUrl, '/api/v1/project/all'),
+    (url: string) => {
+      return axios.get(url)
+        .then((response) => {if (good_response(response)) return response.data.data;})
+        .catch((e) => console.error(e));
+    });
+
+export const projectViewPost = (params: Project) =>
+  makeApi(concatPath(apiBaseUrl, '/api/v1/project/all'),
+    (url: string) => {
+      return axios.post(url, makeRequest(params), makeJsonRequestHeader())
+        .then((response) => {if (good_response(response)) return response.data.data;})
+        .catch((e) => console.error(e));
+
+    },
+    params);
+
+/*
+ * spot_view
+ */
+export const spotViewGet = (pid: number): Promise<Array<Spot>> =>
+  makeApi(concatPath(apiBaseUrl, `/api/v1/project/${pid}/spots`),
+    (url: string) => {
+
+      return axios.get(url)
+        .then((response) => {if (good_response(response)) return response.data.data;})
+        .catch((e) => console.error(e));
+
+    });
+
+export const spotViewPost = (params: Spot, pid: number) =>
+  makeApi(concatPath(apiBaseUrl, `/api/v1/project/${pid}/spots`),
+    (url: string) => {
+
+      return axios.post(url, makeRequest(params), makeJsonRequestHeader())
+        .then((response) => {if (good_response(response)) return response.data.data;})
+        .catch((e) => console.error(e));
+
+    },
+    params);
+
+/*
+ * spot_record_view
+ */
+export const spotRecordView = (did: number): Promise<Array<SpotRecord>> =>
+  makeApi(concatPath(apiBaseUrl, `/api/v1/device/${did}/records`),
+    (url: string) => {
+
+      return axios.get(url)
+        .then((response) => {if (good_response(response)) return response.data.data;})
+        .catch((e) => console.error(e));
+    });
+
+export const projecPicView = (pid: number): Promise<Array<ProjectDetail>> =>
+  makeApi(concatPath(apiBaseUrl, `/api/v1/project_pic/${pid}`),
+    (url: string) => {
+
+      return axios.get(url)
+        .then((response) => {if (good_response(response)) return response.data.data;})
+        .catch((e) => console.error(e));
+    });
+
+/*
+ * project_view_update_delete
+ */
+export const projectViewUpdate = (params: Project, pid: number): Promise<Array<Project>> =>
+  makeApi(concatPath(apiBaseUrl, `api/v1/project/${pid}`),
+    (url: string) => {
+      return axios.put(url, params)
+        .then((response) => {if (good_response(response)) return response.data.data;})
+        .catch((e) => console.error(e))
+    });
+
+export const projectViewDelete = (params: Project, pid: number): Promise<Message> =>
+  makeApi(concatPath(apiBaseUrl, `api/v1/project/${pid}`),
+    (url: string) => {
+      return axios.put(url, makeRequest(params))
+        .then((response) => response.data.message)  // always return message from the server.
+        .catch((e) => console.error(e))
+    });
+
+/* spot_generic_view_update_delete */
+export const spotViewUpdate = (params: Project,
+  pid: number, sid: number): Promise<Array<Project>> =>
+  makeApi(concatPath(apiBaseUrl, `api/v1/project/spot/${pid}`),
+    (url: string) => {
+      return axios.put(url, makeRequest(params))
+        .then((response) => {if (good_response(response)) return response.data.data})
+        .catch((e) => console.error(e))
+    });
+
+export const spotViewDelete = (params: Project, pid: number): Promise<Message> =>
+  makeApi(concatPath(apiBaseUrl, `api/v1/spot/${pid}`),
+    (url: string) => {
+      return axios.put(url, makeRequest(params))
+        .then((response) => response.data.message)  // always return message from the server.
+        .catch((e) => console.error(e))
+    });
+
+
+/*
+ * paged post
+ */
+export const projectPaged = (params: PaginationRequest): Promise<Array<Project>> =>
+  makeApi(concatPath(apiBaseUrl, `api/v1/project`),
+    (url: string, params) => {
+      return axios.post(url, makeRequest(params), makeJsonRequestHeader())
+        .then((response) => {if (good_response(response)) return response.data.data;})
+        .catch((e) => console.error(e))
+    },
+    params);
+
+export const spotPaged = (params: PaginationRequest): Promise<Array<Spot>> =>
+  makeApi(concatPath(apiBaseUrl, `api/v1/spot`),
+    (url: string) => {
+      return axios.post(url, makeRequest(params), makeJsonRequestHeader())
+        .then((response) => {if (good_response(response)) return response.data.data})
+        .catch((e) => console.error(e))
+    },
+    params);
+
+export const spotRecordPaged =
+  (params: PaginationRequest, did: number): Promise<Array<SpotRecord>> =>
+    makeApi(concatPath(apiBaseUrl, `api/v1/spot_record/${did}`),
+      (url: string) => {
+        return axios.post(url, makeRequest(params), makeJsonRequestHeader())
+          .then((response) => {if (good_response(response)) return response.data.data})
+          .catch((e) => console.error(e))
+      },
+      params);
+

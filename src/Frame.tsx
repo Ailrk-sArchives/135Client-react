@@ -10,9 +10,8 @@ const Frame: React.FC<{children: any}> = (props) => {
 
   return (
     <Pane
-      style={style}
       paddingLeft="2%" paddingRight="2%"
-      marginTop={72+24} marginBottom={36} >
+      marginTop={72+24} marginBottom={20} >
 
       { props.children }
     </Pane>

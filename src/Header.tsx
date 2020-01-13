@@ -3,7 +3,6 @@
 import React, {MouseEvent, useState } from 'react';
 import { Redirect } from 'react-router-dom';
 import {Pane, Strong, Text, Icon, Tab, TabNavigation, IconName } from 'evergreen-ui';
-import Mapp from './Mapp';
 import history from './history';
 
 const Header: React.FC = (props) => {
@@ -15,7 +14,7 @@ const Header: React.FC = (props) => {
     right: 0,
     top: 0,
     left: 0,
-    zIndex: 3000
+    zIndex: 1001
   };
 
 
@@ -37,6 +36,7 @@ const Header: React.FC = (props) => {
 
           <Title titlename={"十三五\"长江流域建筑供暖空调解决方案和相应系统\"云平台"}/>
           <Topnav tablists={[
+            ['项目信息', 'office', '/'],
             ['历史数据', 'join-table', 'Table'],
             ['实时数据', 'timeline-line-chart', ''] ,
             ['对比数据', 'comparison', '']
