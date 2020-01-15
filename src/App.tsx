@@ -1,15 +1,19 @@
 /* Entrance of the App
 */
 import React, { useState, Suspense, lazy } from 'react';
-import {Pane, Text, Spinner } from 'evergreen-ui';
+import {Pane, Text, Spinner, Icon, defaultTheme } from 'evergreen-ui';
 import { Router, Route, Switch } from 'react-router-dom';
 import Frame from './Frame';
 import Header from './Header';
 import Sidebar from './Sidebar/Sidebar';
 import history from './history';
+import {Rectangle} from 'leaflet';
 
 const Mapp: any = lazy(() => import('./Mapp/Mapp'));
-const Table: any = lazy(() => import('./Table/Table'));
+const DeviceTable: any = lazy(() => import('./Table/DeviceTable'));
+const ProjectTable: any = lazy(() => import('./Table/ProjectTable'));
+const RecordTable: any = lazy(() => import('./Table/RecordTable'));
+const SpotTable: any = lazy(() => import('./Table/SpotTable'));
 const Test: any = lazy(() => import('./Test'));
 
 
@@ -26,10 +30,10 @@ const App: React.FC = () => {
   return ( // routing.
     <Pane className="Main" position="relative" height="100hv">
 
-      <Header/>
 
       <Router history={history}>
 
+        <Header/>
         <Suspense fallback= {
           <Pane alignItems="center" display="flex"
           justifyContent="center" height={800}> <Spinner/> </Pane> }>
@@ -37,18 +41,19 @@ const App: React.FC = () => {
             <Route exact path="/">
               <Sidebar sidebarButtons={
                 [
-                  ['项目地图', 'map', '/'],
-                  ['项目列表', 'panel-table', '/']
+                  ['项目地图', 'map', '/', '展示项目所在地'],
+                  ['项目列表', 'panel-table', '/ProjectTable', '展示所有项目']
                 ]
               }
                 sidebarWidth={sidebarWidth}
                 headerHeight={headerHeight}/>
             </Route>
 
-            <Route path="/Map" component={Mapp}>
+              <Route path={["/Map", "/ProjectTable", "/Project/:sid/Spots"]} component={Mapp}>
               <Sidebar sidebarButtons={
                 [
-                  ['项目地图', 'map', '/Map']
+                  ['项目地图', 'map', '/', '展示项目所在地'],
+                  ['项目列表', 'panel-table', '/ProjectTable', '展示所有项目']
                 ]
               }
                 sidebarWidth={sidebarWidth}
@@ -56,10 +61,10 @@ const App: React.FC = () => {
 
             </Route>
 
-            <Route path="/Table" component={Table}>
+            <Route path={["/DeviceTable", "/Device/:did/SpotRecords"]} component={DeviceTable}>
               <Sidebar sidebarButtons={
                 [
-                  ['数据表格', 'panel-table', '/Table']
+                  ['设备列表', 'panel-table', '/DeviceTable', '展示所有设备']
                 ]
               }
                 sidebarWidth={sidebarWidth}
@@ -69,7 +74,7 @@ const App: React.FC = () => {
             <Route path="/Test" component={Test}>
               <Sidebar sidebarButtons={
                 [
-                  ['测试', '', '/Test']
+                  ['测试', '', '/Test', '']
                 ]
               }
                 sidebarWidth={sidebarWidth}
@@ -87,9 +92,21 @@ const App: React.FC = () => {
             justifyContent="center" height={800}> <Spinner/> </Pane> }>
             <Switch>
               <Route exact path="/" component={Mapp}/>
+
               <Route path="/Map" component={Mapp}/>
-              <Route path="/Table" component={Table}/>
+
+              <Route path="/ProjectTable" component={ProjectTable}/>
+
+              <Route path="/DeviceTable" component={DeviceTable} />
+
+              <Route path="/Device/:did/SpotRecords"
+                children={React.createElement(RecordTable)}/>
+
+              <Route path="/Project/:sid/Spots"
+                children={React.createElement(SpotTable)}/>
+
               <Route path="/Test" component={Test}/>
+
             </Switch>
           </Suspense>
         </Router>

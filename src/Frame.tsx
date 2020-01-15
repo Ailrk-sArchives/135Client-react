@@ -1,9 +1,19 @@
 /* Frame to hold components.
 */
-import React from 'react';
-import { Pane, Text } from 'evergreen-ui';
+import React, {useState, cloneElement} from 'react';
+import {Pane} from 'evergreen-ui';
+import getZoomRatio from './utils/winZoom';
+import {grapName} from './utils/utils';
 
-const Frame: React.FC<{children: any}> = (props) => {
+
+type FrameComponent = React.FunctionComponentElement<{currentZoom: number}>
+
+const Frame: React.FC<{children: FrameComponent}> = (props) => {
+  const [currentZoom, getCurrentZoom] = useState<number>(getZoomRatio());
+
+  window.onresize = () => getCurrentZoom(getZoomRatio());
+  document.onfullscreenchange = () => getCurrentZoom(getZoomRatio());
+
   const style: React.CSSProperties = {
     bottom: 0,
   };
@@ -13,7 +23,7 @@ const Frame: React.FC<{children: any}> = (props) => {
       paddingLeft="2%" paddingRight="2%"
       marginTop={72+24} marginBottom={20} >
 
-      { props.children }
+      { React.cloneElement(props.children, {currentZoom: currentZoom}) }
     </Pane>
   );
 };

@@ -1,13 +1,11 @@
 /* Reusable Header.
  */
-import React, {MouseEvent, useState } from 'react';
-import { Redirect } from 'react-router-dom';
-import {Pane, Strong, Text, Icon, Tab, TabNavigation, IconName } from 'evergreen-ui';
+import React, { useState } from 'react';
+import {Pane, Strong, Text, Icon, Tab, TabNavigation, IconName} from 'evergreen-ui';
+import TabContentResolver, {TabContentTriple} from './utils/TabContentResolver';
 import history from './history';
 
 const Header: React.FC = (props) => {
-  const [homerefer, setHomerefer] = useState<string | null>(null);
-  const onTitleRedirect = (): void => setHomerefer('/');
   const fixedHeaderCss: React.CSSProperties = {
     position: "fixed",
     width: "100hv",
@@ -19,7 +17,6 @@ const Header: React.FC = (props) => {
 
 
   // redirect to home
-  if (homerefer) history.push('/');
   return (
     <div style={fixedHeaderCss}>
       <Pane elevation={3}
@@ -31,15 +28,14 @@ const Header: React.FC = (props) => {
           height={72}
           padding={24}
           display="flex"
-          justifyContent="space-between"
-          onClick={onTitleRedirect}>
+          justifyContent="space-between">
 
           <Title titlename={"十三五\"长江流域建筑供暖空调解决方案和相应系统\"云平台"}/>
           <Topnav tablists={[
-            ['项目信息', 'office', '/'],
-            ['历史数据', 'join-table', 'Table'],
-            ['实时数据', 'timeline-line-chart', ''] ,
-            ['对比数据', 'comparison', '']
+            ['项目信息', 'office', '/', '项目信息汇总'],
+            ['历史数据', 'join-table', '/DeviceTable', '设备列表历史汇总'],
+            ['实时数据', 'timeline-line-chart', ,'实时设备数据汇总'] ,
+            ['数据分析', 'comparison', , '数据对比及可视化']
           ]}/>
         </Pane>
 
@@ -59,20 +55,15 @@ const Title: React.FC<{titlename: string}> = (props) => {
 
 };
 
-const Topnav: React.FC<{tablists: Array<Array<string>>}> = (props) => {
-  const tablists: Array<Array<string>> = props.tablists;
+const Topnav: React.FC<{tablists: Array<TabContentTriple>}> = (props) => {
+  const tablists: Array<TabContentTriple> = props.tablists;
 
   return (
     <TabNavigation display="flex">
       {
         tablists.map((tab, index) => (
-          <Tab key={tab[0]} is="a" href={tab[2]} id={tab} size={600}>
-            <Icon icon={tab[1] as IconName} marginRight={8}/>
-            <Text size={400}>
-              {tab[0]}
-            </Text>
-          </Tab>
-      ))}
+          <TabContentResolver contentList={tab} index={index} key={index} tabwidth={100}/>))
+      }
     </TabNavigation>
   );
 };

@@ -2,15 +2,17 @@
    Map components goes here.
  */
 import React, {useState, useEffect} from 'react';
-import {Pane, Card, Table, Dialog, Stack} from 'evergreen-ui';
+import {Pane, Card, Tooltip, Table, Dialog, Stack} from 'evergreen-ui';
 import Frame from '../Frame';
 import {Map, Marker, TileLayer, Popup, GeoJSON} from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
-import {projectViewGet, Project, Location} from '../data';
+import {IdempotentApis, Project} from '../data';
 import {FeatureCollection, Feature} from 'geojson';
-import getZoomRatio from '../utils/winZoom';
 import placeholder from '../static/placeholder.png';
+import {ProjectInfosCards, ProjectInfosAll,
+  projectInfosAll, projectInfosInCards} from '../Mapp/index';
+import {grapName} from '../utils/utils';
 
 // remove default leaflet icon.
 delete L.Icon.Default.prototype._getIconUrl;
@@ -35,48 +37,6 @@ const markerIcon = new L.Icon({
   shadowAnchor: [0, 82],
 });
 
-interface ProjectInfosInCards {
-  location?: string;
-  building_type?: string;
-  finished_time?: string;
-  construction_company?: string;
-  project_company?: string;
-};
-
-interface ProjectInfosAll extends ProjectInfosInCards {
-  area?: string;
-  building_height?: string;
-  demo_area?: string;
-  description?: string;
-  district?: string;
-  floor?: string;
-  record_started_from?: string;
-  started_time?: string;
-  tech_support_company?: string;
-};
-
-const projectInfosInCards: ProjectInfosInCards = {
-  "location": "地址",
-  "construction_company": "施工单位",
-  "project_company": "负责单位",
-  "building_type": "建筑类型",
-  "finished_time": "竣工日期"
-};
-
-const projectInfosAll: ProjectInfosAll = {
-  ...projectInfosInCards,
-  "started_time": "开工时间",
-  "record_started_from": "开始记录时间",
-  "building_height": "建筑高度",
-  "area": "建筑面积",
-  "demo_area": "示范面积",
-  "floor": "楼层",
-  "district": "街区",
-  "tech_support_company": "技术支撑单位",
-  "description": "技术亮点"
-}
-
-
 
 const filterGeoJson =  // filter FeatureCollection type GeoJson.
   (data: FeatureCollection, propertyNames: Array<string>) => {
@@ -85,17 +45,11 @@ const filterGeoJson =  // filter FeatureCollection type GeoJson.
     return data;
   };
 
-const grapName = (val: string | object | undefined): string | null => {  // val =>
-  return ((val != null) ?
-    ((typeof val === 'object') ? Object.values(val)[0] : val)
-    : null);
-}
-
-const tableRow = <T extends any>(e: Array<any>, info: T) => {
+const tableRow = <T extends any>(e: Array<any>, info: T) => {  // generate row of key-val pairs
   const [key, val] = e;
 
   if (Object.keys(info).includes(key)) {
-    const k: keyof ProjectInfosInCards = key;
+    const k: keyof ProjectInfosCards = key;
     return (
       <Table.Row key={key}>
         <Table.TextCell> <h5> {info[k]} </h5> </Table.TextCell>
@@ -104,28 +58,22 @@ const tableRow = <T extends any>(e: Array<any>, info: T) => {
   }
 };
 
-
-
 const Mapp: React.FC<{}> = (props) => {
   // zoom depth of the map
-  const [currentZoom, getCurrentZoom] = useState<number>(getZoomRatio());
   const [mapzoom, setMapzoom] = useState<number>(5);
 
   // fetech data in initialize pharse.
   const [projects, setProjects] = useState<Array<Project>>([]);
 
-  window.onresize = () => getCurrentZoom(getZoomRatio());
-  document.onfullscreenchange = () => getCurrentZoom(getZoomRatio());
-
   useEffect(() => {
-    projectViewGet().then((ps) => setProjects(ps));
+    IdempotentApis.Get.projectViewGet().then((ps) => setProjects(ps));
   }, []);
 
   const chinaGeoJson: FeatureCollection = require('../static/china-province.json');
   const provinces: Array<string> =
     ["江苏", "上海", "浙江", "安徽", "湖南", "湖北", "重庆", "四川"];
 
-  const content = (
+  const contentFC: React.FC<{currentZoom: number}> = (props) => (
     <Pane>
       <Card background="overlay"
         paddingTop={5}
@@ -134,13 +82,13 @@ const Mapp: React.FC<{}> = (props) => {
         paddingBottom={40}
         width="100%"
         height="100%">
-        <MapCanvas mapzoom={mapzoom}  projects={projects} currentZoom={currentZoom}
+        <MapCanvas mapzoom={mapzoom}  projects={projects} currentZoom={props.currentZoom}
           geoJson={filterGeoJson(chinaGeoJson, provinces)}/>
       </Card>
     </Pane>
   );
 
-  return <Frame children={content} />;
+  return <Frame children={React.createElement(contentFC)} />;
 };
 
 
@@ -171,11 +119,12 @@ const MapCanvas:
         (<Marker position={L.latLng(p.latitude, p.longitude)}
           key={p.project_id}
           icon={markerIcon}>
-          <Popup>
-            <MapPopup project={p} projectInfosInCards={projectInfosInCards}
-              setdialogueIsShown={setdialogueIsShown} setdialogueProject={setdialogueProject} />
-          </Popup>
-        </Marker>))
+            <Popup>
+              <MapPopup project={p} projectInfosInCards={projectInfosInCards}
+                setdialogueIsShown={setdialogueIsShown} setdialogueProject={setdialogueProject} />
+            </Popup>
+        </Marker>
+        ))
       : [];
 
     return (
@@ -195,7 +144,7 @@ const MapCanvas:
 const MapPopup:
   React.FC<{
     project: Project,
-    projectInfosInCards: ProjectInfosInCards,
+    projectInfosInCards: ProjectInfosCards,
     setdialogueProject: Function,
     setdialogueIsShown: Function
   }> = (props) => {

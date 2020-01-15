@@ -35,7 +35,8 @@
     "eject": "react-scripts eject"
   },
   "eslintConfig": {
-    "extends": "react-app"
+    "extends": "react-app",
+    "@typescript-eslint/no-namespace": "off"
   },
   "browserslist": {
     "production": [
