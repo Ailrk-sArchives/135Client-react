@@ -6,7 +6,6 @@ import {Table, Card, Pane, Checkbox, Position, Menu,
   Popover, Text, Button, Icon} from 'evergreen-ui';
 import Frame from '../Frame';
 import {IdempotentApis, Project} from '../data';
-import getZoomRatio from '../utils/winZoom';
 import {grapName} from '../utils/utils';
 import {Link} from 'react-router-dom';
 
@@ -43,9 +42,7 @@ const PopupMenu:
           </Menu>
         }
       >
-        <Pane paddingLeft={"10%"} paddingTop={"40%"} height={"100%"} width={"100%"}>
-          <Icon icon="more" />
-        </Pane>
+        <Icon icon="more" />
       </Popover>
     );
   };
@@ -53,7 +50,6 @@ const PopupMenu:
 
 const ProjectTable: React.FC<{}> = (props) => {
   const [projects, setProjects] = useState<Array<Project>>([]);
-
   const [checkedAll, setCheckedAll] = useState<boolean>(false);
   const [itemCheckedList, setItemCheckedList] = useState<Array<boolean>>([]);
 

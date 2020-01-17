@@ -1,9 +1,10 @@
 import React, {useState, useEffect} from 'react';
 import {Pane, Menu, Checkbox, Text, Table, Position, Icon, Popover, Card} from 'evergreen-ui';
-import {IdempotentApis, Spot, makePaginationRequest} from '../data';
+import {IdempotentApis, Spot, makePaginationRequest, PaginationRequest} from '../data';
 import Frame from '../Frame';
 import {Link, useParams} from 'react-router-dom';
 import {grapName} from '../utils/utils';
+import TablePaginationBar, {PaginationProps}  from './TablePagination';
 
 
 const PopupMenu: React.FC<{
@@ -32,35 +33,58 @@ const PopupMenu: React.FC<{
             </Menu.Item>
           </Menu.Group>
         </Menu>
-      }
-    >
-      <Pane paddingLeft={"10%"} paddingTop={"40%"} height={"100%"} width={"100%"}>
+      }>
         <Icon icon="more" />
-      </Pane>
     </Popover>
   );
 }
 
 
-
 const SpotTable: React.FC<{}> = (props) => {
   const [spots, setSpots] = useState<Array<Spot>>([]);
-
+  const [totalPage, setTotalPage] = useState<number>(5);
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [totalElementCount, setTotalElementCount] = useState<number>(0);
   const [checkedAll, setCheckedAll] = useState<boolean>(false);
   const [itemCheckedList, setItemCheckedList] = useState<Array<boolean>>([]);
-  let { sid } = useParams();
+  const [pageSize, setPageSize] = useState<number>(20);
+  let { pid } = useParams();
 
-  useEffect(() => {
+  const useInit = (paginationRequest: PaginationRequest) => useEffect(() => {
     IdempotentApis
     .Get
     .Paged
-    .spotByProjectPaged(makePaginationRequest(1, 50), (sid ? Number.parseInt(sid) : 1))
+    .spotByProjectPaged(paginationRequest, (pid ? Number.parseInt(pid) : 1))
       .then(srs => {
-        setSpots(srs);
-        setItemCheckedList(srs.map(() => false));
+        setSpots(srs.data);
+        setTotalElementCount(srs.totalElementCount);
+        setCurrentPage(srs.currentPage);
+        setTotalPage(Math.floor(srs.totalElementCount / srs.pageSize) + 1);
+        setItemCheckedList(srs.data.map(() => false));
       })
       .catch(e => console.error(e))
   }, []);
+
+  useInit(makePaginationRequest(1, pageSize));
+
+  const useUpdate = (paginationRequest: PaginationRequest) => useEffect(() => {
+    IdempotentApis
+    .Get
+    .Paged
+    .spotByProjectPaged(paginationRequest, (pid ? Number.parseInt(pid) : 1))
+      .then(srs => {
+        setSpots(srs.data);
+        setTotalElementCount(srs.totalElementCount);
+        setCurrentPage(srs.currentPage);
+        setTotalPage(Math.floor(srs.totalElementCount / srs.pageSize) + 1);
+        setItemCheckedList(srs.data.map(() => false));
+      })
+      .catch(e => console.error(e))
+  });
+
+  const useChangePageSize = (pageSize: number) => {
+    setTotalPage(pageSize);
+  };
 
   const tableFC: React.FC<{currentZoom: number}> = (props) => (
     <Table background="tint2">
@@ -107,7 +131,7 @@ const SpotTable: React.FC<{}> = (props) => {
         {spots?
 
           spots.map((s, index) => (
-            <Table.Row key={index} isSelectable height={60}>
+            <Table.Row key={index} isSelectable height={70}>
               <Table.Cell flexBasis={50} flexShrink={0} flexGrow={0}>
                 <Checkbox label=""
                   checked={
@@ -142,6 +166,16 @@ const SpotTable: React.FC<{}> = (props) => {
     </Table>
   );
 
+  const paginationProps: PaginationProps = {
+    useUpdate: useUpdate,
+    useChangePageSize: useChangePageSize,
+    pageSize: pageSize,
+    totalElementCount: totalElementCount,
+    totalPage: totalPage,
+    currentPage: currentPage,
+    pageButtonLimit: totalPage > 6 ? 6 : totalPage
+  };
+
   const contentFC: React.FC<{currentZoom: number}> = (props) => (
     <Card background="overlay"
       paddingTop={2}
@@ -151,6 +185,7 @@ const SpotTable: React.FC<{}> = (props) => {
       width="100%"
       height="100%">
       {React.createElement(tableFC)}
+      {React.createElement(TablePaginationBar, paginationProps)}
     </Card>
   );
   return <Frame children={React.createElement(contentFC)} />

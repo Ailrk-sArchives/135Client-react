@@ -1,8 +1,9 @@
 import React, {useState, useEffect} from 'react';
 import {Pane, Card, Table, Checkbox, Position, Popover, Menu, Icon, Tooltip} from 'evergreen-ui';
 import Frame from '../Frame';
-import {IdempotentApis, makePaginationRequest, SpotRecord} from '../data';
+import {IdempotentApis, makePaginationRequest, SpotRecord, PaginationRequest} from '../data';
 import {useParams} from 'react-router-dom';
+import TablePaginationBar,{PaginationProps} from './TablePagination';
 import {grapName} from '../utils/utils';
 
 
@@ -26,31 +27,56 @@ const PopupMenu: React.FC<{}> = (props) => {
         </Menu>
       }
     >
-      <Pane paddingLeft={"10%"} paddingTop={"40%"} height={"100%"} width={"100%"}>
-        <Icon icon="more"/>
-      </Pane>
+      <Icon icon="more"/>
     </Popover>
   );
 }
 
 const RecordTable: React.FC<{}> = (props) => {
   const [spotRecords, setSpotRecords] = useState<Array<SpotRecord>>([]);
-
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [totalPage, setTotalPage] = useState<number>(1);
+  const [totalElementCount, setTotalElementCount] = useState<number>(0);
   const [checkedAll, setCheckedAll] = useState<boolean>(false);
   const [itemCheckedList, setItemCheckedList] = useState<Array<boolean>>([]);
+  const [pageSize, setPageSize] = useState<number>(50);
   let { did } = useParams();
 
-  useEffect(() => {
+  const useInit = (paginationRequest: PaginationRequest) => useEffect(() => {
     IdempotentApis
     .Get
     .Paged
-    .spotRecordPaged(makePaginationRequest(1, 50), (did ? Number.parseInt(did) : 1))
+    .spotRecordPaged(paginationRequest, (did ? Number.parseInt(did) : 1))
       .then(srs => {
-        setSpotRecords(srs);
-        setItemCheckedList(srs.map(() => false));
+        setSpotRecords(srs.data);
+        setTotalElementCount(srs.totalElementCount);
+        setTotalPage(Math.floor(srs.totalElementCount/ srs.pageSize) + 1);
+        setCurrentPage(srs.currentPage);
+        setItemCheckedList(srs.data.map(() => false));
       })
       .catch(e => console.error(e))
   }, []);
+  useInit(makePaginationRequest(1, pageSize));
+
+  const useUpdate = (paginationRequest: PaginationRequest) => {
+    IdempotentApis
+    .Get
+    .Paged
+    .spotRecordPaged(paginationRequest, (did ? Number.parseInt(did) : 1))
+      .then(srs => {
+        setSpotRecords(srs.data);
+        setTotalElementCount(srs.totalElementCount);
+        setTotalPage(Math.floor(srs.totalElementCount/ srs.pageSize) + 1);
+        setCurrentPage(srs.currentPage);
+        setItemCheckedList(srs.data.map(() => false));
+      })
+      .catch(e => console.error(e))
+  };
+
+  const useChangePageSize = (pageSize: number) => {
+    setTotalPage(pageSize);
+  };
+
 
   const tableFC: React.FC<{currentZoom: number}> = (props) => (
     <Table background="tint2">
@@ -163,6 +189,16 @@ const RecordTable: React.FC<{}> = (props) => {
     </Table>
   );
 
+  const paginationProps: PaginationProps = {
+    useUpdate: useUpdate,
+    useChangePageSize: useChangePageSize,
+    totalElementCount: totalElementCount,
+    totalPage: totalPage,
+    pageSize: pageSize,
+    currentPage: currentPage,
+    pageButtonLimit: totalPage > 6 ? 6 : totalPage
+  };
+
   const contentFC: React.FC<{currentZoom: number}> = (props) => (
     <Card background="overlay"
       paddingTop={2}
@@ -172,6 +208,7 @@ const RecordTable: React.FC<{}> = (props) => {
       width="100%"
       height="100%">
       {React.createElement(tableFC)}
+      {React.createElement(TablePaginationBar, paginationProps)}
     </Card>
   );
   return <Frame children={React.createElement(contentFC)} />

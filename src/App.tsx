@@ -1,4 +1,4 @@
-/* Entrance of the App
+                             /* Entrance of the App
 */
 import React, { useState, Suspense, lazy } from 'react';
 import {Pane, Text, Spinner, Icon, defaultTheme } from 'evergreen-ui';
@@ -42,7 +42,8 @@ const App: React.FC = () => {
               <Sidebar sidebarButtons={
                 [
                   ['项目地图', 'map', '/', '展示项目所在地'],
-                  ['项目列表', 'panel-table', '/ProjectTable', '展示所有项目']
+                  ['项目列表', 'panel-table', '/ProjectTable', '展示所有项目'],
+                  ['设备列表', 'panel-table', '/DeviceTable', '展示所有设备']
                 ]
               }
                 sidebarWidth={sidebarWidth}
@@ -53,7 +54,8 @@ const App: React.FC = () => {
               <Sidebar sidebarButtons={
                 [
                   ['项目地图', 'map', '/', '展示项目所在地'],
-                  ['项目列表', 'panel-table', '/ProjectTable', '展示所有项目']
+                  ['项目列表', 'panel-table', '/ProjectTable', '展示所有项目'],
+                  ['设备列表', 'panel-table', '/DeviceTable', '展示所有设备']
                 ]
               }
                 sidebarWidth={sidebarWidth}
@@ -61,9 +63,12 @@ const App: React.FC = () => {
 
             </Route>
 
-            <Route path={["/DeviceTable", "/Device/:did/SpotRecords"]} component={DeviceTable}>
+            <Route path={["/DeviceTable", "/Device/:did/SpotRecords", "/Spot/:sid/Devices"]}
+              component={DeviceTable}>
               <Sidebar sidebarButtons={
                 [
+                  ['项目地图', 'map', '/', '展示项目所在地'],
+                  ['项目列表', 'panel-table', '/ProjectTable', '展示所有项目'],
                   ['设备列表', 'panel-table', '/DeviceTable', '展示所有设备']
                 ]
               }
@@ -102,8 +107,11 @@ const App: React.FC = () => {
               <Route path="/Device/:did/SpotRecords"
                 children={React.createElement(RecordTable)}/>
 
-              <Route path="/Project/:sid/Spots"
+              <Route path="/Project/:pid/Spots"
                 children={React.createElement(SpotTable)}/>
+
+              <Route path="/Spot/:sid/Devices"
+                children={React.createElement(DeviceTable)}/>
 
               <Route path="/Test" component={Test}/>
 

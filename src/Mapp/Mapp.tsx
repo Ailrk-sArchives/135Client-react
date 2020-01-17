@@ -2,7 +2,7 @@
    Map components goes here.
  */
 import React, {useState, useEffect} from 'react';
-import {Pane, Card, Tooltip, Table, Dialog, Stack} from 'evergreen-ui';
+import {Pane, Text, Card, Tooltip, Table, Dialog, Stack} from 'evergreen-ui';
 import Frame from '../Frame';
 import {Map, Marker, TileLayer, Popup, GeoJSON} from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -82,8 +82,12 @@ const Mapp: React.FC<{}> = (props) => {
         paddingBottom={40}
         width="100%"
         height="100%">
-        <MapCanvas mapzoom={mapzoom}  projects={projects} currentZoom={props.currentZoom}
-          geoJson={filterGeoJson(chinaGeoJson, provinces)}/>
+        <MapCanvas mapzoom={mapzoom} projects={projects} currentZoom={props.currentZoom}
+          geoJson={filterGeoJson(chinaGeoJson, provinces)} />
+        <Pane width="70hv" display="flex" />
+        <p style={{color: "#66788A", height: 3, width: 20, fontSize: 6, cursor: "default"}}>
+          B y . j    i    m    m    y
+              </p>
       </Card>
     </Pane>
   );

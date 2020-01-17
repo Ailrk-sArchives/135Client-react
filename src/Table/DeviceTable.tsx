@@ -1,9 +1,10 @@
 import React, {useState, useEffect} from 'react';
 import {Table, Card, Pane, Checkbox, Position, Menu,
   Popover, Icon, Tooltip, Text} from 'evergreen-ui';
-import {Link} from 'react-router-dom';
-import {IdempotentApis, Device, makePaginationRequest} from '../data';
+import {Link, useParams} from 'react-router-dom';
+import {IdempotentApis, Device, PagedData, makePaginationRequest, PaginationRequest} from '../data';
 import {grapName} from '../utils/utils';
+import TablePaginationBar,{PaginationProps} from './TablePagination';
 import Frame from '../Frame';
 
 const PopupMenu:
@@ -37,41 +38,110 @@ const PopupMenu:
           </Menu>
         }
       >
-        <Pane paddingLeft={"10%"} paddingTop={"40%"} height={"100%"} width={"100%"}>
-          <Icon icon="more" />
-        </Pane>
+        <Icon icon="more" />
       </Popover>
     );
   };
 
-const TableFrame: React.FC<{}> = (props) => {
+const DeviceTable: React.FC<{}> = (props) => {
   const [devices, setDevices] = useState<Array<Device>>([]);
-
+  const [totalPage, setTotalPage] = useState<number>(5);
+  const [totalElementCount, setTotalElementCount] = useState<number>(0);
+  const [currentPage, setCurrentPage] = useState<number>(1);
   const [checkedAll, setCheckedAll] = useState<boolean>(false);
   const [itemCheckedList, setItemCheckedList] = useState<Array<boolean>>([]);
+  const [pageSize, setPageSize] = useState<number>(20);
+  let {sid} = useParams();
 
-  useEffect(() => {
-    IdempotentApis.Get.Paged.devicePaged(makePaginationRequest(1, 20))
-    .then(ds => {
-      setDevices(ds);
-      setItemCheckedList(ds.map(() => false));
+  const useInit =
+    (paginationRequest: PaginationRequest) => useEffect(() => {
+    const resposne: Promise<Array<Device> | PagedData<Array<Device>>> =
+      (sid ?
+        IdempotentApis
+          .Get
+          .Paged
+          .deviceBySpotPaged(
+            paginationRequest,
+            (sid ? Number.parseInt(sid) : 1))
+        :
+        IdempotentApis
+          .Get
+          .Paged
+          .devicePaged(paginationRequest)
+      );
+
+    resposne.then(ds => {
+      if ((ds as Array<Device>).length) {
+        setDevices(ds as Array<Device>);
+        setItemCheckedList((ds as Array<Device>).map(() => false));
+      }
+
+      if ((ds as PagedData<Array<Device>>).data) {
+        const {totalElementCount, data, currentPage, pageSize} = ds as PagedData<Array<Device>>;
+        setDevices(data);
+        setCurrentPage(currentPage);
+        setTotalElementCount(totalElementCount);
+        setTotalPage(Math.floor(totalElementCount / pageSize) + 1);
+        setItemCheckedList(data.map(() => false));
+      }
     })
-    .catch(e => console.error(e))
+      .catch(e => console.error(e))
   }, []);
+  useInit(makePaginationRequest(1, pageSize));
 
+  // useUpdate only happen in paged device query.
+  const useUpdate = (paginationRequest: PaginationRequest) => {
+
+    const resposne: Promise<Array<Device> | PagedData<Array<Device>>> =
+      (sid ?
+        IdempotentApis
+          .Get
+          .Paged
+          .deviceBySpotPaged(
+            paginationRequest,
+            (sid ? Number.parseInt(sid) : 1))
+        :
+        IdempotentApis
+          .Get
+          .Paged
+          .devicePaged(paginationRequest)
+      );
+
+    resposne.then(ds => {
+      if ((ds as Array<Device>).length) {
+        setDevices(ds as Array<Device>);
+        setItemCheckedList((ds as Array<Device>).map(() => false));
+      }
+
+      if ((ds as PagedData<Array<Device>>).data) {
+        const {totalElementCount, data, currentPage, pageSize} = ds as PagedData<Array<Device>>;
+        setDevices(data);
+        setCurrentPage(currentPage);
+        setTotalElementCount(totalElementCount);
+        setTotalPage(Math.floor(totalElementCount / pageSize) + 1);
+        setItemCheckedList(data.map(() => false));
+      }
+    })
+      .catch(e => console.error(e))
+
+  };
+
+  const useChangePageSize = (pageSize: number) => {
+    setPageSize(pageSize);
+  };
 
   const tableFC: React.FC<{currentZoom: number}> = (props) => (
     <Table background="tint2">
       <Table.Head height={70} elevation={1}>
-          <Table.HeaderCell flexBasis={50} flexShrink={0} flexGrow={0}>
-            <Checkbox label="" checked={checkedAll}
+        <Table.HeaderCell flexBasis={50} flexShrink={0} flexGrow={0}>
+          <Checkbox label="" checked={checkedAll}
             onChange={
               e => {
                 setCheckedAll(e.target.checked);
                 setItemCheckedList(itemCheckedList.map(() => e.target.checked))
               }
-            }/>
-          </Table.HeaderCell>
+            } />
+        </Table.HeaderCell>
 
           <Table.HeaderCell flexBasis={50} flexShrink={0} flexGrow={0}>
             ID
@@ -82,7 +152,7 @@ const TableFrame: React.FC<{}> = (props) => {
           <Table.HeaderCell flexBasis={150} flexShrink={0} flexGrow={0}>
             设备类型
           </Table.HeaderCell>
-          <Table.HeaderCell flexBasis={150} flexShrink={0} flexGrow={0}>
+          <Table.HeaderCell flexBasis={200} flexShrink={0} flexGrow={0}>
             测点名称
           </Table.HeaderCell>
 
@@ -90,11 +160,11 @@ const TableFrame: React.FC<{}> = (props) => {
             所属项目
           </Table.HeaderCell>
 
-          <Table.HeaderCell>
+          <Table.HeaderCell flexBasis={100} flexShrink={0} flexGrow={0}>
             创建时间
           </Table.HeaderCell>
 
-          <Table.HeaderCell>
+          <Table.HeaderCell flexBasis={150} flexShrink={0} flexGrow={0}>
             修改时间
           </Table.HeaderCell>
           <Table.HeaderCell flexBasis={100} flexShrink={0} flexGrow={0}>
@@ -139,16 +209,17 @@ const TableFrame: React.FC<{}> = (props) => {
                 <Table.Cell flexBasis={150} flexShrink={0} flexGrow={0}
                 >{grapName(d.device_type)}</Table.Cell>
 
-                <Table.Cell flexBasis={150} flexShrink={0} flexGrow={0}>
+                <Table.Cell flexBasis={200} flexShrink={0} flexGrow={0}>
                   {grapName(d.spot_name)}
                 </Table.Cell>
 
                 <Table.Cell>{grapName(d.project_name)}</Table.Cell>
 
+                <Table.Cell flexBasis={150} flexShrink={0} flexGrow={0}>
+                  {grapName(d.create_time)}</Table.Cell>
 
-                <Table.Cell>{grapName(d.create_time)}</Table.Cell>
-
-                <Table.Cell>{grapName(d.modify_time)}</Table.Cell>
+                <Table.Cell flexBasis={150} flexShrink={0} flexGrow={0}>
+                  {grapName(d.modify_time)}</Table.Cell>
 
                 <Table.Cell flexBasis={100} flexShrink={0} flexGrow={0}>
                   <Tooltip content={d.online ? "online" : "offline"}>
@@ -168,6 +239,17 @@ const TableFrame: React.FC<{}> = (props) => {
       </Table.VirtualBody>
     </Table>
   );
+
+  const paginationProps: PaginationProps = {
+    useUpdate: useUpdate,
+    useChangePageSize: useChangePageSize,
+    totalPage: totalPage,
+    pageSize: pageSize,
+    currentPage: currentPage,
+    totalElementCount: totalElementCount,
+    pageButtonLimit: totalPage > 6 ? 6 : totalPage
+  };
+
   const contentFC: React.FC<{currentZoom: number}> = (props) => (
     <Card background="overlay"
       paddingTop={2}
@@ -177,6 +259,7 @@ const TableFrame: React.FC<{}> = (props) => {
       width="100%"
       height="100%">
       {React.createElement(tableFC)}
+      {React.createElement(TablePaginationBar, paginationProps)}
     </Card>
   );
 
@@ -184,4 +267,4 @@ const TableFrame: React.FC<{}> = (props) => {
 };
 
 
-export default TableFrame;
+export default DeviceTable;
