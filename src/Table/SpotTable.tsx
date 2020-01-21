@@ -76,7 +76,7 @@ const SpotTable: React.FC<{}> = (props) => {
         setSpots(srs.data);
         setTotalElementCount(srs.totalElementCount);
         setCurrentPage(srs.currentPage);
-        setTotalPage(Math.floor(srs.totalElementCount / srs.pageSize) + 1);
+        setTotalPage(Math.floor(srs.totalElementCount / srs.pageSize));
         setItemCheckedList(srs.data.map(() => false));
       })
       .catch(e => console.error(e))
@@ -168,7 +168,7 @@ const SpotTable: React.FC<{}> = (props) => {
 
   const paginationProps: PaginationProps = {
     useUpdate: useUpdate,
-    useChangePageSize: useChangePageSize,
+    useChangePageSize: setPageSize,
     pageSize: pageSize,
     totalElementCount: totalElementCount,
     totalPage: totalPage,

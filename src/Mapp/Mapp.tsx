@@ -23,7 +23,6 @@ L.Icon.Default.mergeOptions({
   shadowUrl: require('leaflet/dist/images/marker-shadow.png')
 });
 
-
 const pos: L.LatLng = L.latLng(31.544, 111.782);
 
 const markerIcon = new L.Icon({

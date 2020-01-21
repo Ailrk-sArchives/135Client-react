@@ -1,10 +1,11 @@
 import React, {useState, useEffect} from 'react';
-import {Table, Card, Pane, Checkbox, Position, Menu,
+import {Table, Card, Pane, Checkbox, Position, Menu, toaster, Stack,
   Popover, Icon, Tooltip, Text} from 'evergreen-ui';
 import {Link, useParams} from 'react-router-dom';
 import {IdempotentApis, Device, PagedData, makePaginationRequest, PaginationRequest} from '../data';
 import {grapName} from '../utils/utils';
 import TablePaginationBar,{PaginationProps} from './TablePagination';
+import TableControlPanel from './TableControlPanel';
 import Frame from '../Frame';
 
 const PopupMenu:
@@ -31,7 +32,12 @@ const PopupMenu:
             </Menu.Group>
             <Menu.Divider />
             <Menu.Group>
-              <Menu.Item icon="trash" intent="danger">
+              <Menu.Item icon="trash"
+                intent="danger"
+                onSelect={
+                  () => {
+                    toaster.danger('删除设备', {description: '您已成功删除设备'});
+                  }}>
                 删除...
             </Menu.Item>
             </Menu.Group>
@@ -50,7 +56,7 @@ const DeviceTable: React.FC<{}> = (props) => {
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [checkedAll, setCheckedAll] = useState<boolean>(false);
   const [itemCheckedList, setItemCheckedList] = useState<Array<boolean>>([]);
-  const [pageSize, setPageSize] = useState<number>(20);
+  const [pageSize, setPageSize] = useState<number>(10);
   let {sid} = useParams();
 
   const useInit =
@@ -118,16 +124,12 @@ const DeviceTable: React.FC<{}> = (props) => {
         setDevices(data);
         setCurrentPage(currentPage);
         setTotalElementCount(totalElementCount);
-        setTotalPage(Math.floor(totalElementCount / pageSize) + 1);
+        setTotalPage(Math.floor(totalElementCount / pageSize));
         setItemCheckedList(data.map(() => false));
       }
     })
       .catch(e => console.error(e))
 
-  };
-
-  const useChangePageSize = (pageSize: number) => {
-    setPageSize(pageSize);
   };
 
   const tableFC: React.FC<{currentZoom: number}> = (props) => (
@@ -176,10 +178,10 @@ const DeviceTable: React.FC<{}> = (props) => {
       </Table.Head>
       <Table.VirtualBody height={
         ((zoom) => {
-          if (zoom >= 180) return window.innerHeight * 0.65;
-          if (zoom >= 140) return window.innerHeight * 0.75;
-          if (zoom >= 80) return window.innerHeight * 0.83;
-          return window.innerHeight * 0.75;
+          if (zoom >= 180) return window.innerHeight * 0.35;
+          if (zoom >= 120) return window.innerHeight * 0.56;
+          if (zoom >= 80) return window.innerHeight * 0.65;
+          return window.innerHeight * 0.65;
         })(props.currentZoom)
         }>
         {
@@ -242,7 +244,7 @@ const DeviceTable: React.FC<{}> = (props) => {
 
   const paginationProps: PaginationProps = {
     useUpdate: useUpdate,
-    useChangePageSize: useChangePageSize,
+    useChangePageSize: setPageSize,
     totalPage: totalPage,
     pageSize: pageSize,
     currentPage: currentPage,
@@ -258,6 +260,7 @@ const DeviceTable: React.FC<{}> = (props) => {
       paddingBottom={2}
       width="100%"
       height="100%">
+      {React.createElement(TableControlPanel)}
       {React.createElement(tableFC)}
       {React.createElement(TablePaginationBar, paginationProps)}
     </Card>

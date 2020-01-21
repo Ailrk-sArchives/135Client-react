@@ -1,4 +1,4 @@
-                             /* Entrance of the App
+/* Entrance of the App
 */
 import React, { useState, Suspense, lazy } from 'react';
 import {Pane, Text, Spinner, Icon, defaultTheme } from 'evergreen-ui';
@@ -29,7 +29,6 @@ const App: React.FC = () => {
 
   return ( // routing.
     <Pane className="Main" position="relative" height="100hv">
-
 
       <Router history={history}>
 

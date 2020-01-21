@@ -4,6 +4,7 @@ import Frame from '../Frame';
 import {IdempotentApis, makePaginationRequest, SpotRecord, PaginationRequest} from '../data';
 import {useParams} from 'react-router-dom';
 import TablePaginationBar,{PaginationProps} from './TablePagination';
+import TableControlPanel from './TableControlPanel';
 import {grapName} from '../utils/utils';
 
 
@@ -66,15 +67,11 @@ const RecordTable: React.FC<{}> = (props) => {
       .then(srs => {
         setSpotRecords(srs.data);
         setTotalElementCount(srs.totalElementCount);
-        setTotalPage(Math.floor(srs.totalElementCount/ srs.pageSize) + 1);
+        setTotalPage(Math.floor(srs.totalElementCount/ srs.pageSize));
         setCurrentPage(srs.currentPage);
         setItemCheckedList(srs.data.map(() => false));
       })
       .catch(e => console.error(e))
-  };
-
-  const useChangePageSize = (pageSize: number) => {
-    setTotalPage(pageSize);
   };
 
 
@@ -129,9 +126,9 @@ const RecordTable: React.FC<{}> = (props) => {
       <Table.VirtualBody height={
         ((zoom) => {
           if (zoom >= 180) return window.innerHeight * 0.35;
-          if (zoom >= 140) return window.innerHeight * 0.45;
-          if (zoom >= 80) return window.innerHeight * 0.53;
-          return window.innerHeight * 0.75;
+          if (zoom >= 140) return window.innerHeight * 0.56;
+          if (zoom >= 80) return window.innerHeight * 0.65;
+          return window.innerHeight * 0.65;
         })(props.currentZoom)
       }>
         {spotRecords?
@@ -191,7 +188,7 @@ const RecordTable: React.FC<{}> = (props) => {
 
   const paginationProps: PaginationProps = {
     useUpdate: useUpdate,
-    useChangePageSize: useChangePageSize,
+    useChangePageSize: setPageSize,
     totalElementCount: totalElementCount,
     totalPage: totalPage,
     pageSize: pageSize,
@@ -207,6 +204,7 @@ const RecordTable: React.FC<{}> = (props) => {
       paddingBottom={2}
       width="100%"
       height="100%">
+      {React.createElement(TableControlPanel)}
       {React.createElement(tableFC)}
       {React.createElement(TablePaginationBar, paginationProps)}
     </Card>

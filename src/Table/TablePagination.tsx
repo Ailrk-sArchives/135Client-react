@@ -61,20 +61,15 @@ const TablePaginationBar = (props: PaginationProps) => {
       1
       : props.currentPage + 1);
 
-  const elipsisButton =
-    BasicButton("...", Math.floor(props.totalPage - props.currentPage) / 2);
+  const elipsisButtonLeft =
+    BasicButton("...", Math.floor((props.currentPage - 1) / 2));
 
-  const lastPageButton =
-    BasicButton(props.totalPage,
-      (props.currentPage === 1) ?
-        props.totalPage :
-        props.currentPage - 1)
+  const elipsisButtonRight =
+    BasicButton("...", Math.floor((props.totalPage + props.currentPage - 1) / 2));
 
-  const firstPageButton =
-    BasicButton(props.totalPage,
-      (props.currentPage === 1) ?
-        props.totalPage :
-        props.currentPage - 1)
+  const lastPageButton = BasicButton(props.totalPage, props.totalPage)
+
+  const firstPageButton = BasicButton(1, 1);
 
   const numberList: Array<JSX.Element> =
     [
@@ -92,7 +87,18 @@ const TablePaginationBar = (props: PaginationProps) => {
       <TablePaginationButton elevation={index === props.currentPage ? 3 : 1}
         name={index} pageNum={index} useUpdate={props.useUpdate} pageSize={props.pageSize}/>);
 
-  const pagingList = [goLeftButton].concat(numberList).concat([goRightButton]);
+  const pagingList =
+    inHead(props.currentPage, props.pageButtonLimit) ||
+      inTail(props.currentPage, props.totalPage, props.pageButtonLimit) ?
+      [goLeftButton].concat(numberList).concat([goRightButton])
+      :
+      [goLeftButton]
+        .concat(firstPageButton)
+        .concat(elipsisButtonLeft)
+        .concat(numberList)
+        .concat(elipsisButtonRight)
+        .concat(lastPageButton)
+        .concat([goRightButton]);
 
   return (
     <Pane background="tint2" paddingTop={10} paddingBottom={10} paddingRight={20}
@@ -104,8 +110,8 @@ const TablePaginationBar = (props: PaginationProps) => {
         共计{props.totalPage}页,
         {props.totalElementCount}条记录。每页显示
       </Text>
-        <Combobox paddingRight={10} marginLeft={-60} paddingTop={5}
-          items={[10, 20, 50, 100]}
+        <Combobox paddingRight={10} marginLeft={-35} paddingTop={5}
+          items={[5, 10, 20, 50, 100]}
           onChange={e => {
             props.useChangePageSize(e);
             props.useUpdate(makePaginationRequest(1, e));
@@ -113,7 +119,7 @@ const TablePaginationBar = (props: PaginationProps) => {
           placeholder={props.pageSize.toString()}
           width={100}
         />
-        <Text paddingTop={10} marginLeft={-280} width={150}> 条记录 </Text>
+        <Text paddingTop={10} marginLeft={-270} width={150}> 条记录 </Text>
       </Pane>
 
       <Pane display="flex">
