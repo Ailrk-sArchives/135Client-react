@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from 'react';
-import {Table, Card, Pane, Checkbox, Position, Menu, toaster, Stack,
+import {Table, Card, Pane, Checkbox, Position, Menu, toaster, Stack, Spinner,
   Popover, Icon, Tooltip, Text} from 'evergreen-ui';
 import {Link, useParams} from 'react-router-dom';
 import {IdempotentApis, Device, PagedData, makePaginationRequest, PaginationRequest} from '../data';
@@ -134,6 +134,7 @@ const DeviceTable: React.FC<{}> = (props) => {
 
   const tableFC: React.FC<{currentZoom: number}> = (props) => (
     <Table background="tint2">
+
       <Table.Head height={70} elevation={1}>
         <Table.HeaderCell flexBasis={50} flexShrink={0} flexGrow={0}>
           <Checkbox label="" checked={checkedAll}
@@ -176,6 +177,7 @@ const DeviceTable: React.FC<{}> = (props) => {
             操作
           </Table.HeaderCell>
       </Table.Head>
+
       <Table.VirtualBody height={
         ((zoom) => {
           if (zoom >= 180) return window.innerHeight * 0.35;
@@ -184,6 +186,7 @@ const DeviceTable: React.FC<{}> = (props) => {
           return window.innerHeight * 0.65;
         })(props.currentZoom)
         }>
+
         {
           devices ?
             devices.map((d, index) => (
@@ -202,6 +205,7 @@ const DeviceTable: React.FC<{}> = (props) => {
                     } />
 
                 </Table.Cell>
+
 
                 <Table.Cell flexBasis={50} flexShrink={0} flexGrow={0}
                 >{grapName(d.device_id)}</Table.Cell>
