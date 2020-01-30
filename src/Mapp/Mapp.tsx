@@ -40,11 +40,17 @@ const markerIcon = new L.Icon({
 const filterGeoJson =  // filter FeatureCollection type GeoJson.
   (data: FeatureCollection, propertyNames: Array<string>) => {
     data.features = data.features
-      .filter((e: Feature) => e.properties ? propertyNames.includes(e.properties.NAME) : null);
+      .filter((e: Feature) =>
+        e.properties ? propertyNames.includes(e.properties.NAME) : null);
     return data;
   };
 
-const tableRow = <T extends any>(e: Array<any>, info: T) => {  // generate row of key-val pairs
+const tableRow = <T extends any>(e: Array<any>, info: T) => {
+  /*
+   *  generate row of key-val pairs
+   *  @param e:    A tuple of key and value from Object.entries().
+   *  @param info: projetInfo.
+   */
   const [key, val] = e;
 
   if (Object.keys(info).includes(key)) {
@@ -118,16 +124,17 @@ const MapCanvas:
 
     // create array of markers.
     const projectMarkers: Array<any> = props.projects ?
-      props.projects.map((p) =>
+      props.projects.map((p) => p.latitude && p.longitude ?
         (<Marker position={L.latLng(p.latitude, p.longitude)}
           key={p.project_id}
           icon={markerIcon}>
-            <Popup>
-              <MapPopup project={p} projectInfosInCards={projectInfosInCards}
-                setdialogueIsShown={setdialogueIsShown} setdialogueProject={setdialogueProject} />
-            </Popup>
+          <Popup>
+            <MapPopup project={p} projectInfosInCards={projectInfosInCards}
+              setdialogueIsShown={setdialogueIsShown} setdialogueProject={setdialogueProject} />
+          </Popup>
         </Marker>
-        ))
+        )
+        : null)
       : [];
 
     return (
@@ -158,7 +165,8 @@ const MapPopup:
         <Pane> <h4>{props.project.project_name}</h4></Pane>
         <img src={placeholder} alt={placeholder} width={300} height={200} />
         {
-          Object.entries(props.project).map((e) => tableRow(e, props.projectInfosInCards))
+          Object.entries(props.project).map(
+            (e) => tableRow(e, props.projectInfosInCards))
         }
       </Pane>
     );
@@ -179,19 +187,27 @@ const ProjectInfoDialogue:
       <Stack value={1100}>
         {
           zindex =>
-            <Dialog isShown={props.isShown}  width={700} hasFooter={false} topOffset="8vmin"
-              title={props.project ? props.project.project_name : ''}
+            <Dialog isShown={props.isShown} width={700} hasFooter={false} topOffset="8vmin"
+              title={
+                props.project ? props.project.project_name : ''
+              }
+
               onCloseComplete={
-                () => {props.setdialogueProject(undefined); props.setdialogueIsShown(false)}
+                () => {
+                  props.setdialogueProject(undefined);
+                  props.setdialogueIsShown(false)
+                }
               }
               preventBodyScrolling>
               <Pane alignItems="center" justifyContent="center" display="flex">
                 <img src={placeholder} alt={placeholder} width={500} height={300} />
                 <br />
               </Pane>
-              { (props.project)?
-                Object.entries(props.project).map((e) => tableRow(e, props.projectInfosAll))
-                : null
+              {
+                (props.project) ?
+                  Object.entries(props.project).map((e) =>
+                    tableRow(e, props.projectInfosAll))
+                  : null
               }
             </Dialog>
         }

@@ -13,10 +13,7 @@ const Frame: React.FC<{children: FrameComponent}> = (props) => {
 
   window.onresize = () => getCurrentZoom(getZoomRatio());
   document.onfullscreenchange = () => getCurrentZoom(getZoomRatio());
-
-  const style: React.CSSProperties = {
-    bottom: 0,
-  };
+  const FrameContext = React.createContext(currentZoom);
 
   return (
     <Pane

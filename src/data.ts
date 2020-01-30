@@ -115,7 +115,21 @@ export interface ProjectDetail {
   image_description?: string;
 };
 
-export type ApiDataType = Spot | Device | Project;
+
+export type ApiDataType = Spot | Device | Project | SpotRecord;
+
+export const apiDataTypeCheck = (data: ApiDataType):
+    "Spot" | "Device" | "Project" | "SpotRecord" | undefined => {
+
+  if ((data as Project).location !== undefined) return "Project";
+
+  if ((data as Spot).spot_type !== undefined) return "Spot";
+
+  if ((data as Device).device_name !== undefined) return "Device";
+
+  if ((data as SpotRecord).window_opened !== undefined) return "SpotRecord";
+
+};
 
 const makeRequest = <T>(params: T) => {
   return { "request": params };
@@ -158,7 +172,12 @@ export class IdempotentApis {
       makeApi(concatPath(apiBaseUrl, '/api/v1/project/all'),
         (url: string) => {
           return axios.get(url)
-            .then((response) => {if (good_response<Array<Project>>(response)) return response.data.data;})
+            .then((response) => {
+
+              if (good_response<Array<Project>>(response))
+                return response.data.data;
+
+            })
             .catch((e) => console.error(e));
         });
 
@@ -168,7 +187,12 @@ export class IdempotentApis {
         (url: string) => {
 
           return axios.get(url)
-            .then((response) => {if (good_response<Array<Spot>>(response)) return response.data.data;})
+            .then((response) => {
+
+              if (good_response<Array<Spot>>(response))
+                return response.data.data;
+
+            })
             .catch((e) => console.error(e));
 
         });
@@ -178,7 +202,12 @@ export class IdempotentApis {
         (url: string) => {
 
           return axios.get(url)
-            .then((response) => {if (good_response<Array<SpotRecord>>(response)) return response.data.data;})
+            .then((response) => {
+
+              if (good_response<Array<SpotRecord>>(response))
+                return response.data.data;
+
+            })
             .catch((e) => console.error(e));
         });
 
@@ -187,9 +216,16 @@ export class IdempotentApis {
         (url: string) => {
 
           return axios.get(url)
-            .then((response) => {if (good_response<Array<ProjectDetail>>(response)) return response.data.data;})
+            .then((response) => {
+
+              if (good_response<Array<ProjectDetail>>(response))
+                return response.data.data;
+
+            })
             .catch((e) => console.error(e));
         });
+
+
     static Paged = class {
 
       static projectPaged = (params: PaginationRequest): Promise<PagedData<Array<Project>>> =>
@@ -197,7 +233,10 @@ export class IdempotentApis {
           (url: string, params) => {
             return axios.post(url, makeRequest(params), makeJsonRequestHeader())
               .then((response) => {
-                if (good_response<PagedData<Array<Project>>>(response)) return response.data.data;
+
+                if (good_response<PagedData<Array<Project>>>(response))
+                  return response.data.data;
+
               })
               .catch((e) => console.error(e))
           },
@@ -209,7 +248,10 @@ export class IdempotentApis {
           (url: string) => {
             return axios.post(url, makeRequest(params), makeJsonRequestHeader())
               .then((response) => {
-                if (good_response<PagedData<Array<Spot>>>(response)) return response.data.data
+
+                if (good_response<PagedData<Array<Spot>>>(response))
+                  return response.data.data
+
               })
               .catch((e) => console.error(e))
           },
@@ -220,7 +262,10 @@ export class IdempotentApis {
           (url: string) => {
             return axios.post(url, makeRequest(params), makeJsonRequestHeader())
               .then((response) => {
-                if (good_response<PagedData<Array<Spot>>>(response)) return response.data.data
+
+                if (good_response<PagedData<Array<Spot>>>(response))
+                  return response.data.data
+
               })
               .catch((e) => console.error(e))
           },
@@ -232,7 +277,10 @@ export class IdempotentApis {
           (url: string) => {
             return axios.post(url, makeRequest(params), makeJsonRequestHeader())
               .then((response) => {
-                if (good_response<PagedData<Array<Device>>>(response)) return response.data.data
+
+                if (good_response<PagedData<Array<Device>>>(response))
+                  return response.data.data
+
               })
               .catch((e) => console.error(e))
           },
@@ -243,7 +291,10 @@ export class IdempotentApis {
           (url: string) => {
             return axios.post(url, makeRequest(params), makeJsonRequestHeader())
               .then((response) => {
-                if (good_response<PagedData<Array<Device>>>(response)) return response.data.data
+
+                if (good_response<PagedData<Array<Device>>>(response))
+                  return response.data.data
+
               })
               .catch((e) => console.error(e))
           },
@@ -255,8 +306,10 @@ export class IdempotentApis {
             (url: string) => {
               return axios.post(url, makeRequest(params), makeJsonRequestHeader())
                 .then((response) => {
+
                   if (good_response<PagedData<Array<SpotRecord>>>(response))
                     return response.data.data
+
                 })
                 .catch((e) => console.error(e))
             },
@@ -265,12 +318,18 @@ export class IdempotentApis {
     };
   };
 
+
   static Put = class {
+
     static projectViewUpdate = (params: Project, pid: number): Promise<Project> =>
       makeApi(concatPath(apiBaseUrl, `api/v1/project/${pid}`),
         (url: string) => {
           return axios.put(url, params)
-            .then((response) => {if (good_response<Project>(response)) return response.data.data;})
+            .then((response) => {
+
+              if (good_response<Project>(response))
+                return response.data.data;})
+
             .catch((e) => console.error(e))
         });
 
@@ -279,38 +338,79 @@ export class IdempotentApis {
       makeApi(concatPath(apiBaseUrl, `api/v1/project/spot/${pid}`),
         (url: string) => {
           return axios.put(url, makeRequest(params))
-            .then((response) => {if (good_response<Spot>(response)) return response.data.data})
+            .then((response) => {
+
+              if (good_response<Spot>(response))
+                return response.data.data})
+
             .catch((e) => console.error(e))
         });
   };
 
-  static Delete = class {
-    static projectViewDelete = (params: Project, pid: number): Promise<Message> =>
-      makeApi(concatPath(apiBaseUrl, `api/v1/project/${pid}`),
-        (url: string) => {
-          return axios.put(url, makeRequest(params))
-            .then((response) => response.data.message)  // always return message from the server.
-            .catch((e) => console.error(e))
-        });
 
-    static spotViewDelete = (params: Project, pid: number): Promise<Message> =>
-      makeApi(concatPath(apiBaseUrl, `api/v1/spot/${pid}`),
-        (url: string) => {
-          return axios.put(url, makeRequest(params))
-            .then((response) => response.data.message)  // always return message from the server.
+  static Delete = class {
+    static projectViewDelete = (pid: number): Promise<Message> =>
+      makeApi(
+
+        concatPath(apiBaseUrl, `api/v1/project/${pid}`),
+
+        (url: string) =>
+          axios.delete(url)
+            .then((response) =>
+              response.data as ApiResponse<any>)  // always return message from the server.
             .catch((e) => console.error(e))
-        });
+      );
+
+    static deviceViewDelete = (did: number): Promise<Message> =>
+      makeApi(
+        concatPath(apiBaseUrl, `api/v1/device/${did}`),
+        (url: string) =>
+          axios.delete(url)
+            .then((response) => response.data as ApiResponse<any>)  // always return message from the server.
+            .catch((e) => console.error(e))
+      );
+
+
+    static spotViewDelete = (sid: number): Promise<Message> =>
+      makeApi(
+        concatPath(apiBaseUrl, `api/v1/spot/${sid}`),
+
+        (url: string) =>
+          axios.delete(url)
+            .then((response) => response.data as ApiResponse<any>)  // always return message from the server.
+            .catch((e) => console.error(e))
+      );
+
+    static spotRecordViewDelete = (rid: number): Promise<Message> =>
+      makeApi(
+        concatPath(apiBaseUrl, `api/v1/spotRecord/${rid}`),
+
+        (url: string) =>
+          axios.delete(url)
+            .then((response) => response.data as ApiResponse<any>)  // always return message from the server.
+            .catch((e) => console.error(e))
+      );
+
+
   };
 
 };
 
+
 export class NonIdempotentApis {
+
   static Post = class {
+
     static projectViewPost = (params: Project): Promise<Project> =>
       makeApi(concatPath(apiBaseUrl, '/api/v1/project/all'),
         (url: string) => {
           return axios.post(url, makeRequest(params), makeJsonRequestHeader())
-            .then((response) => {if (good_response<Project>(response)) return response.data.data;})
+            .then((response) => {
+
+              if (good_response<Project>(response))
+                return response.data.data;
+
+            })
             .catch((e) => console.error(e));
 
         },
@@ -321,7 +421,12 @@ export class NonIdempotentApis {
         (url: string) => {
 
           return axios.post(url, makeRequest(params), makeJsonRequestHeader())
-            .then((response) => {if (good_response<Spot>(response)) return response.data.data;})
+            .then((response) => {
+
+              if (good_response<Spot>(response))
+                return response.data.data;
+
+            })
             .catch((e) => console.error(e));
 
         },

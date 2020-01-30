@@ -10,10 +10,10 @@ import history from './history';
 import {Rectangle} from 'leaflet';
 
 const Mapp: any = lazy(() => import('./Mapp/Mapp'));
-const DeviceTable: any = lazy(() => import('./Table/DeviceTable'));
-const ProjectTable: any = lazy(() => import('./Table/ProjectTable'));
-const RecordTable: any = lazy(() => import('./Table/RecordTable'));
-const SpotTable: any = lazy(() => import('./Table/SpotTable'));
+const DeviceTable: any = lazy(() => import('./Table/DeviceTable/DeviceTable'));
+const ProjectTable: any = lazy(() => import('./Table/ProjectTable/ProjectTable'));
+const RecordTable: any = lazy(() => import('./Table/RecordTable/RecordTable'));
+const SpotTable: any = lazy(() => import('./Table/SpotTable/SpotTable'));
 const Test: any = lazy(() => import('./Test'));
 
 
@@ -103,14 +103,11 @@ const App: React.FC = () => {
 
               <Route path="/DeviceTable" component={DeviceTable} />
 
-              <Route path="/Device/:did/SpotRecords"
-                children={React.createElement(RecordTable)}/>
+              <Route path="/Device/:did/SpotRecords" component={RecordTable} />
 
-              <Route path="/Project/:pid/Spots"
-                children={React.createElement(SpotTable)}/>
+              <Route path="/Project/:pid/Spots" component={SpotTable}/>
 
-              <Route path="/Spot/:sid/Devices"
-                children={React.createElement(DeviceTable)}/>
+              <Route path="/Spot/:sid/Devices" component={DeviceTable}/>
 
               <Route path="/Test" component={Test}/>
 
