@@ -1,5 +1,5 @@
 import React from 'react';
-import {IdempotentApis, NonIdempotentApis, makePaginationRequest} from './data';
+import {IdempotentApis, NonIdempotentApis, makePaginationRequest} from './Data/data';
 import Frame from './Frame';
 
 const test_apis = () => {

@@ -27,10 +27,14 @@ const Sidebar:
             {
               props.sidebarButtons ?
                 props.sidebarButtons.map((tab, index) =>
-                  <TabContentResolver contentList={tab} selectedTabIndex={selectedTabIndex}
-                    setSelectedTabIndex={setSelectedTabIndex} index={index} key={index}
+                  <TabContentResolver
+                    contentList={tab}
+                    selectedTabIndex={selectedTabIndex}
+                    setSelectedTabIndex={setSelectedTabIndex}
+                    index={index}
+                    key={index}
                     tabwidth={props.sidebarWidth}
-                    tabHeigh={55}/>)
+                    tabHeigh={55} />)
                 : null
             }
           </TabNavigation>

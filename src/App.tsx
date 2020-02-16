@@ -1,13 +1,11 @@
 /* Entrance of the App
 */
 import React, { useState, Suspense, lazy } from 'react';
-import {Pane, Text, Spinner, Icon, defaultTheme } from 'evergreen-ui';
+import {Pane, Text, Spinner, Icon} from 'evergreen-ui';
 import { Router, Route, Switch } from 'react-router-dom';
-import Frame from './Frame';
 import Header from './Header';
 import Sidebar from './Sidebar/Sidebar';
 import history from './history';
-import {Rectangle} from 'leaflet';
 
 const Mapp: any = lazy(() => import('./Mapp/Mapp'));
 const DeviceTable: any = lazy(() => import('./Table/DeviceTable/DeviceTable'));
@@ -32,10 +30,12 @@ const App: React.FC = () => {
 
       <Router history={history}>
 
-        <Header/>
-        <Suspense fallback= {
-          <Pane alignItems="center" display="flex"
-          justifyContent="center" height={800}> <Spinner/> </Pane> }>
+        <Header />
+        <Suspense fallback={
+          <Pane alignItems="center"
+            display="flex"
+            justifyContent="center"
+            height={800}> <Spinner /> </Pane>}>
           <Switch>
             <Route exact path="/">
               <Sidebar sidebarButtons={
@@ -46,7 +46,7 @@ const App: React.FC = () => {
                 ]
               }
                 sidebarWidth={sidebarWidth}
-                headerHeight={headerHeight}/>
+                headerHeight={headerHeight} />
             </Route>
 
               <Route path={["/Map", "/ProjectTable", "/Project/:sid/Spots"]} component={Mapp}>
@@ -91,26 +91,29 @@ const App: React.FC = () => {
 
       <Pane marginLeft={sidebarWidth}>
         <Router history={history}>
-          <Suspense fallback= {
-            <Pane alignItems="center" display="flex"
-            justifyContent="center" height={800}> <Spinner/> </Pane> }>
+          <Suspense fallback={
+            <Pane alignItems="center"
+              display="flex"
+              justifyContent="center"
+              height={800}> <Spinner /> </Pane>}>
             <Switch>
-              <Route exact path="/" component={Mapp}/>
-
-              <Route path="/Map" component={Mapp}/>
-
-              <Route path="/ProjectTable" component={ProjectTable}/>
-
-              <Route path="/DeviceTable" component={DeviceTable} />
-
-              <Route path="/Device/:did/SpotRecords" component={RecordTable} />
-
-              <Route path="/Project/:pid/Spots" component={SpotTable}/>
-
-              <Route path="/Spot/:sid/Devices" component={DeviceTable}/>
-
-              <Route path="/Test" component={Test}/>
-
+              <Route exact
+                path="/"
+                component={Mapp} />
+              <Route path="/Map"
+                component={Mapp} />
+              <Route path="/ProjectTable"
+                component={ProjectTable} />
+              <Route path="/DeviceTable"
+                component={DeviceTable} />
+              <Route path="/Device/:did/SpotRecords"
+                component={RecordTable} />
+              <Route path="/Project/:pid/Spots"
+                component={SpotTable} />
+              <Route path="/Spot/:sid/Devices"
+                component={DeviceTable} />
+              <Route path="/Test"
+                component={Test} />
             </Switch>
           </Suspense>
         </Router>

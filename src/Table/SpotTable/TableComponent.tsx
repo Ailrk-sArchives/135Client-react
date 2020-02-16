@@ -1,6 +1,6 @@
 import React, {useState, useEffect} from 'react';
 import {Pane, Menu, Spinner, Text, Table, Position, Icon, Popover, Card, Tab} from 'evergreen-ui';
-import {IdempotentApis, Spot, makePaginationRequest, PaginationRequest, ApiDataType} from '../../data';
+import {IdempotentApis, Spot, makePaginationRequest, PaginationRequest, ApiDataType} from '../../Data/data';
 import Frame from '../../Frame';
 import {Link, useParams} from 'react-router-dom';
 import {grapName, dynamicHeightProperties, dynamicHeight} from '../../utils/utils';

@@ -1,15 +1,17 @@
 import React, {useState, useEffect} from 'react';
-import {Pane, Card, Table, Checkbox, Position, Popover, Menu, Icon,
-  Tooltip, Spinner} from 'evergreen-ui';
 import Frame from '../../Frame';
-import {IdempotentApis, makePaginationRequest, SpotRecord, PaginationRequest, ApiDataType} from '../../data';
+import {
+  IdempotentApis, NonIdempotentApis, makePaginationRequest, SpotRecord, PaginationRequest, ApiDataType,
+  spotRecordKeys
+} from '../../Data/data';
 import {useParams} from 'react-router-dom';
 import {PaginationProps} from '../TablePagination';
-import {grapName, dynamicHeightProperties, dynamicHeight} from '../../utils/utils';
 import ContentCard, {TableFC} from '../ContentCard';
-import {useTableParent} from '../utils/utils';
+import {keys} from 'ts-transformer-keys';
+import {useTableParent, HTTPMethods, PanelOperationTable} from '../utils/utils';
+import * as DataAdaptor from '../../Data/dataAdaptor';
 
-import {tableFC, PopupMenu} from './TableComponent';
+import {tableFC} from './TableComponent';
 
 const RecordTable: React.FC<{}> = (props) => {
   const [spotRecords, setSpotRecords] = useState<Array<SpotRecord>>([]);
@@ -79,20 +81,29 @@ const RecordTable: React.FC<{}> = (props) => {
   return (<Frame children={
     React.createElement(
       ContentCard(
-      {
-        titlename: "测点数据",
-        paginationProps: paginationProps,
-        tableParent: tableParent,
-        loaded: loaded,
-        data: spotRecords,
-        setData: setSpotRecords,
-        tableFC: tableFC,
-        tickAll: tickAll,
-        setTickAll: setTickAll,
-        itemCheckedList: itemCheckedList,
-        setItemCheckedList: setItemCheckedList,
-      })
-    ) } />);
+        {
+          titlename: "测点数据",
+          paginationProps: paginationProps,
+          panelOperationTable: (new Map(
+            [
+              [
+                "post" as HTTPMethods,
+                NonIdempotentApis.Post.Single.postSpotRecord
+              ],
+            ]
+          ) as PanelOperationTable<DataAdaptor.PanelDataType>),
+          tableParent: tableParent,
+          loaded: loaded,
+          data: spotRecords,
+          dataTypeKeys: spotRecordKeys,
+          setData: setSpotRecords,
+          tableFC: tableFC,
+          tickAll: tickAll,
+          setTickAll: setTickAll,
+          itemCheckedList: itemCheckedList,
+          setItemCheckedList: setItemCheckedList,
+        })
+    )} />);
 };
 
 export default RecordTable;

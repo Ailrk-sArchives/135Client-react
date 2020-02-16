@@ -1,22 +1,20 @@
 import React, {useState, useEffect} from 'react';
+import {useParams} from 'react-router-dom';
 import {
-  Table, Pane, Checkbox, Position, Menu, toaster, Stack, Spinner,
-  Popover, Icon, Tooltip, Text
-} from 'evergreen-ui';
-import {Link, useParams, useLocation} from 'react-router-dom';
-import {
-  IdempotentApis, Device, PagedData, makePaginationRequest, PaginationRequest, Spot,
-  ApiDataType
-} from '../../data';
-import {grapName, dynamicHeightProperties, dynamicHeight} from '../../utils/utils';
+  IdempotentApis, NonIdempotentApis, Device, PagedData, makePaginationRequest, PaginationRequest,
+  ApiDataType, deviceKeys
+} from '../../Data/data';
 import {PaginationProps} from '../TablePagination';
-import ContentCard, {TableFC} from '../ContentCard';
+import ContentCard from '../ContentCard';
 import Frame from '../../Frame';
-import {useTableParent} from '../utils/utils';
+import {useTableParent, HTTPMethods, PanelOperationTable} from '../utils/utils';
+import * as DataAdaptor from '../../Data/dataAdaptor';
 
-import {tableFC, PopupMenu} from './TableComponent';
+import {tableFC} from './TableComponent';
 
 const DeviceTable: React.FC<{}> = (props) => {
+
+  //
   const [devices, setDevices] = useState<Array<Device>>([]);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [totalPage, setTotalPage] = useState<number>(5);
@@ -33,6 +31,7 @@ const DeviceTable: React.FC<{}> = (props) => {
   let {sid} = useParams();
   useTableParent(setTableParent);
 
+  // fetch
   const useInit =
     (paginationRequest: PaginationRequest) => useEffect(() => {
       const resposne: Promise<Array<Device> | PagedData<Array<Device>>> =
@@ -111,7 +110,7 @@ const DeviceTable: React.FC<{}> = (props) => {
 
   };
 
-  const paginationProps: PaginationProps = {
+  const paginationProps: PaginationProps = {  // set pagination control.
     useUpdate: useUpdate,
     useChangePageSize: setPageSize,
     totalPage: totalPage,
@@ -128,6 +127,15 @@ const DeviceTable: React.FC<{}> = (props) => {
           titlename: "设备信息",
           tableParent: tableParent,
           paginationProps: paginationProps,
+          panelOperationTable: (new Map(
+            [
+              [
+                "post" as HTTPMethods,
+                NonIdempotentApis.Post.Single.postDevice
+              ],
+            ]
+          ) as PanelOperationTable<DataAdaptor.PanelDataType>),
+          dataTypeKeys: deviceKeys,
           loaded: loaded,
           data: devices,
           setData: setDevices,

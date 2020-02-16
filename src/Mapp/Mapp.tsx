@@ -7,11 +7,13 @@ import Frame from '../Frame';
 import {Map, Marker, TileLayer, Popup, GeoJSON} from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
-import {IdempotentApis, Project} from '../data';
+import {IdempotentApis, Project} from '../Data/data';
 import {FeatureCollection, Feature} from 'geojson';
 import placeholder from '../static/placeholder.png';
-import {ProjectInfosCards, ProjectInfosAll,
-  projectInfosAll, projectInfosInCards} from '../Mapp/index';
+import {
+  ProjectInfosCards, ProjectInfosAll,
+  projectInfosAll, projectInfosInCards
+} from '../Mapp/index';
 import {grapName} from '../utils/utils';
 
 // remove default leaflet icon.
@@ -36,15 +38,6 @@ const markerIcon = new L.Icon({
   shadowAnchor: [0, 82],
 });
 
-
-const filterGeoJson =  // filter FeatureCollection type GeoJson.
-  (data: FeatureCollection, propertyNames: Array<string>) => {
-    data.features = data.features
-      .filter((e: Feature) =>
-        e.properties ? propertyNames.includes(e.properties.NAME) : null);
-    return data;
-  };
-
 const tableRow = <T extends any>(e: Array<any>, info: T) => {
   /*
    *  generate row of key-val pairs
@@ -54,7 +47,7 @@ const tableRow = <T extends any>(e: Array<any>, info: T) => {
   const [key, val] = e;
 
   if (Object.keys(info).includes(key)) {
-    const k: keyof ProjectInfosCards = key;
+    const k: keyof T = key;
     return (
       <Table.Row key={key}>
         <Table.TextCell> <h5> {info[k]} </h5> </Table.TextCell>
@@ -63,20 +56,28 @@ const tableRow = <T extends any>(e: Array<any>, info: T) => {
   }
 };
 
+
+
+const filterGeoJson =  // filter FeatureCollection type GeoJson.
+  (data: FeatureCollection, propertyNames: Array<string>) => {
+    data.features = data.features
+      .filter((e: Feature) =>
+        e.properties ? propertyNames.includes(e.properties.NAME) : null);
+    return data;
+  };
+
 const Mapp: React.FC<{}> = (props) => {
   // zoom depth of the map
   const [mapzoom, setMapzoom] = useState<number>(5);
-
-  // fetech data in initialize pharse.
   const [projects, setProjects] = useState<Array<Project>>([]);
+  const chinaGeoJson: FeatureCollection = require('../static/china-province.json');
+  const provinces: Array<string> =
+    ["江苏", "上海", "浙江", "安徽", "湖南", "湖北", "重庆", "四川"];
 
   useEffect(() => {
     IdempotentApis.Get.projectViewGet().then((ps) => setProjects(ps));
   }, []);
 
-  const chinaGeoJson: FeatureCollection = require('../static/china-province.json');
-  const provinces: Array<string> =
-    ["江苏", "上海", "浙江", "安徽", "湖南", "湖北", "重庆", "四川"];
 
   const contentFC: React.FC<{currentZoom: number}> = (props) => (
     <Pane>
@@ -87,7 +88,9 @@ const Mapp: React.FC<{}> = (props) => {
         paddingBottom={40}
         width="100%"
         height="100%">
-        <MapCanvas mapzoom={mapzoom} projects={projects} currentZoom={props.currentZoom}
+        <MapCanvas mapzoom={mapzoom}
+          projects={projects}
+          currentZoom={props.currentZoom}
           geoJson={filterGeoJson(chinaGeoJson, provinces)} />
         <Pane width="70hv" display="flex" />
         <p style={{color: "#66788A", height: 3, width: 20, fontSize: 6, cursor: "default"}}>
@@ -129,8 +132,10 @@ const MapCanvas:
           key={p.project_id}
           icon={markerIcon}>
           <Popup>
-            <MapPopup project={p} projectInfosInCards={projectInfosInCards}
-              setdialogueIsShown={setdialogueIsShown} setdialogueProject={setdialogueProject} />
+            <MapPopup project={p}
+              projectInfosInCards={projectInfosInCards}
+              setdialogueIsShown={setdialogueIsShown}
+              setdialogueProject={setdialogueProject} />
           </Popup>
         </Marker>
         )
@@ -143,9 +148,11 @@ const MapCanvas:
           attribution="&copy; <a href=&quot;http://osm.org/copyright&quot;>OpenStreetMap</a> contributors" />
         <GeoJSON data={props.geoJson}></GeoJSON>
         {projectMarkers}
-        <ProjectInfoDialogue isShown={dialogueIsShown} project={dialogueProject}
-        setdialogueIsShown={setdialogueIsShown} setdialogueProject={setdialogueProject}
-        projectInfosAll={projectInfosAll}/>
+        <ProjectInfoDialogue isShown={dialogueIsShown}
+          project={dialogueProject}
+          setdialogueIsShown={setdialogueIsShown}
+          setdialogueProject={setdialogueProject}
+          projectInfosAll={projectInfosAll} />
       </Map>
     );
   };
@@ -187,7 +194,10 @@ const ProjectInfoDialogue:
       <Stack value={1100}>
         {
           zindex =>
-            <Dialog isShown={props.isShown} width={700} hasFooter={false} topOffset="8vmin"
+            <Dialog isShown={props.isShown}
+              width={700}
+              hasFooter={false}
+              topOffset="8vmin"
               title={
                 props.project ? props.project.project_name : ''
               }
@@ -195,12 +205,18 @@ const ProjectInfoDialogue:
               onCloseComplete={
                 () => {
                   props.setdialogueProject(undefined);
-                  props.setdialogueIsShown(false)
+                  props.setdialogueIsShown(false);
                 }
               }
               preventBodyScrolling>
-              <Pane alignItems="center" justifyContent="center" display="flex">
-                <img src={placeholder} alt={placeholder} width={500} height={300} />
+
+              <Pane alignItems="center"
+                justifyContent="center"
+                display="flex">
+                <img src={placeholder}
+                  alt={placeholder}
+                  width={500}
+                  height={300} />
                 <br />
               </Pane>
               {

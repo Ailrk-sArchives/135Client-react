@@ -3,16 +3,10 @@ import {
   Table, Pane, Checkbox, Position, Menu, toaster, Stack, Spinner,
   Popover, Icon, Tooltip, Text
 } from 'evergreen-ui';
-import {Link, useParams, useLocation} from 'react-router-dom';
-import {
-  IdempotentApis, Device, PagedData, makePaginationRequest, PaginationRequest, Spot,
-  ApiDataType
-} from '../../data';
+import {Link} from 'react-router-dom';
+import { IdempotentApis, Device } from '../../Data/data';
 import {grapName, dynamicHeightProperties, dynamicHeight} from '../../utils/utils';
-import {PaginationProps} from '../TablePagination';
-import ContentCard, {TableFC} from '../ContentCard';
-import Frame from '../../Frame';
-import {useTableParent} from '../utils/utils';
+import {TableFC} from '../ContentCard';
 
 
 export const PopupMenu:
@@ -39,7 +33,7 @@ export const PopupMenu:
               <Link to={
                 {
                   pathname: "/Device" + "/" + deviceId + "/" + "SpotRecords",
-                  state: { tableParent: props.device }
+                  state: {tableParent: props.device}
                 }
               } style={linkCss}>
                 <Menu.Item icon="list-columns">
@@ -169,26 +163,34 @@ export const tableFC: TableFC = (props) => (
                       {
                         (d as Device).online ?
                           <Icon icon='dot' color='success' size={20} />
-                          : <Icon icon='dot' color="muted" size={20} />}
+                          :
+                          <Icon icon='dot' color="muted" size={20} />
+                      }
                     </Tooltip>
                   </Table.Cell>
 
                   <Table.Cell flexBasis={100} flexShrink={0} flexGrow={0}
                   >{
                       <PopupMenu device={d as Device}
-                        devices={props.data as Array<Device>} setDevices={props.setData} />
+                        devices={props.data as Array<Device>}
+                        setDevices={props.setData} />
 
                     }</Table.Cell>
 
                 </Table.Row>
               ))
-              : <Pane display="flex" alignItems="center" justifyContent="center"> 暂无数据 </Pane>
+              :
+              <Pane display="flex"
+                alignItems="center"
+                justifyContent="center"> 暂无数据 </Pane>
           }
 
         </Table.VirtualBody>
 
         :
-        <Pane display="flex" alignItems="center" justifyContent="center"
+        <Pane display="flex"
+          alignItems="center"
+          justifyContent="center"
           height={
             dynamicHeight(
               props.currentZoom,

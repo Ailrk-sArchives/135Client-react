@@ -1,104 +1,123 @@
+/*
+ * The purpose of these Component is to transfer
+ * data from Main component downwards to other components
+ * like control panel, pagination, tables, etc.
+ *
+ * */
+
 import React, {useEffect, useState} from 'react';
 import {Card} from 'evergreen-ui';
 
-import TablePaginationBar,{PaginationProps} from './TablePagination';
-import TableControlPanel, {ControlHub} from './TableControlPanel';
+import TablePaginationBar, {PaginationProps} from './TablePagination';
+import TableControlPanel from './TableControlPanel';
+import {ControlHub, PanelOperationTable} from './utils/utils';
 import {
-  ApiDataType, apiDataTypeCheck, Spot, Project, Device, SpotRecord
-} from '../data';
+  ApiDataType, apiDataTypeCheck, Spot, Project, Device, SpotRecord,
+  DataTypeKeys
+} from '../Data/data';
+import {PanelDataType} from '../Data/dataAdaptor';
 
-
-export type TableFC = React.FC<{
+export interface TableFCParams {
   currentZoom: number,
   loaded: boolean,
   data: Array<ApiDataType>,
   setData?: Function,
+  panelOperationTable?: PanelOperationTable<ApiDataType>,
   tickAll: boolean,
   setTickAll: Function,
   tickone: Function;
   itemCheckedList: Array<boolean>,
   setItemCheckedList: Function
-}>;
+};
 
+export type TableFC = React.FC<TableFCParams>;
 
+export interface ContentControlParams {
+  titlename?: string,
+  tableParent?: ApiDataType,
+
+  paginationProps?: PaginationProps,
+  tableFC: TableFC,
+  loaded: boolean,
+  data: Array<PanelDataType>,
+  setData?: Function,
+  itemCheckedList: Array<boolean>,
+  setItemCheckedList: Function,
+
+  tickAll: boolean,
+  setTickAll: Function,
+  setShown?: Function,
+
+  dataTypeKeys?: DataTypeKeys,
+
+  panelOperationTable?: PanelOperationTable<PanelDataType>,
+
+  resourceId?: number
+
+};
+
+const tableParentNameResolver = (props: {
+  tableParent?: ApiDataType,
+  setTableParentName: React.Dispatch<React.SetStateAction<string | undefined>>
+}) => {
+
+  if (props.tableParent !== undefined) {
+
+    switch (apiDataTypeCheck(props.tableParent)) {
+      case "Spot":
+        props.setTableParentName((props.tableParent as Spot)?.spot_name);
+        break;
+
+      case "Project":
+        props.setTableParentName((props.tableParent as Project)?.project_name);
+        break;
+
+      case "SpotRecord":
+        props.setTableParentName(
+          (props.tableParent as SpotRecord)?.spot_record_time?.toString());
+        break;
+
+      case "Device":
+        props.setTableParentName((() => {
+          const dt = (props.tableParent as Device)?.device_type;
+          const dn = (props.tableParent as Device)?.device_name;
+
+          if (dt !== undefined && dn !== undefined) {
+            return `${dn} | ${dt} `;
+          }
+        })());
+        break;
+
+      default:
+        props.setTableParentName("");
+        break;
+    }
+
+  }
+}
+
+// render content for a Table Component.
 const ContentCard =
-  <T extends ApiDataType>(props: {
-    titlename?: string,
-    tableParent?: ApiDataType,
-
-    paginationProps?: PaginationProps,
-    tableFC: TableFC,
-    loaded: boolean,
-    data: Array<T>,
-    setData?: Function,
-    itemCheckedList: Array<boolean>,
-    setItemCheckedList: Function,
-
-    tickAll: boolean,
-    setTickAll: Function,
-    shown?: boolean,
-    setShown?: Function,
-
-    resourceId?: number
-
-  }): React.FC<{currentZoom: number}> => {
+  (props: ContentControlParams): React.FC<{currentZoom: number}> => {
 
     const [tableParentName, setTableParentName] = useState<string | undefined>("");
 
-    useEffect(() => {
-
-      if (props.tableParent !== undefined) {
-
-        switch (apiDataTypeCheck(props.tableParent)) {
-          case "Spot":
-            setTableParentName((props.tableParent as Spot)?.spot_name);
-            break;
-
-          case "Project":
-            setTableParentName((props.tableParent as Project)?.project_name);
-            break;
-
-          case "SpotRecord":
-            setTableParentName(
-              (props.tableParent as SpotRecord)?.spot_record_time?.toString());
-            break;
-
-          case "Device":
-            setTableParentName((() => {
-              const dt = (props.tableParent as Device)?.device_type;
-              const dn = (props.tableParent as Device)?.device_name;
-
-              if (dt !== undefined && dn !== undefined) {
-                return `${dn} | ${dt} `;
-              }
-          })());
-            break;
-
-          default:
-            setTableParentName("N");
-            break;
-        }
-
-      }
-    }, [tableParentName, props.tableParent]);
+    // check table Parent types
+    useEffect(() =>
+      tableParentNameResolver({
+        tableParent: props.tableParent,
+        setTableParentName: setTableParentName
+      }),
+      [tableParentName, props.tableParent]);
 
 
     const titlename: string = `${props.titlename} > ${tableParentName} `;
     const env = props;
 
-    return (props: {currentZoom: number}) => {
+    return (props: {currentZoom: number}) => {  // return FC of content
 
+      const tickone = (index: number) => { // helper function.
 
-      // TODO
-      const controlHub: ControlHub<T> = {
-        titlename: titlename,
-        data: env.data,
-        setData: env.setData,
-        shown: env.shown,
-        resourceId: env.resourceId
-      };
-
-      const tickone = (index: number) => {
         env.setItemCheckedList(
           env.itemCheckedList.slice(0, index)
             .concat([
@@ -107,6 +126,34 @@ const ContentCard =
             .concat(env.itemCheckedList.slice(index + 1)))
       };
 
+
+      const controlHub: ControlHub = {
+        titlename: titlename,
+
+        panelOperationTable: env.panelOperationTable,
+        dataTypeKeys: env.dataTypeKeys,
+
+        data: env.data,
+        setData: env.setData,
+        resourceId: env.resourceId
+      };
+
+      const tableFCParams: TableFCParams = {
+        currentZoom: props.currentZoom,
+        loaded: env.loaded,
+
+        data: env.data,
+        setData: env.setData,
+
+        tickAll: env.tickAll,
+        setTickAll: env.setTickAll,
+        tickone: tickone,
+
+        itemCheckedList: env.itemCheckedList,
+        setItemCheckedList: env.setItemCheckedList
+      }
+
+      // dispatching data into different subcomponents.
       return (
         <Card background="overlay"
           paddingTop={2}
@@ -116,28 +163,14 @@ const ContentCard =
           width="100%"
           height="100%">
 
-          {
-            React.createElement(TableControlPanel, controlHub)
-          }
-
-          {
-            React.createElement(env.tableFC, {
-              currentZoom: props.currentZoom,
-              loaded: env.loaded,
-              data: env.data,
-              setData: env.setData,
-              tickAll: env.tickAll,
-              setTickAll: env.setTickAll,
-              tickone: tickone,
-              itemCheckedList: env.itemCheckedList,
-              setItemCheckedList: env.setItemCheckedList
-            })
-          }
+          { React.createElement(TableControlPanel, controlHub) }
+          { React.createElement(env.tableFC,  tableFCParams) }
 
           {
             env.paginationProps ?
               React.createElement(TablePaginationBar, env.paginationProps)
-              : null
+              :
+              null
           }
 
         </Card>);

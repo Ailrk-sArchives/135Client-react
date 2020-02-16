@@ -1,13 +1,15 @@
 import React, {useState, useEffect} from 'react';
-import {Pane, Menu, Spinner, Text, Table, Position, Icon, Popover, Card, Tab} from 'evergreen-ui';
-import {IdempotentApis, Spot, makePaginationRequest, PaginationRequest, ApiDataType} from '../../data';
+import {Menu, Spinner, Text, Table, Position, Icon, Popover, Card, Tab} from 'evergreen-ui';
+import {
+  IdempotentApis, NonIdempotentApis, Spot, makePaginationRequest, PaginationRequest, ApiDataType, spotKeys
+} from '../../Data/data';
 import Frame from '../../Frame';
-import {Link, useParams} from 'react-router-dom';
-import {grapName, dynamicHeightProperties, dynamicHeight} from '../../utils/utils';
-import ContentCard, {TableFC} from '../ContentCard';
-import TablePaginationBar, {PaginationProps}  from '../TablePagination';
-import {tableFC, PopupMenu} from './TableComponent';
-import {useTableParent} from '../utils/utils';
+import {useParams} from 'react-router-dom';
+import ContentCard from '../ContentCard';
+import TablePaginationBar, {PaginationProps} from '../TablePagination';
+import {tableFC} from './TableComponent';
+import {useTableParent, HTTPMethods, PanelOperationTable} from '../utils/utils';
+import * as DataAdaptor from '../../Data/dataAdaptor';
 
 
 const SpotTable: React.FC<{}> = (props) => {
@@ -94,8 +96,17 @@ const SpotTable: React.FC<{}> = (props) => {
         {
           titlename: "测点信息",
           paginationProps: paginationProps,
+          panelOperationTable: (new Map(
+            [
+              [
+                "post" as HTTPMethods,
+                NonIdempotentApis.Post.Single.postSpot
+              ],
+            ]
+          ) as PanelOperationTable<DataAdaptor.PanelDataType>),
           tableParent: tableParent,
           loaded: loaded,
+          dataTypeKeys: spotKeys,
           data: spots,
           setData: setSpots,
           tableFC: tableFC,

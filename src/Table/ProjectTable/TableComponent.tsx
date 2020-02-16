@@ -4,16 +4,19 @@ import {
   Table, Card, Pane, Checkbox, Position, Menu, Spinner,
   Popover, Text, Button, Icon, toaster
 } from 'evergreen-ui';
-import {IdempotentApis, Project, ApiDataType} from '../../data';
+import {IdempotentApis, Project, ApiDataType} from '../../Data/data';
 import ContentCard, {TableFC} from '../ContentCard';
 import {Link} from 'react-router-dom';
 
 
 export const tableFC: TableFC = (props) => (
   <Table background="tint2">
-    <Table.Head height={70} elevation={1}>
+    <Table.Head height={70}
+    elevation={1}>
 
-      <Table.Cell flexBasis={50} flexShrink={0} flexGrow={0}
+    <Table.Cell flexBasis={50}
+    flexShrink={0}
+    flexGrow={0}
         onClick={
           () => {
             props.setItemCheckedList(
@@ -41,7 +44,6 @@ export const tableFC: TableFC = (props) => (
     </Table.Head>
     {
       props.data ?
-
         <Table.VirtualBody height={
           dynamicHeight(
             props.currentZoom,
@@ -88,18 +90,23 @@ export const tableFC: TableFC = (props) => (
 
                 <Table.Cell flexBasis={100} flexShrink={0} flexGrow={0}
                 >{
-                    <PopupMenu projectId={(p as Project).project_id || 1}
+                    <PopupMenu project={p as Project}
                       projects={props.data as Array<Project>}
                       setProjects={props.setData} />
                   }</Table.Cell>
               </Table.Row>
             ))
-            : <Pane display="flex" alignItems="center" justifyContent="center"> 暂无数据 </Pane>
+            :
+            <Pane display="flex"
+              alignItems="center"
+              justifyContent="center"> 暂无数据 </Pane>
           }
         </Table.VirtualBody>
 
         :
-        <Pane display="flex" alignItems="center" justifyContent="center"
+        <Pane display="flex"
+          alignItems="center"
+          justifyContent="center"
           height={
             dynamicHeight(
               props.currentZoom,
@@ -121,15 +128,13 @@ export const tableFC: TableFC = (props) => (
 
 export const PopupMenu:
   React.FC<{
-  projectId: number,
-  projects: Array<Project>,
-  setProjects?: Function,
+    project: Project,
+    projects: Array<Project>,
+    setProjects?: Function,
   }> = (props) => {
     const [deleteMsg, setDeleteMsg] = useState<string>("");
+    const projectId = props.project.project_id || 1;
 
-    /* useEffect(() => { */
-
-    /* }, [deleteMsg]); */
 
     const linkCss: React.CSSProperties = {
       textDecoration: 'none',
@@ -143,7 +148,13 @@ export const PopupMenu:
             <Menu.Group>
               <Menu.Item icon="edit">修改...</Menu.Item>
               <Menu.Item icon="download">下载...</Menu.Item>
-              <Link to={"/Project" + "/" + props.projectId + "/" + "Spots"} style={linkCss}>
+              <Link to={
+                {
+
+                  pathname: "/Project" + "/" + projectId + "/" + "Spots",
+                  state: {tableParent: props.project}
+                }
+              } style={linkCss}>
                 <Menu.Item icon="list-columns">
                   <Text> 查看测点...  </Text>
                 </Menu.Item>
@@ -152,20 +163,18 @@ export const PopupMenu:
             <Menu.Divider />
             <Menu.Group>
               <Menu.Item icon="trash" intent="danger"
+                hoverElevation={2}
                 onSelect={
                   () => {
-
                     if (props.setProjects) {
-                      IdempotentApis.Delete.projectViewDelete(props.projectId)
-                      .then((res) => setDeleteMsg(res))
-                      .catch(e => console.log(e));
+                      IdempotentApis.Delete.projectViewDelete(projectId)
+                        .then((res) => setDeleteMsg(res))
+                        .catch(e => console.log(e));
 
                       props.setProjects(
-                        props.projects.filter(e => e.project_id != props.projectId));
-
+                        props.projects.filter(e => e.project_id != projectId));
                     }
-
-                     toaster.danger('删除', {description: deleteMsg});
+                    toaster.danger('删除', {description: deleteMsg});
                   }
                 }>
                 删除...

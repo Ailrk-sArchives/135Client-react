@@ -2,17 +2,13 @@
  * Project list
  */
 import React, {useState, useEffect} from 'react';
-import {
-  Table, Card, Pane, Checkbox, Position, Menu, Spinner,
-  Popover, Text, Button, Icon, toaster
-} from 'evergreen-ui';
 import Frame from '../../Frame';
-import {IdempotentApis, Project, ApiDataType} from '../../data';
-import {grapName, dynamicHeightProperties, dynamicHeight} from '../../utils/utils';
+import {IdempotentApis, NonIdempotentApis, Project, ApiDataType, projectKeys} from '../../Data/data';
 import ContentCard, {TableFC} from '../ContentCard';
-import SubmitSlide from '../SubmitSlide';
+import {HTTPMethods, PanelOperationTable} from '../utils/utils';
+import * as DataAdaptor from '../../Data/dataAdaptor';
 
-import {tableFC, PopupMenu} from './TableComponent';
+import {tableFC} from './TableComponent';
 
 
 const ProjectTable: React.FC<{}> = (props) => {
@@ -38,8 +34,17 @@ const ProjectTable: React.FC<{}> = (props) => {
         {
           titlename: "示范工程项目信息",
           loaded: loaded,
+          panelOperationTable: (new Map(
+            [
+              [
+                "post" as HTTPMethods,
+                NonIdempotentApis.Post.Single.postProject
+              ],
+            ]
+          ) as PanelOperationTable<DataAdaptor.PanelDataType>),
           data: projects,
           setData: setProjects,
+          dataTypeKeys: projectKeys,
           tableFC: tableFC,
           tickAll: tickAll,
           setTickAll: setTickAll,

@@ -9,12 +9,14 @@ import {grapName} from './utils/utils';
 type FrameComponent = React.FunctionComponentElement<{currentZoom: number}>
 
 const Frame: React.FC<{children: FrameComponent}> = (props) => {
+
   const [currentZoom, getCurrentZoom] = useState<number>(getZoomRatio());
 
   window.onresize = () => getCurrentZoom(getZoomRatio());
   document.onfullscreenchange = () => getCurrentZoom(getZoomRatio());
-  const FrameContext = React.createContext(currentZoom);
 
+  // const FrameContext = React.createContext(currentZoom);
+  //
   return (
     <Pane
       paddingLeft="2%" paddingRight="2%"
