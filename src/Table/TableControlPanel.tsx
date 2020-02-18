@@ -1,12 +1,19 @@
-import React, {useState} from 'react';
+import React, {useState, useRef} from 'react';
 import {
   Pane, Menu, Popover, Position, Tab, SearchInput,
   Text, Icon, toaster
 } from 'evergreen-ui';
 import {ApiDataType, DataTypeKeys} from '../Data/data';
 import SubmitDialogue, {SubmitDialogueProps} from './SubmitDialogue';
+import ConfirmDialogue, {ConfirmDialogueProps} from './ConfirmDialogue';
 import {Operation, PanelOperationTable, HTTPMethods, ControlHub} from './utils/utils';
+import {waitClickAndPost, CallbackProps} from './utils/callbacks';
+import {ShownDialogProps} from './utils/dialogStateUtils';
 
+type PanelPopupMenuProps =
+  & ShownDialogProps
+  & Omit<SubmitDialogueProps, "shown" | "setShown">
+  & Omit<ConfirmDialogueProps, "shown" | "setShown">;
 
 const _ControlPanel = (controlHub: ControlHub) => {
   /*
@@ -17,7 +24,24 @@ const _ControlPanel = (controlHub: ControlHub) => {
    *
    */
   const titlename: string = controlHub.titlename;
-  const [shown, setShown] = useState<boolean>(false);
+  const confirmed = useRef<boolean>(false);
+  const [shownConfirmDialog, setShownConfirmDialog] = useState<boolean>(false);
+  const [shownSubmitDialog, setShownSubmitDialog] = useState<boolean>(false);
+  const [message, setMessage] = useState<string>("");
+  const [entries, setEntries] = useState<Map<string, string | undefined>>(new Map());
+
+  const panelPopupMenuProps: PanelPopupMenuProps = {
+    confirmed,
+    dataTypeKeys: controlHub.dataTypeKeys,
+    shownSubmitDialog,
+    setShownSubmitDialog,
+    shownConfirmDialog,
+    setShownConfirmDialog,
+    message,
+    setMessage,
+    entries,
+    setEntries
+  };
 
   return (
     <Pane height={50} width={"100hv"} display="flex" justifyContent="space-between">
@@ -49,11 +73,7 @@ const _ControlPanel = (controlHub: ControlHub) => {
         </Tab>
 
         <Tab height={35} width={35}>
-          <PanelPopupMenu
-            panelOperationTable={controlHub.panelOperationTable}
-            dataTypeKeys={controlHub.dataTypeKeys}
-            shown={shown}
-            setShown={setShown} />
+          { React.createElement(PanelPopupMenu, panelPopupMenuProps) }
         </Tab>
 
         <Tab height={35} width={35}>
@@ -74,9 +94,7 @@ const TableControlPanel = (controlHub: ControlHub) => {
   return (
     <Pane background="tint2" paddingTop={10} paddingButton={10}
       paddingRight={20} paddingLeft={20}>
-      {
-        React.createElement(_ControlPanel, controlHub)
-      }
+      { React.createElement(_ControlPanel, controlHub) }
     </Pane>
   );
 
@@ -88,21 +106,23 @@ const TableControlPanel = (controlHub: ControlHub) => {
  * post, update will happend here.
  */
 const PanelPopupMenu:
-  React.FC<{
-    panelOperationTable?: PanelOperationTable,
-    dataTypeKeys?: DataTypeKeys,
-    shown: boolean,
-    setShown: Function
-  }> = (props) => {
-
-    const [httpMethod, setHttpMethod] = useState<HTTPMethods>();
+  React.FC<PanelPopupMenuProps> = (props) => {
 
     const dprops: SubmitDialogueProps = {
-      panelOperationTable: props.panelOperationTable,
+      confirmed: props.confirmed,
       dataTypeKeys: props.dataTypeKeys,
-      shown: props.shown,
-      setShown: props.setShown,
-      httpMethod: httpMethod
+      shown: props.shownSubmitDialog,
+      setShown: props.setShownConfirmDialog,
+      entries: props.entries,
+      setEntries: props.setEntries
+    };
+
+    const confirmDialogueProps: ConfirmDialogueProps = {
+      confirmed: props.confirmed,
+      shown: props.shownConfirmDialog,
+      setShown: props.setShownConfirmDialog,
+      message: props.message,
+      setMessage: props.setMessage
     };
 
     const linkCss: React.CSSProperties = {
@@ -111,7 +131,12 @@ const PanelPopupMenu:
 
     return (
       <>
-        {React.createElement(SubmitDialogue, dprops)}
+        {
+          React.createElement(SubmitDialogue, dprops)
+        }
+      {
+        React.createElement(ConfirmDialogue, confirmDialogueProps)
+      }
         <Popover
           position={Position.BOTTOM_LEFT}
           content={
@@ -121,8 +146,8 @@ const PanelPopupMenu:
                   hoverElevation={1}
                   activeElevation={2}
                   onSelect={() => {
-                    props.setShown(true);
-                    setHttpMethod("post" as HTTPMethods);
+                    props.setShownSubmitDialog(true);
+                    //waitClickAndPost(props.confirmed, );
                   }}>
                   添加...
                   </Menu.Item>
@@ -135,8 +160,8 @@ const PanelPopupMenu:
                   hoverElevation={3}
                   activeElevation={4}
                   onSelect={() => {
-                    setHttpMethod("delete" as HTTPMethods);
-
+                    props.setShownConfirmDialog(true);
+                    props.setMessage("确定要删除所选项目吗？");
                   }}>
                   删除...
               </Menu.Item>

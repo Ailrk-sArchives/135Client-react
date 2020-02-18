@@ -1,17 +1,13 @@
 import React, {useEffect} from 'react';
 import {toaster, Icon, Dialog, Pane, Heading, Stack} from 'evergreen-ui';
-import {
-  Operation, OPPost, OPDelete, OPUpdate, HTTPMethods, PanelOperationTable
-} from './utils';
+import {DialogProps} from './utils/dialogStateUtils';
 
+export interface ConfirmDialogueProps extends DialogProps {
+  message: string,
+  setMessage: React.Dispatch<React.SetStateAction<string>>,
+};
 
-export const confirmDialogue: React.FC<{
-  confirmed: React.MutableRefObject<boolean>,
-  //setConfirm: React.Dispatch<React.SetStateAction<boolean>>,
-  shown: boolean,
-  setShown: React.Dispatch<React.SetStateAction<boolean>>,
-  message?: string
-}> = (props) => {
+const ConfirmDialogue: React.FC<ConfirmDialogueProps> = (props) => {
 
   return (
     <Stack value={1100}>
@@ -47,3 +43,4 @@ export const confirmDialogue: React.FC<{
   );
 };
 
+export default ConfirmDialogue;

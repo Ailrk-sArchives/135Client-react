@@ -20,6 +20,7 @@ export type Operation =
 export type HTTPMethods = "post" | "delete" | "put" | "get" | undefined;
 export type PanelOperationTable = Map<HTTPMethods, Operation>;
 
+
 // dispatch data from cotrol panel to its sub components.
 export interface ControlHub {
   data?: Array<ApiDataType>;
@@ -58,4 +59,6 @@ export const waitClick =
     }
     callback();
   };
+
+
 

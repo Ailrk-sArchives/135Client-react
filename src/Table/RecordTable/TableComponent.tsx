@@ -6,23 +6,26 @@ import {
 import {SpotRecord} from '../../Data/data';
 import {grapName, dynamicHeightProperties, dynamicHeight} from '../../utils/utils';
 import {PanelOperationTable} from '../utils/utils'
-import {confirmDialogue} from '../utils/utilComponents';
+import ConfirmDialogue from '../ConfirmDialogue';
 import {TableFC} from '../ContentCard';
 import {waitClickAndDelete, CallbackProps} from '../utils/callbacks';
 
 
 export const PopupMenu: React.FC<{
-  spotRecordId: number,
+  spotRecord: SpotRecord,
   spotRecords: Array<SpotRecord>,
   setSpotRecords?: Function
   panelOperationTable?: PanelOperationTable,
 }> = (props) => {
+
+  const spotRecordId = props.spotRecord.spot_record_id || 1;
   const [shown, setShown] = useState<boolean>(false);
   const confirmed = useRef<boolean>(false);
   const [message, setMessage] = useState<string>("");
+
   const opCallbackProps: CallbackProps<SpotRecord> = {
-    someid: props.spotRecordId,
-    someData: props.spotRecords,
+    someid: spotRecordId,
+    someDatas: props.spotRecords,
     setSomeData: props.setSpotRecords,
     panelOperationTable: props.panelOperationTable
   };
@@ -30,7 +33,7 @@ export const PopupMenu: React.FC<{
   return (
     <>
       {
-        React.createElement(confirmDialogue, {
+        React.createElement(ConfirmDialogue, {
           confirmed: confirmed,
           shown: shown,
           setShown: setShown,
@@ -54,7 +57,7 @@ export const PopupMenu: React.FC<{
                       if (props.setSpotRecords)
                         props.setSpotRecords(
                           props.spotRecords
-                            .filter(e => e.spot_record_id != props.spotRecordId));
+                            .filter(e => e.spot_record_id != spotRecordId));
                     });
                     setMessage("确定要删除吗？");
                     setShown(true);
@@ -157,7 +160,7 @@ export const tableFC: TableFC = (props) => (
                   <Table.Cell>{grapName((r as SpotRecord).device_id)}</Table.Cell>
                   <Table.Cell>
                     {
-                      <PopupMenu spotRecordId={(r as SpotRecord).spot_record_id || 1}
+                      <PopupMenu spotRecord={(r as SpotRecord)}
                         spotRecords={props.data as Array<SpotRecord>}
                         setSpotRecords={props.setData}
                         panelOperationTable={props.panelOperationTable} />

@@ -3,13 +3,13 @@ import {
   Pane, Menu, Spinner, Text, Table, Position, Icon, Popover, Card, toaster,
   Tab
 } from 'evergreen-ui';
-import {Spot} from '../../Data/data';
+import {Spot, spotKeys} from '../../Data/data';
 import {Link} from 'react-router-dom';
 import {grapName, dynamicHeightProperties, dynamicHeight} from '../../utils/utils';
 import {TableFC} from '../ContentCard';
-import {PanelOperationTable, waitClick} from '../utils/utils'
+import {PanelOperationTable} from '../utils/utils'
 import {waitClickAndDelete, CallbackProps} from '../utils/callbacks';
-import {confirmDialogue} from '../utils/utilComponents';
+import ConfirmDialogue, {ConfirmDialogueProps} from '../ConfirmDialogue';
 
 
 export const PopupMenu: React.FC<{
@@ -24,27 +24,31 @@ export const PopupMenu: React.FC<{
     textDecoration: 'none',
   };
 
-  const [shown, setShown] = useState<boolean>(false);
+  const [shownConfirmDialog, setShownConfirmDialog] = useState<boolean>(false);
+  const [shownSubmitDialog, setShownSubmitDialog] = useState<boolean>(false);
   const confirmed = useRef<boolean>(false);
   const [message, setMessage] = useState<string>("");
 
   const opCallbackProps: CallbackProps<Spot> = {
     someid: spotId,
-    someData: props.spots,
+    someDatas: props.spots,
     setSomeData: props.setSpots,
     panelOperationTable: props.panelOperationTable
+  };
+
+  const confirmDialogueProps: ConfirmDialogueProps = {
+    confirmed: confirmed,
+    shown: shownConfirmDialog,
+    setShown: setShownConfirmDialog,
+    message: message
   };
 
   return (
     <>
       {
-        React.createElement(confirmDialogue, {
-          confirmed: confirmed,
-          shown: shown,
-          setShown: setShown,
-          message: message
-        })
+        React.createElement(ConfirmDialogue, confirmDialogueProps)
       }
+
       <Popover
         position={Position.BOTTOM_LEFT}
         content={
@@ -72,7 +76,7 @@ export const PopupMenu: React.FC<{
                           .filter(e => e.spot_id != spotId));
                   });
                   setMessage("确定要删除吗？");
-                  setShown(true);
+                  setShownConfirmDialog(true);
                 }
                 }>
                 删除...

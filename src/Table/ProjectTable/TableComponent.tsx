@@ -9,7 +9,7 @@ import ContentCard, {TableFC} from '../ContentCard';
 import {Link} from 'react-router-dom';
 import {PanelOperationTable} from '../utils/utils'
 import {waitClickAndDelete, CallbackProps} from '../utils/callbacks';
-import {confirmDialogue} from '../utils/utilComponents';
+import ConfirmDialogue from '../ConfirmDialogue';
 
 
 export const tableFC: TableFC = (props) => (
@@ -149,7 +149,7 @@ export const PopupMenu:
 
     const opCallbackProps: CallbackProps<Project> = {
       someid: projectId,
-      someData: props.projects,
+      someDatas: props.projects,
       setSomeData: props.setProjects,
       panelOperationTable: props.panelOperationTable
 
@@ -158,7 +158,7 @@ export const PopupMenu:
     return (
       <>
         {
-          React.createElement(confirmDialogue, {
+          React.createElement(ConfirmDialogue, {
             confirmed: confirmed,
             shown: shown,
             setShown: setShown,

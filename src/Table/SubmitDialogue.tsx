@@ -5,26 +5,18 @@ import {
   Operation, PanelOperationTable, HTTPMethods,
   OPPost, OPUpdate, OPDelete
 } from './utils/utils';
+import {DialogProps} from './utils/dialogStateUtils';
 import * as DataAdaptor from '../Data/dataAdaptor';
 
-export interface SubmitDialogueProps {
-  panelOperationTable?: PanelOperationTable;
-  someid?: number;  // api id if it presents.
-  dataTypeKeys?: DataTypeKeys;
-  shown: boolean;
-  setShown: Function;
-  httpMethod?: HTTPMethods;
+export interface SubmitDialogueProps extends DialogProps {
+  dataTypeKeys?: DataTypeKeys,
+  entries: Map<string, string | undefined>,
+  setEntries: React.Dispatch<React.SetStateAction<Map<string, string | undefined>>>
+
 }
 
 const SubmitTable =
-  (props:
-    SubmitDialogueProps &
-    {
-      entriesMap: Map<string, string | undefined>,
-      setEntries: React.Dispatch<React.SetStateAction<Map<string, string | undefined>>>
-    },
-    // map from SubmitDialogue. store state of text input.
-  ) =>
+  (props: SubmitDialogueProps) => // map from SubmitDialogue. store state of text input.
     (<Table>
       {
         props.dataTypeKeys ?
@@ -43,7 +35,7 @@ const SubmitTable =
                   onChange={
                     (t: React.ChangeEvent<HTMLInputElement>) => {
                       props.setEntries(
-                        props.entriesMap.set(e[0], t.target.value)
+                        props.entries.set(e[0], t.target.value)
                       );
                     }
                   }
@@ -65,37 +57,14 @@ const mapToObject = (map: Map<string, string | undefined>): any => {
   return data;
 };
 
-const submitRequest = (
-  props: {
-    paneldata?: DataAdaptor.PanelDataType,
-    panelOperationTable: PanelOperationTable,
-    method: HTTPMethods,
-    someid?: number
-  }
-)
-  : ReturnType<Operation> | undefined => {
-
-  const op = props.panelOperationTable.get(props.method);
-  if (!op) return undefined;
-
-  if (props.method === "post" && props.paneldata)
-    return (op as OPPost<DataAdaptor.PanelDataType>)(props.paneldata);
-
-  if (props.method === "put" && props.paneldata && props.someid)
-    return (op as OPUpdate<DataAdaptor.PanelDataType>)(props.paneldata, props.someid);
-
-  if (props.method === "delete" && props.someid)
-    return (op as OPDelete)(props.someid);
-
-};
-
 const SubmitDialogue =
   (props: SubmitDialogueProps) => {
 
     // map between entry name and input text value
-    const [entries, setEntries] =
-      useState<Map<string, string | undefined>>(new Map());
+    const entries = props.entries;
+    const setEntries = props.setEntries;
 
+    // set empty.
     useEffect(() => {
       props.dataTypeKeys?.map(
         e => setEntries(entries.set(e[0], undefined))
@@ -113,25 +82,7 @@ const SubmitDialogue =
               preventBodyScrolling
               onCloseComplete={() => props.setShown(false)}
               onConfirm={close => {
-                console.log(entries)
-
-                // operation will be passed from Table components all the way to here.
-                if (props.panelOperationTable && props.httpMethod) {
-                  (submitRequest(
-                    {
-                      paneldata: mapToObject(entries),
-                      panelOperationTable: props.panelOperationTable,
-                      method: props.httpMethod,
-                      someid: props.someid
-                    }
-                  ) as Promise<FeedBack>)
-                    ?.then(response => {
-                      console.log(response);
-                      if (response.status === 0) toaster.success(`${response.message}`);
-                      else toaster.warning(`${response.message}`);
-                    })
-                    .catch(e => console.error(`${e}`));
-                }
+                props.confirmed.current = true;
                 close();
               }}>
               {

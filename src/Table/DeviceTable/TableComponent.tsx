@@ -9,7 +9,7 @@ import {grapName, dynamicHeightProperties, dynamicHeight} from '../../utils/util
 import {PanelOperationTable} from '../utils/utils'
 import {waitClickAndDelete, CallbackProps} from '../utils/callbacks';
 import {TableFC} from '../ContentCard';
-import {confirmDialogue} from '../utils/utilComponents';
+import ConfirmDialogue from '../ConfirmDialogue';
 
 
 export const PopupMenu:
@@ -33,7 +33,7 @@ export const PopupMenu:
 
     const opCallbackProps: CallbackProps<Device> = {
       someid: deviceId,
-      someData: props.devices,
+      someDatas: props.devices,
       setSomeData: props.setDevices,
       panelOperationTable: props.panelOperationTable
     };
@@ -41,7 +41,7 @@ export const PopupMenu:
     return (
       <>
         {
-          React.createElement(confirmDialogue, {
+          React.createElement(ConfirmDialogue, {
             confirmed: confirmed,
             shown: shown,
             setShown: setShown,
