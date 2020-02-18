@@ -89,7 +89,7 @@ const TableControlPanel = (controlHub: ControlHub) => {
  */
 const PanelPopupMenu:
   React.FC<{
-    panelOperationTable?: PanelOperationTable<ApiDataType>,
+    panelOperationTable?: PanelOperationTable,
     dataTypeKeys?: DataTypeKeys,
     shown: boolean,
     setShown: Function

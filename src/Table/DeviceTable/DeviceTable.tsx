@@ -7,7 +7,7 @@ import {
 import {PaginationProps} from '../TablePagination';
 import ContentCard from '../ContentCard';
 import Frame from '../../Frame';
-import {useTableParent, HTTPMethods, PanelOperationTable} from '../utils/utils';
+import {useTableParent, HTTPMethods, PanelOperationTable, Operation} from '../utils/utils';
 import * as DataAdaptor from '../../Data/dataAdaptor';
 
 import {tableFC} from './TableComponent';
@@ -131,10 +131,21 @@ const DeviceTable: React.FC<{}> = (props) => {
             [
               [
                 "post" as HTTPMethods,
-                NonIdempotentApis.Post.Single.postDevice
+                NonIdempotentApis.Post.postDevice as Operation
               ],
+
+              [
+                "put" as HTTPMethods,
+                IdempotentApis.Put.updateDevice as Operation
+              ],
+
+              [
+                "delete" as HTTPMethods,
+                IdempotentApis.Delete.deleteDevice as Operation
+              ]
             ]
-          ) as PanelOperationTable<DataAdaptor.PanelDataType>),
+          ) as PanelOperationTable),
+
           dataTypeKeys: deviceKeys,
           loaded: loaded,
           data: devices,

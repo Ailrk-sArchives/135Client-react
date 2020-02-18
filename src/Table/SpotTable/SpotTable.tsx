@@ -8,7 +8,7 @@ import {useParams} from 'react-router-dom';
 import ContentCard from '../ContentCard';
 import TablePaginationBar, {PaginationProps} from '../TablePagination';
 import {tableFC} from './TableComponent';
-import {useTableParent, HTTPMethods, PanelOperationTable} from '../utils/utils';
+import {useTableParent, HTTPMethods, PanelOperationTable, Operation} from '../utils/utils';
 import * as DataAdaptor from '../../Data/dataAdaptor';
 
 
@@ -100,10 +100,21 @@ const SpotTable: React.FC<{}> = (props) => {
             [
               [
                 "post" as HTTPMethods,
-                NonIdempotentApis.Post.Single.postSpot
+                NonIdempotentApis.Post.postSpot as Operation
               ],
+
+              [
+                "put" as HTTPMethods,
+                IdempotentApis.Put.updateSpot as Operation
+              ],
+
+              [
+                "delete" as HTTPMethods,
+                IdempotentApis.Delete.deleteSpot as Operation
+              ],
+
             ]
-          ) as PanelOperationTable<DataAdaptor.PanelDataType>),
+          ) as PanelOperationTable),
           tableParent: tableParent,
           loaded: loaded,
           dataTypeKeys: spotKeys,

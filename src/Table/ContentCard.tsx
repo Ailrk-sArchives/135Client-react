@@ -22,7 +22,7 @@ export interface TableFCParams {
   loaded: boolean,
   data: Array<ApiDataType>,
   setData?: Function,
-  panelOperationTable?: PanelOperationTable<ApiDataType>,
+  panelOperationTable?: PanelOperationTable,
   tickAll: boolean,
   setTickAll: Function,
   tickone: Function;
@@ -50,7 +50,7 @@ export interface ContentControlParams {
 
   dataTypeKeys?: DataTypeKeys,
 
-  panelOperationTable?: PanelOperationTable<PanelDataType>,
+  panelOperationTable?: PanelOperationTable,
 
   resourceId?: number
 
@@ -144,6 +144,8 @@ const ContentCard =
 
         data: env.data,
         setData: env.setData,
+
+        panelOperationTable: env.panelOperationTable,
 
         tickAll: env.tickAll,
         setTickAll: env.setTickAll,

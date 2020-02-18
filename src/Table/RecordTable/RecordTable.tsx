@@ -8,7 +8,7 @@ import {useParams} from 'react-router-dom';
 import {PaginationProps} from '../TablePagination';
 import ContentCard, {TableFC} from '../ContentCard';
 import {keys} from 'ts-transformer-keys';
-import {useTableParent, HTTPMethods, PanelOperationTable} from '../utils/utils';
+import {useTableParent, HTTPMethods, PanelOperationTable, Operation} from '../utils/utils';
 import * as DataAdaptor from '../../Data/dataAdaptor';
 
 import {tableFC} from './TableComponent';
@@ -88,10 +88,22 @@ const RecordTable: React.FC<{}> = (props) => {
             [
               [
                 "post" as HTTPMethods,
-                NonIdempotentApis.Post.Single.postSpotRecord
+                NonIdempotentApis.Post.postSpotRecord as Operation
               ],
+
+              [
+                "put" as HTTPMethods,
+                IdempotentApis.Put.updateSpotRecord as Operation
+              ],
+
+              [
+                "delete" as HTTPMethods,
+                IdempotentApis.Delete.deleteSpotRecord as Operation
+              ],
+
             ]
-          ) as PanelOperationTable<DataAdaptor.PanelDataType>),
+          ) as PanelOperationTable),
+
           tableParent: tableParent,
           loaded: loaded,
           data: spotRecords,

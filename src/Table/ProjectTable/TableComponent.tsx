@@ -1,22 +1,25 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useRef} from 'react';
 import {grapName, dynamicHeightProperties, dynamicHeight} from '../../utils/utils';
 import {
   Table, Card, Pane, Checkbox, Position, Menu, Spinner,
   Popover, Text, Button, Icon, toaster
 } from 'evergreen-ui';
-import {IdempotentApis, Project, ApiDataType} from '../../Data/data';
+import {IdempotentApis, Project, ApiDataType, FeedBack} from '../../Data/data';
 import ContentCard, {TableFC} from '../ContentCard';
 import {Link} from 'react-router-dom';
+import {PanelOperationTable} from '../utils/utils'
+import {waitClickAndDelete, CallbackProps} from '../utils/callbacks';
+import {confirmDialogue} from '../utils/utilComponents';
 
 
 export const tableFC: TableFC = (props) => (
   <Table background="tint2">
     <Table.Head height={70}
-    elevation={1}>
+      elevation={1}>
 
-    <Table.Cell flexBasis={50}
-    flexShrink={0}
-    flexGrow={0}
+      <Table.Cell flexBasis={50}
+        flexShrink={0}
+        flexGrow={0}
         onClick={
           () => {
             props.setItemCheckedList(
@@ -92,7 +95,8 @@ export const tableFC: TableFC = (props) => (
                 >{
                     <PopupMenu project={p as Project}
                       projects={props.data as Array<Project>}
-                      setProjects={props.setData} />
+                      setProjects={props.setData}
+                      panelOperationTable={props.panelOperationTable} />
                   }</Table.Cell>
               </Table.Row>
             ))
@@ -131,60 +135,79 @@ export const PopupMenu:
     project: Project,
     projects: Array<Project>,
     setProjects?: Function,
+    panelOperationTable?: PanelOperationTable,
   }> = (props) => {
-    const [deleteMsg, setDeleteMsg] = useState<string>("");
     const projectId = props.project.project_id || 1;
-
-
     const linkCss: React.CSSProperties = {
       textDecoration: 'none',
     };
 
+    const [shown, setShown] = useState<boolean>(false);
+    //const [confirmed, setConfirm] = useState<boolean>(false);
+    const confirmed = useRef<boolean>(false);
+    const [message, setMessage] = useState<string>("");
+
+    const opCallbackProps: CallbackProps<Project> = {
+      someid: projectId,
+      someData: props.projects,
+      setSomeData: props.setProjects,
+      panelOperationTable: props.panelOperationTable
+
+    };
+
     return (
-      <Popover
-        position={Position.BOTTOM_LEFT}
-        content={
-          <Menu>
-            <Menu.Group>
-              <Menu.Item icon="edit">修改...</Menu.Item>
-              <Menu.Item icon="download">下载...</Menu.Item>
-              <Link to={
-                {
-
-                  pathname: "/Project" + "/" + projectId + "/" + "Spots",
-                  state: {tableParent: props.project}
-                }
-              } style={linkCss}>
-                <Menu.Item icon="list-columns">
-                  <Text> 查看测点...  </Text>
-                </Menu.Item>
-              </Link>
-            </Menu.Group>
-            <Menu.Divider />
-            <Menu.Group>
-              <Menu.Item icon="trash" intent="danger"
-                hoverElevation={2}
-                onSelect={
-                  () => {
-                    if (props.setProjects) {
-                      IdempotentApis.Delete.projectViewDelete(projectId)
-                        .then((res) => setDeleteMsg(res))
-                        .catch(e => console.log(e));
-
-                      props.setProjects(
-                        props.projects.filter(e => e.project_id != projectId));
-                    }
-                    toaster.danger('删除', {description: deleteMsg});
-                  }
-                }>
-                删除...
-        </Menu.Item>
-            </Menu.Group>
-          </Menu>
+      <>
+        {
+          React.createElement(confirmDialogue, {
+            confirmed: confirmed,
+            shown: shown,
+            setShown: setShown,
+            message: message
+          })
         }
-      >
-        <Icon icon="more" />
-      </Popover>
+
+
+        <Popover
+          position={Position.BOTTOM_LEFT}
+          content={
+            <Menu>
+              <Menu.Group>
+                <Menu.Item icon="edit">修改...</Menu.Item>
+                <Menu.Item icon="download">下载...</Menu.Item>
+                <Link to={
+                  {
+
+                    pathname: "/Project" + "/" + projectId + "/" + "Spots",
+                    state: {tableParent: props.project}
+                  }
+                } style={linkCss}>
+                  <Menu.Item icon="list-columns">
+                    <Text> 查看测点...  </Text>
+                  </Menu.Item>
+                </Link>
+              </Menu.Group>
+              <Menu.Divider />
+              <Menu.Group>
+                <Menu.Item icon="trash" intent="danger"
+                  hoverElevation={2}
+                  onSelect={
+                    () => {
+                      waitClickAndDelete(confirmed, opCallbackProps)?.then(() => {
+                        if (props.setProjects)
+                          props.setProjects(
+                            props.projects.filter(e => e.project_id != projectId));
+                      });
+                    }
+                  }>
+                  删除...
+        </Menu.Item>
+              </Menu.Group>
+            </Menu>
+          }
+        >
+          <Icon icon="more" />
+        </Popover>
+      </>
     );
   };
 

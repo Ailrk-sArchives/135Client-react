@@ -1,56 +1,75 @@
-import React, {useState, useEffect} from 'react';
-import {Pane, Card, Table, Checkbox, Position, Popover, Menu, Icon,
-  Tooltip, Spinner} from 'evergreen-ui';
-import Frame from '../../Frame';
-import {IdempotentApis, makePaginationRequest, SpotRecord, PaginationRequest, ApiDataType} from '../../Data/data';
-import {useParams} from 'react-router-dom';
-import {PaginationProps} from '../TablePagination';
+import React, {useState, useEffect, useRef} from 'react';
+import {
+  Pane, Table, Position, Popover, Menu, Icon,
+  Tooltip, Spinner
+} from 'evergreen-ui';
+import {SpotRecord} from '../../Data/data';
 import {grapName, dynamicHeightProperties, dynamicHeight} from '../../utils/utils';
-import ContentCard, {TableFC} from '../ContentCard';
+import {PanelOperationTable} from '../utils/utils'
+import {confirmDialogue} from '../utils/utilComponents';
+import {TableFC} from '../ContentCard';
+import {waitClickAndDelete, CallbackProps} from '../utils/callbacks';
 
 
 export const PopupMenu: React.FC<{
   spotRecordId: number,
   spotRecords: Array<SpotRecord>,
   setSpotRecords?: Function
-
+  panelOperationTable?: PanelOperationTable,
 }> = (props) => {
-
-  const [deleteMsg, setDeleteMsg] = useState<string>("");
+  const [shown, setShown] = useState<boolean>(false);
+  const confirmed = useRef<boolean>(false);
+  const [message, setMessage] = useState<string>("");
+  const opCallbackProps: CallbackProps<SpotRecord> = {
+    someid: props.spotRecordId,
+    someData: props.spotRecords,
+    setSomeData: props.setSpotRecords,
+    panelOperationTable: props.panelOperationTable
+  };
 
   return (
-    <Popover
-      position={Position.BOTTOM_LEFT}
-      content={
-        <Menu>
-          <Menu.Group>
-            <Menu.Item icon="edit">修改...</Menu.Item>
-            <Menu.Item icon="download">下载...</Menu.Item>
-          </Menu.Group>
-          <Menu.Divider />
-          <Menu.Group>
-            <Menu.Item icon="trash" intent="danger"
-              onSelect={
-                () => {
-                  if (props.setSpotRecords) {
-                    IdempotentApis.Delete.spotViewDelete(props.spotRecordId)
-                      .then((res) => setDeleteMsg(res))
-                      .catch(e => console.log(e));
-                    props.setSpotRecords(
-                      props.spotRecords
-                        .filter(e => e.spot_record_id != props.spotRecordId));
+    <>
+      {
+        React.createElement(confirmDialogue, {
+          confirmed: confirmed,
+          shown: shown,
+          setShown: setShown,
+          message: message
+        })
+      }
+      <Popover
+        position={Position.BOTTOM_LEFT}
+        content={
+          <Menu>
+            <Menu.Group>
+              <Menu.Item icon="edit">修改...</Menu.Item>
+              <Menu.Item icon="download">下载...</Menu.Item>
+            </Menu.Group>
+            <Menu.Divider />
+            <Menu.Group>
+              <Menu.Item icon="trash" intent="danger"
+                onSelect={
+                  () => {
+                    waitClickAndDelete(confirmed, opCallbackProps)?.then(() => {
+                      if (props.setSpotRecords)
+                        props.setSpotRecords(
+                          props.spotRecords
+                            .filter(e => e.spot_record_id != props.spotRecordId));
+                    });
+                    setMessage("确定要删除吗？");
+                    setShown(true);
                   }
-                }
-              }>
-              删除...
+                }>
+                删除...
         </Menu.Item>
-          </Menu.Group>
-        </Menu>
-      }>
-      <Icon icon="more" />
-    </Popover>
+            </Menu.Group>
+          </Menu>
+        }>
+        <Icon icon="more" />
+      </Popover>
+    </>
   );
-}
+};
 
 export const tableFC: TableFC = (props) => (
   <Table background="tint2">
@@ -140,7 +159,8 @@ export const tableFC: TableFC = (props) => (
                     {
                       <PopupMenu spotRecordId={(r as SpotRecord).spot_record_id || 1}
                         spotRecords={props.data as Array<SpotRecord>}
-                        setSpotRecords={props.setData} />
+                        setSpotRecords={props.setData}
+                        panelOperationTable={props.panelOperationTable} />
                     }
                   </Table.Cell>
                 </Table.Row>

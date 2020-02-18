@@ -1,12 +1,15 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useRef} from 'react';
 import {
-  Table, Pane, Checkbox, Position, Menu, toaster, Stack, Spinner,
+  Table, Pane, Position, Menu, toaster, Stack, Spinner,
   Popover, Icon, Tooltip, Text
 } from 'evergreen-ui';
 import {Link} from 'react-router-dom';
-import { IdempotentApis, Device } from '../../Data/data';
+import {IdempotentApis, Device, FeedBack} from '../../Data/data';
 import {grapName, dynamicHeightProperties, dynamicHeight} from '../../utils/utils';
+import {PanelOperationTable} from '../utils/utils'
+import {waitClickAndDelete, CallbackProps} from '../utils/callbacks';
 import {TableFC} from '../ContentCard';
+import {confirmDialogue} from '../utils/utilComponents';
 
 
 export const PopupMenu:
@@ -14,60 +17,82 @@ export const PopupMenu:
     device: Device,
     devices: Array<Device>,
     setDevices?: Function,
+    panelOperationTable?: PanelOperationTable,
   }> = (props) => {
-    const [deleteMsg, setDeleteMsg] = useState<string>("");
     const deviceId = props.device.device_id || 1;
 
     const linkCss: React.CSSProperties = {
       textDecoration: 'none',
     };
 
+    const [shown, setShown] = useState<boolean>(false);
+    //const [confirmed, setConfirm] = useState<boolean>(false);
+    const confirmed = useRef<boolean>(false);
+    const [message, setMessage] = useState<string>("");
+
+
+    const opCallbackProps: CallbackProps<Device> = {
+      someid: deviceId,
+      someData: props.devices,
+      setSomeData: props.setDevices,
+      panelOperationTable: props.panelOperationTable
+    };
+
     return (
-      <Popover
-        position={Position.BOTTOM_LEFT}
-        content={
-          <Menu>
-            <Menu.Group>
-              <Menu.Item icon="edit">修改...</Menu.Item>
-              <Menu.Item icon="download">下载...</Menu.Item>
-              <Link to={
-                {
-                  pathname: "/Device" + "/" + deviceId + "/" + "SpotRecords",
-                  state: {tableParent: props.device}
-                }
-              } style={linkCss}>
-                <Menu.Item icon="list-columns">
-                  <Text> 查看数据...</Text>
-                </Menu.Item>
-              </Link>
-            </Menu.Group>
-            <Menu.Divider />
-            <Menu.Group>
-              <Menu.Item icon="trash"
-                intent="danger"
-                onSelect={
-                  () => {
-
-                    if (props.setDevices) {
-                      IdempotentApis.Delete.deviceViewDelete(deviceId)
-                        .then((res) => setDeleteMsg(res))
-                        .catch(e => console.log(e));
-
-                      props.setDevices(
-                        props.devices.filter(e => e.device_id != deviceId));
-                    }
-                  }
-
-                }>
-
-                删除...
-            </Menu.Item>
-            </Menu.Group>
-          </Menu>
+      <>
+        {
+          React.createElement(confirmDialogue, {
+            confirmed: confirmed,
+            shown: shown,
+            setShown: setShown,
+            message: message
+          })
         }
-      >
-        <Icon icon="more" />
-      </Popover>
+
+        <Popover
+          position={Position.BOTTOM_LEFT}
+          content={
+            <Menu>
+              <Menu.Group>
+                <Menu.Item icon="edit">修改...</Menu.Item>
+                <Menu.Item icon="download">下载...</Menu.Item>
+                <Link to={
+                  {
+                    pathname: "/Device" + "/" + deviceId + "/" + "SpotRecords",
+                    state: {tableParent: props.device}
+                  }
+                } style={linkCss}>
+                  <Menu.Item icon="list-columns">
+                    <Text> 查看数据...</Text>
+                  </Menu.Item>
+                </Link>
+              </Menu.Group>
+              <Menu.Divider />
+              <Menu.Group>
+                <Menu.Item icon="trash"
+                  intent="danger"
+                  onSelect={
+                    () => {
+                      waitClickAndDelete(confirmed, opCallbackProps)?.then(() => {
+                        if (props.setDevices)
+                          props.setDevices(
+                            props.devices.filter(e => e.device_id != deviceId));
+                      });
+                      setMessage("确定要删除吗？");
+                      setShown(true);
+
+                    }
+                  }>
+
+                  删除...
+            </Menu.Item>
+              </Menu.Group>
+            </Menu>
+          }
+        >
+          <Icon icon="more" />
+        </Popover>
+      </>
     );
   };
 
@@ -173,7 +198,8 @@ export const tableFC: TableFC = (props) => (
                   >{
                       <PopupMenu device={d as Device}
                         devices={props.data as Array<Device>}
-                        setDevices={props.setData} />
+                        setDevices={props.setData}
+                        panelOperationTable={props.panelOperationTable} />
 
                     }</Table.Cell>
 

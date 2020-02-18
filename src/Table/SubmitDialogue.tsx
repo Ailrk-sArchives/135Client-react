@@ -1,11 +1,14 @@
 import {Dialog, Heading, Stack, Table, TextInput, toaster} from 'evergreen-ui';
 import React, {useState, useEffect} from 'react';
-import {ApiDataType, DataTypeKeys, Message} from '../Data/data';
-import {Operation, PanelOperationTable, HTTPMethods} from './utils/utils';
+import {ApiDataType, DataTypeKeys, FeedBack} from '../Data/data';
+import {
+  Operation, PanelOperationTable, HTTPMethods,
+  OPPost, OPUpdate, OPDelete
+} from './utils/utils';
 import * as DataAdaptor from '../Data/dataAdaptor';
 
 export interface SubmitDialogueProps {
-  panelOperationTable?: PanelOperationTable<ApiDataType>;
+  panelOperationTable?: PanelOperationTable;
   someid?: number;  // api id if it presents.
   dataTypeKeys?: DataTypeKeys;
   shown: boolean;
@@ -62,24 +65,32 @@ const mapToObject = (map: Map<string, string | undefined>): any => {
   return data;
 };
 
-const submitRequest = (data: DataAdaptor.PanelDataType,
-  panelOperationTable: PanelOperationTable<ApiDataType>,
-  method: HTTPMethods,
-  someid?: number): ReturnType<Operation<ApiDataType>> | undefined => {
+const submitRequest = (
+  props: {
+    paneldata?: DataAdaptor.PanelDataType,
+    panelOperationTable: PanelOperationTable,
+    method: HTTPMethods,
+    someid?: number
+  }
+)
+  : ReturnType<Operation> | undefined => {
 
-  const op = panelOperationTable.get(method);
+  const op = props.panelOperationTable.get(props.method);
   if (!op) return undefined;
 
-  if (someid) return op(data, someid);
-  else return op(data);
+  if (props.method === "post" && props.paneldata)
+    return (op as OPPost<DataAdaptor.PanelDataType>)(props.paneldata);
+
+  if (props.method === "put" && props.paneldata && props.someid)
+    return (op as OPUpdate<DataAdaptor.PanelDataType>)(props.paneldata, props.someid);
+
+  if (props.method === "delete" && props.someid)
+    return (op as OPDelete)(props.someid);
+
 };
 
 const SubmitDialogue =
   (props: SubmitDialogueProps) => {
-    /*
-     * TODO call Operations.
-     * @param submitTable: will be generated for each specific T
-     */
 
     // map between entry name and input text value
     const [entries, setEntries] =
@@ -107,15 +118,17 @@ const SubmitDialogue =
                 // operation will be passed from Table components all the way to here.
                 if (props.panelOperationTable && props.httpMethod) {
                   (submitRequest(
-                    mapToObject(entries),
-                    props.panelOperationTable,
-                    props.httpMethod,
-                    props.someid) as Promise<Message>  // apis that are not get will return a message
-                  )
+                    {
+                      paneldata: mapToObject(entries),
+                      panelOperationTable: props.panelOperationTable,
+                      method: props.httpMethod,
+                      someid: props.someid
+                    }
+                  ) as Promise<FeedBack>)
                     ?.then(response => {
-                      console.log(response)
-                      // toaster.success("post successed");
-                      // toaster.warning(`post failed: ${e}`);
+                      console.log(response);
+                      if (response.status === 0) toaster.success(`${response.message}`);
+                      else toaster.warning(`${response.message}`);
                     })
                     .catch(e => console.error(`${e}`));
                 }

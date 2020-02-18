@@ -145,7 +145,7 @@ export const spotRecordKeys: DataTypeKeys = [
 
 export interface ApiResponse<T> {
   status: number;
-  data: T;
+  data?: T;
   message: string;
 };
 
@@ -220,6 +220,7 @@ export const makePaginationRequest =
 */
 
 export type Message = string;
+export type FeedBack = { message: string, status: number };
 
 export class IdempotentApis {
 
@@ -376,37 +377,63 @@ export class IdempotentApis {
 
   static Put = class {
 
-    static projectViewUpdate = (params: Project, pid: number): Promise<Project> =>
-      makeApi(concatPath(apiBaseUrl, `api/v1/project/${pid}`),
-        (url: string) => {
-          return axios.put(url, params)
-            .then(response => {
+    static updateProject =
+      (params: AdaptorTypes.PanelProject, pid: number): Promise<FeedBack> =>
+        makeApi(concatPath(apiBaseUrl, `api/v1/project/${pid}`),
+          (url: string) => {
+            return axios.put(url,
+              AdaptorTypes.MakeServerData.makeProject(params))
+              .then(response => {
+                return response.data as ApiResponse<any>;
+              })
 
-              if (good_response<Project>(response))
-                return response.data.data;
-            })
+              .catch(e => console.error(e))
+          });
 
-            .catch(e => console.error(e))
-        });
+    static updateSpot =
+      (params: AdaptorTypes.PanelSpot, sid: number): Promise<FeedBack> =>
+        makeApi(concatPath(apiBaseUrl, `api/v1/project/spot/${sid}`),
+          (url: string) => {
+            return axios.put(url,
+              makeRequest(AdaptorTypes.MakeServerData.makeSpot(params)))
+              .then(response => {
+                return response.data as ApiResponse<any>;
+              })
 
-    static spotViewUpdate = (params: Project,
-      pid: number, sid: number): Promise<Spot> =>
-      makeApi(concatPath(apiBaseUrl, `api/v1/project/spot/${pid}`),
-        (url: string) => {
-          return axios.put(url, makeRequest(params))
-            .then(response => {
+              .catch(e => console.error(e))
+          });
 
-              if (good_response<Spot>(response))
-                return response.data.data
-            })
+    static updateDevice =
+      (params: AdaptorTypes.PanelDevice, did: number): Promise<FeedBack> =>
+        makeApi(concatPath(apiBaseUrl, `api/v1/project/device/${did}`),
+          (url: string) => {
+            return axios.put(url,
+              makeRequest(AdaptorTypes.MakeServerData.makeDevice(params)))
+              .then(response => {
+                return response.data as ApiResponse<any>;
+              })
 
-            .catch(e => console.error(e))
-        });
+              .catch(e => console.error(e))
+          });
+
+    static updateSpotRecord =
+      (params: AdaptorTypes.PanelSpotRecord, rid: number): Promise<FeedBack> =>
+        makeApi(concatPath(apiBaseUrl, `api/v1/project/spotRecord/${rid}`),
+          (url: string) => {
+            return axios.put(url,
+              makeRequest(AdaptorTypes.MakeServerData.makeSpotRecord(params)))
+              .then(response => {
+                return response.data as ApiResponse<any>;
+              })
+
+              .catch(e => console.error(e))
+          });
+
   };
 
 
   static Delete = class {
-    static projectViewDelete = (pid: number): Promise<Message> =>
+    static deleteProject = (pid: number): Promise<FeedBack> =>
       makeApi(
 
         concatPath(apiBaseUrl, `api/v1/project/${pid}`),
@@ -418,7 +445,7 @@ export class IdempotentApis {
             .catch(e => console.error(e))
       );
 
-    static deviceViewDelete = (did: number): Promise<Message> =>
+    static deleteDevice = (did: number): Promise<FeedBack> =>
       makeApi(
         concatPath(apiBaseUrl, `api/v1/device/${did}`),
         (url: string) =>
@@ -428,7 +455,7 @@ export class IdempotentApis {
       );
 
 
-    static spotViewDelete = (sid: number): Promise<Message> =>
+    static deleteSpot = (sid: number): Promise<FeedBack> =>
       makeApi(
         concatPath(apiBaseUrl, `api/v1/spot/${sid}`),
 
@@ -438,7 +465,7 @@ export class IdempotentApis {
             .catch(e => console.error(e))
       );
 
-    static spotRecordViewDelete = (rid: number): Promise<Message> =>
+    static deleteSpotRecord= (rid: number): Promise<FeedBack> =>
       makeApi(
         concatPath(apiBaseUrl, `api/v1/spotRecord/${rid}`),
 
@@ -458,102 +485,70 @@ export class NonIdempotentApis {
 
   static Post = class {
 
-    static Single = class {
-      static postProject =
-        (params: AdaptorTypes.PanelSpot, pid: number): Promise<Message> =>
-          makeApi(concatPath(apiBaseUrl, `api/v1/project/`),
+    static postProject =
+      (params: AdaptorTypes.PanelProject): Promise<FeedBack> =>
+        makeApi(concatPath(apiBaseUrl, `api/v1/project/`),
 
-            (url: string) => {
-              return axios.post(url,
-                makeRequest(AdaptorTypes.MakeServerData.makeSpot(params)),
-                makeJsonRequestHeader())
+          (url: string) => {
+            return axios.post(url,
+              makeRequest(AdaptorTypes.MakeServerData.makeProject(params)),
+              makeJsonRequestHeader())
 
-                .then(response => {
-                  return response.data as ApiResponse<any>
-                })
-                .catch(e => console.error(e));
-            }
-          );
+              .then(response => {
+                return response.data as ApiResponse<any>
+              })
+              .catch(e => console.error(e));
+          }
+        );
 
-      static postSpot =
-        (params: AdaptorTypes.PanelSpot, pid: number): Promise<Message> =>
-          makeApi(concatPath(apiBaseUrl, `api/v1/spot/`),
-            (url: string) => {
-              return axios.post(url,
-                makeRequest(AdaptorTypes.MakeServerData.makeSpot(params)),
-                makeJsonRequestHeader())
+    static postSpot =
+      (params: AdaptorTypes.PanelSpot): Promise<FeedBack> =>
+        makeApi(concatPath(apiBaseUrl, `api/v1/spot/`),
+          (url: string) => {
+            return axios.post(url,
+              makeRequest(AdaptorTypes.MakeServerData.makeSpot(params)),
+              makeJsonRequestHeader())
 
-                .then(response => {
-                  return response.data as ApiResponse<any>
-                })
-                .catch(e => console.error(e));
-            }
-          );
+              .then(response => {
+                return response.data as ApiResponse<any>
+              })
+              .catch(e => console.error(e));
+          }
+        );
 
-      static postDevice =
-        (params: AdaptorTypes.PanelSpot, pid: number): Promise<Message> =>
-          makeApi(concatPath(apiBaseUrl, `api/v1/device/`),
+    static postDevice =
+      (params: AdaptorTypes.PanelDevice): Promise<FeedBack> =>
+        makeApi(concatPath(apiBaseUrl, `api/v1/device/`),
 
-            (url: string) => {
-              return axios.post(url,
-                makeRequest(AdaptorTypes.MakeServerData.makeSpot(params)),
-                makeJsonRequestHeader())
+          (url: string) => {
+            return axios.post(url,
+              makeRequest(AdaptorTypes.MakeServerData.makeDevice(params)),
+              makeJsonRequestHeader())
 
-                .then(response => {
-                  return response.data as ApiResponse<any>
-                })
-                .catch(e => console.error(e));
-            }
-          );
+              .then(response => {
+                return response.data as ApiResponse<any>
+              })
+              .catch(e => console.error(e));
+          }
+        );
 
-      static postSpotRecord =
-        (params: AdaptorTypes.PanelSpot, pid: number): Promise<Message> =>
-          makeApi(concatPath(apiBaseUrl, `api/v1/spotRecord/`),
+    static postSpotRecord =
+      (params: AdaptorTypes.PanelSpotRecord): Promise<FeedBack> =>
+        makeApi(concatPath(apiBaseUrl, `api/v1/spotRecord/`),
 
-            (url: string) => {
-              return axios.post(url,
-                makeRequest(AdaptorTypes.MakeServerData.makeSpot(params)),
-                makeJsonRequestHeader())
+          (url: string) => {
+            return axios.post(url,
+              makeRequest(AdaptorTypes.MakeServerData.makeSpotRecord(params)),
+              makeJsonRequestHeader())
 
-                .then(response => {
-                  return response.data as ApiResponse<any>
-                })
-                .catch(e => console.error(e));
-            }
-          );
+              .then(response => {
+                return response.data as ApiResponse<any>
+              })
+              .catch(e => console.error(e));
+          }
+        );
     };
 
-    static projectViewPost = (params: Project): Promise<Project> =>
-      makeApi(concatPath(apiBaseUrl, '/api/v1/project/all'),
-        (url: string) => {
-          return axios.post(url, makeRequest(params), makeJsonRequestHeader())
-            .then(response => {
-
-              if (good_response<Project>(response))
-                return response.data.data;
-
-            })
-            .catch(e => console.error(e));
-
-        },
-        params);
-
-    static spotViewPost = (params: Spot, pid: number): Promise<Spot> =>
-      makeApi(concatPath(apiBaseUrl, `/api/v1/project/${pid}/spots`),
-        (url: string) => {
-
-          return axios.post(url, makeRequest(params), makeJsonRequestHeader())
-            .then(response => {
-
-              if (good_response<Spot>(response))
-                return response.data.data;
-
-            })
-            .catch(e => console.error(e));
-
-        },
-        params);
-  };
 
 };
 

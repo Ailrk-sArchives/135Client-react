@@ -5,7 +5,7 @@ import React, {useState, useEffect} from 'react';
 import Frame from '../../Frame';
 import {IdempotentApis, NonIdempotentApis, Project, ApiDataType, projectKeys} from '../../Data/data';
 import ContentCard, {TableFC} from '../ContentCard';
-import {HTTPMethods, PanelOperationTable} from '../utils/utils';
+import {HTTPMethods, PanelOperationTable, Operation} from '../utils/utils';
 import * as DataAdaptor from '../../Data/dataAdaptor';
 
 import {tableFC} from './TableComponent';
@@ -38,10 +38,21 @@ const ProjectTable: React.FC<{}> = (props) => {
             [
               [
                 "post" as HTTPMethods,
-                NonIdempotentApis.Post.Single.postProject
+                NonIdempotentApis.Post.postProject as Operation
+              ],
+
+              [
+                "put" as HTTPMethods,
+                IdempotentApis.Put.updateProject as Operation
+              ],
+
+              [
+                "delete" as HTTPMethods,
+                IdempotentApis.Delete.deleteDevice as Operation
               ],
             ]
-          ) as PanelOperationTable<DataAdaptor.PanelDataType>),
+          ) as PanelOperationTable),
+
           data: projects,
           setData: setProjects,
           dataTypeKeys: projectKeys,
