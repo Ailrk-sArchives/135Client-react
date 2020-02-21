@@ -6,29 +6,28 @@
  * */
 
 import React, {useEffect, useState} from 'react';
-import {Card} from 'evergreen-ui';
+import {Card, Table} from 'evergreen-ui';
 
 import TablePaginationBar, {PaginationProps} from './TablePagination';
 import TableControlPanel from './TableControlPanel';
 import {ControlHub, PanelOperationTable} from './utils/utils';
 import {
-  ApiDataType, apiDataTypeCheck, Spot, Project, Device, SpotRecord,
-  DataTypeKeys
+  ApiDataType, Spot, Project, Device, SpotRecord, DataTypeKeys,
+  ApiDataTypeTag
 } from '../Data/data';
 import {PanelDataType} from '../Data/dataAdaptor';
 
-export interface TableFCParams {
-  currentZoom: number,
-  loaded: boolean,
-  data: Array<ApiDataType>,
-  setData?: Function,
-  panelOperationTable?: PanelOperationTable,
-  tickAll: boolean,
-  setTickAll: Function,
-  tickone: Function;
-  itemCheckedList: Array<boolean>,
-  setItemCheckedList: Function
-};
+type TableFCParams =
+  & ControlHub
+  & {
+    currentZoom: number,
+    loaded: boolean,
+    itemCheckedList: Array<boolean>,
+    setItemCheckedList: Function
+    tickAll: boolean,
+    setTickAll: Function,
+    tickone: Function;
+  };
 
 export type TableFC = React.FC<TableFCParams>;
 
@@ -39,8 +38,8 @@ export interface ContentControlParams {
   paginationProps?: PaginationProps,
   tableFC: TableFC,
   loaded: boolean,
-  data: Array<PanelDataType>,
-  setData?: Function,
+  data: Array<ApiDataType>,
+  setData: Function,
   itemCheckedList: Array<boolean>,
   setItemCheckedList: Function,
 
@@ -49,6 +48,7 @@ export interface ContentControlParams {
   setShown?: Function,
 
   dataTypeKeys?: DataTypeKeys,
+  dataTypeTag: ApiDataTypeTag,
 
   panelOperationTable?: PanelOperationTable,
 
@@ -63,7 +63,7 @@ const tableParentNameResolver = (props: {
 
   if (props.tableParent !== undefined) {
 
-    switch (apiDataTypeCheck(props.tableParent)) {
+    switch (props.tableParent._kind) {
       case "Spot":
         props.setTableParentName((props.tableParent as Spot)?.spot_name);
         break;
@@ -128,28 +128,26 @@ const ContentCard =
 
 
       const controlHub: ControlHub = {
-        titlename: titlename,
+        titlename,
 
         panelOperationTable: env.panelOperationTable,
         dataTypeKeys: env.dataTypeKeys,
 
+        dataTypeTag: env.dataTypeTag,
         data: env.data,
         setData: env.setData,
         resourceId: env.resourceId
       };
 
+
       const tableFCParams: TableFCParams = {
+        ...controlHub,
         currentZoom: props.currentZoom,
         loaded: env.loaded,
 
-        data: env.data,
-        setData: env.setData,
-
-        panelOperationTable: env.panelOperationTable,
-
         tickAll: env.tickAll,
         setTickAll: env.setTickAll,
-        tickone: tickone,
+        tickone,
 
         itemCheckedList: env.itemCheckedList,
         setItemCheckedList: env.setItemCheckedList
@@ -179,7 +177,6 @@ const ContentCard =
 
     };
   }
-
 
 
 export default ContentCard;

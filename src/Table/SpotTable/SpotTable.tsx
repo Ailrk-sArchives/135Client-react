@@ -7,7 +7,7 @@ import Frame from '../../Frame';
 import {useParams} from 'react-router-dom';
 import ContentCard from '../ContentCard';
 import TablePaginationBar, {PaginationProps} from '../TablePagination';
-import {tableFC} from './TableComponent';
+import {Tablefc} from './TableComponent';
 import {useTableParent, HTTPMethods, PanelOperationTable, Operation} from '../utils/utils';
 import * as DataAdaptor from '../../Data/dataAdaptor';
 
@@ -68,27 +68,14 @@ const SpotTable: React.FC<{}> = (props) => {
   };
 
   const paginationProps: PaginationProps = {
-    useUpdate: useUpdate,
+    useUpdate,
     useChangePageSize: setPageSize,
-    pageSize: pageSize,
-    totalElementCount: totalElementCount,
-    totalPage: totalPage,
-    currentPage: currentPage,
+    pageSize,
+    totalElementCount,
+    totalPage,
+    currentPage,
     pageButtonLimit: totalPage > 6 ? 6 : totalPage
   };
-
-  const contentFC: React.FC<{currentZoom: number}> = (props) => (
-    <Card background="overlay"
-      paddingTop={2}
-      paddingLeft={2}
-      paddingRight={2}
-      paddingBottom={2}
-      width="100%"
-      height="100%">
-      {React.createElement(tableFC)}
-      {React.createElement(TablePaginationBar, paginationProps)}
-    </Card>
-  );
 
   return (<Frame children={
     React.createElement(
@@ -115,16 +102,17 @@ const SpotTable: React.FC<{}> = (props) => {
 
             ]
           ) as PanelOperationTable),
-          tableParent: tableParent,
-          loaded: loaded,
+          tableParent,
+          loaded,
           dataTypeKeys: spotKeys,
+          dataTypeTag: "Spot",
           data: spots,
           setData: setSpots,
-          tableFC: tableFC,
-          tickAll: tickAll,
-          setTickAll: setTickAll,
-          itemCheckedList: itemCheckedList,
-          setItemCheckedList: setItemCheckedList,
+          tableFC: Tablefc,
+          tickAll,
+          setTickAll,
+          itemCheckedList,
+          setItemCheckedList,
         })
     )} />);
 };

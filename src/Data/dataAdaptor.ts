@@ -12,64 +12,78 @@ import {DateString} from './datetieStringFormater';
 
 export interface PanelDataType {};
 
+/* Define PanelSpot */
+export interface PanelSpot extends PanelDataType {_kind: "PanelSpot", }
 export interface PanelSpot extends PanelDataType {
-  project_id: number;
-  spot_name?: string;
-  spot_type?: string;
-}
+  project_id: number,
+  spot_name?: string,
+  spot_type?: string,
+} /* End PanelSpot */
 
 
+/* Define PanelProject */
+export interface PanelProject extends PanelDataType {_kind: "PanelProject", }
 export interface PanelProject extends PanelDataType {
-  project_name: string;
-  area?: number;
-  demo_area?: number;
-  building_height?: number;
-  floor?: number;
-  building_type?: string;
-  started_time?: DateString;
-  finished_time?: DateString;
-  record_started_from?: DateString;
-
-  construction_company?: string;
-  tech_support_company?: string;
-  project_company?: string;
-
-  district?: string;
-  latitude: number;
-  longitude: number;
-  province: string;
-  city: string;
-  area_name: string;
-
-  outdoor_spot?: number;
-
-  description: string;
+  started_time?: DateString,
+  finished_time?: DateString,
+  record_started_from?: DateString,
 }
+export interface PanelProject extends PanelDataType {
+  construction_company?: string,
+  tech_support_company?: string,
+  project_company?: string,
+}
+export interface PanelProject extends PanelDataType {
+  district?: string,
+  latitude: number,
+  longitude: number,
+  province: string,
+  city: string,
+  area_name: string,
+}
+export interface PanelProject extends PanelDataType {
+  area?: number,
+  demo_area?: number,
+  building_height?: number,
+  floor?: number,
+  building_type?: string,
+}
+export interface PanelProject extends PanelDataType {
+  project_name: string,
+  outdoor_spot?: number,
+  description: string,
+} /* End PanelProject */
 
 
+/* Define PanelSpotRecord */
+export interface PanelSpotRecord extends PanelDataType {_kind: "PanelSpotRecord", }
 export interface PanelSpotRecord extends PanelDataType {
-  ac_power?: number;
-  co2?: number;
-  pm25?: number;
-  device_id?: number;
-  humidity?: number;
-  temperature?: number;
-  spot_record_time: DateString;
+  spot_record_time: DateString,
+}
+export interface PanelSpotRecord extends PanelDataType {
+  ac_power?: number,
+  co2?: number,
+  pm25?: number,
+  device_id?: number,
+  humidity?: number,
+  temperature?: number,
   window_opened?:
   | "0"
-  | "1";
-}
+  | "1",
+} /* End PanelSpotRecord */
 
-
+/* Define PanelDevice*/
+export interface PanelDevice extends PanelDataType {_kind: "PanelDevice", }
 export interface PanelDevice extends PanelDataType {
-  create_time: DateString;
-  device_name?: string;
-  device_type?: string;
-  modify_time: DateString;
-  online?: boolean;
-  spot_id: number;
-};
-
+  device_name?: string,
+  device_type?: string,
+}
+export interface PanelDevice extends PanelDataType {
+  create_time: DateString,
+  modify_time: DateString,
+  online?: boolean,
+  spot_id: number,
+} /* End PanelDevice */
 
 /*
  * data structures that are exactly the same as that the server.
@@ -78,56 +92,69 @@ export interface PanelDevice extends PanelDataType {
 export interface ServerData {};
 
 
+/* Define PanelDevice*/
+
+export interface ServerProject extends ServerData {_kind: "ServerProject", }
 export interface ServerProject extends ServerData {
-  outdoor_spot?: null;  // TODO support later.
   location?: {
-    province: string;
-    city: string;
-    climate_area: {area_name: string};
-  };
-  tech_support_company?: {company_name: string};
-  project_company?: {company_name: string};
-  construction_company?: {company_name: string};
-  project_name?: string;
-  district?: string;
-  floor?: number;
-  longitude?: number;
-  latitude?: number;
-  area?: number;
-  demo_area?: number;
-  building_type?: string;
-  building_height?: string;
-  started_time?: DateString;
-  finished_time?: DateString;
-  record_started_from?: DateString;
-  description?: string;
+    province: string,
+    city: string,
+    climate_area: {area_name: string},
+  },
+  longitude?: number,
+  latitude?: number,
+  district?: string,
 }
+export interface ServerProject extends ServerData {
+  tech_support_company?: {company_name: string},
+  project_company?: {company_name: string},
+  construction_company?: {company_name: string},
+}
+export interface ServerProject extends ServerData {
+  started_time?: DateString,
+  finished_time?: DateString,
+  record_started_from?: DateString,
+}
+export interface ServerProject extends ServerData {
+  outdoor_spot?: null,  // TODO support later.
+  project_name?: string,
+  district?: string,
+  floor?: number,
+  area?: number,
+  demo_area?: number,
+  building_type?: string,
+  building_height?: string,
+  description?: string,
+} /* End PanelDevice*/
 
+export interface ServerDevice extends ServerData {_kind: "ServerDevice", }
 export interface ServerDevice extends ServerData {
-  device_name: string;
-  device_type?: string;
-  online?: string;
-  spot?: number;  // spot id
-  create_time?: DateString;
-  modify_time?: DateString;
+  device_name: string,
+  device_type?: string,
+  online?: string,
+  spot?: number,  // spot id
+  create_time?: DateString,
+  modify_time?: DateString,
 }
 
+export interface ServerSpot extends ServerData {_kind: "ServerSpot", }
 export interface ServerSpot extends ServerData {
-  project?: number;  // project id
-  spot_name?: string;
-  spot_type?: string;
-  image?: string;
+  project?: number,  // project id
+  spot_name?: string,
+  spot_type?: string,
+  image?: string,
 }
 
+interface ServerSpotRecord extends ServerData {_kind: "ServerSpotRecord", }
 interface ServerSpotRecord extends ServerData {
-  spot_record_time: DateString;
-  device: number;
-  window_opened: boolean;
-  temperature: number;
-  humidity: number;
-  ac_power: number;
-  pm25: number;
-  co2: number;
+  spot_record_time: DateString,
+  device: number,
+  window_opened: boolean,
+  temperature: number,
+  humidity: number,
+  ac_power: number,
+  pm25: number,
+  co2: number,
 }
 
 

@@ -8,7 +8,7 @@ import {grapName, dynamicHeightProperties, dynamicHeight} from '../../utils/util
 import {PanelOperationTable} from '../utils/utils'
 import ConfirmDialogue from '../ConfirmDialogue';
 import {TableFC} from '../ContentCard';
-import {waitClickAndDelete, CallbackProps} from '../utils/callbacks';
+import {Wait, CallbackProps} from '../utils/callbacks';
 
 
 export const PopupMenu: React.FC<{
@@ -34,10 +34,10 @@ export const PopupMenu: React.FC<{
     <>
       {
         React.createElement(ConfirmDialogue, {
-          confirmed: confirmed,
-          shown: shown,
-          setShown: setShown,
-          message: message
+          confirmed,
+          shown,
+          setShown,
+          message
         })
       }
       <Popover
@@ -53,12 +53,14 @@ export const PopupMenu: React.FC<{
               <Menu.Item icon="trash" intent="danger"
                 onSelect={
                   () => {
-                    waitClickAndDelete(confirmed, opCallbackProps)?.then(() => {
-                      if (props.setSpotRecords)
-                        props.setSpotRecords(
-                          props.spotRecords
-                            .filter(e => e.spot_record_id != spotRecordId));
-                    });
+                    Wait.delete(confirmed, opCallbackProps)
+                      ?.then(() => {
+                        if (props.setSpotRecords)
+                          props.setSpotRecords(
+                            props.spotRecords
+                              .filter(e => e.spot_record_id != spotRecordId));
+                      })
+                      .then(() => confirmed.current = false);
                     setMessage("确定要删除吗？");
                     setShown(true);
                   }
@@ -74,7 +76,7 @@ export const PopupMenu: React.FC<{
   );
 };
 
-export const tableFC: TableFC = (props) => (
+export const Tablefc: TableFC = (props) => (
   <Table background="tint2">
     <Table.Head height={40} elevation={1}>
 

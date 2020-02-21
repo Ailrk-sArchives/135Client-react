@@ -1,19 +1,22 @@
-import React, {useState, useRef} from 'react';
+import React, {useState, useRef, useEffect} from 'react';
 import {
   Pane, Menu, Popover, Position, Tab, SearchInput,
   Text, Icon, toaster
 } from 'evergreen-ui';
-import {ApiDataType, DataTypeKeys} from '../Data/data';
+import {
+  ApiDataType, DataTypeKeys, Spot, SpotRecord, Project,
+  Device, ApiDataTypeTag, ApiResponse
+} from '../Data/data';
+import {PanelDataType} from '../Data/dataAdaptor';
 import SubmitDialogue, {SubmitDialogueProps} from './SubmitDialogue';
 import ConfirmDialogue, {ConfirmDialogueProps} from './ConfirmDialogue';
-import {Operation, PanelOperationTable, HTTPMethods, ControlHub} from './utils/utils';
-import {waitClickAndPost, CallbackProps} from './utils/callbacks';
+import {
+  Operation, PanelOperationTable, HTTPMethods, ControlHub,
+  mapToObject, apiDataArrayIsDuplicated
+} from './utils/utils';
+import {Wait, CallbackProps, CallbackPropsCb} from './utils/callbacks';
 import {ShownDialogProps} from './utils/dialogStateUtils';
-
-type PanelPopupMenuProps =
-  & ShownDialogProps
-  & Omit<SubmitDialogueProps, "shown" | "setShown">
-  & Omit<ConfirmDialogueProps, "shown" | "setShown">;
+import {PanelPopupMenuProps} from './utils/utils';
 
 const _ControlPanel = (controlHub: ControlHub) => {
   /*
@@ -40,7 +43,14 @@ const _ControlPanel = (controlHub: ControlHub) => {
     message,
     setMessage,
     entries,
-    setEntries
+    setEntries,
+
+    someDatas: controlHub.data,
+    setSomeDatas: controlHub.setData,
+    panelOperationTable: controlHub.panelOperationTable,
+
+    dataTypeTag: controlHub.dataTypeTag,
+
   };
 
   return (
@@ -90,29 +100,25 @@ const TableControlPanel = (controlHub: ControlHub) => {
    * Wrapper of control panel
    * Handle the positioning and styling.
    */
-
   return (
     <Pane background="tint2" paddingTop={10} paddingButton={10}
       paddingRight={20} paddingLeft={20}>
       { React.createElement(_ControlPanel, controlHub) }
     </Pane>
   );
-
 };
-
 
 /*
  * Panel popup for control panel.
  * post, update will happend here.
  */
-const PanelPopupMenu:
-  React.FC<PanelPopupMenuProps> = (props) => {
+const PanelPopupMenu: React.FC<PanelPopupMenuProps> = props => {
 
-    const dprops: SubmitDialogueProps = {
+    const submitDialogProps: SubmitDialogueProps = {
       confirmed: props.confirmed,
       dataTypeKeys: props.dataTypeKeys,
       shown: props.shownSubmitDialog,
-      setShown: props.setShownConfirmDialog,
+      setShown: props.setShownSubmitDialog,
       entries: props.entries,
       setEntries: props.setEntries
     };
@@ -122,21 +128,49 @@ const PanelPopupMenu:
       shown: props.shownConfirmDialog,
       setShown: props.setShownConfirmDialog,
       message: props.message,
-      setMessage: props.setMessage
     };
 
     const linkCss: React.CSSProperties = {
       textDecoration: 'none',
     };
 
+
+    const post_wrapper = (callbackProps: {
+      panelOperationTable?: PanelDataType,
+      panelData: PanelDataType,
+    } | Function) => {
+      // wrap post operation with different types.
+      //
+      switch (props.dataTypeTag) {
+        case "Spot":
+          return () =>
+            Wait.post(props.confirmed, callbackProps as CallbackProps<Spot>);
+
+        case "SpotRecord":
+          return () =>
+            Wait.post(props.confirmed, callbackProps as CallbackProps<SpotRecord>);
+
+        case "Project":
+          return () =>
+            Wait.post(props.confirmed, callbackProps as CallbackProps<Project>);
+
+        case "Device":
+          return () =>
+            Wait.post(props.confirmed, callbackProps as CallbackProps<Device>);
+
+        default:
+          return undefined
+      }
+    };
+
     return (
       <>
         {
-          React.createElement(SubmitDialogue, dprops)
+          React.createElement(SubmitDialogue, submitDialogProps)
         }
-      {
-        React.createElement(ConfirmDialogue, confirmDialogueProps)
-      }
+        {
+          React.createElement(ConfirmDialogue, confirmDialogueProps)
+        }
         <Popover
           position={Position.BOTTOM_LEFT}
           content={
@@ -147,7 +181,29 @@ const PanelPopupMenu:
                   activeElevation={2}
                   onSelect={() => {
                     props.setShownSubmitDialog(true);
-                    //waitClickAndPost(props.confirmed, );
+                    const _post = post_wrapper(
+                      () => {
+                        return {
+                          panelOperationTable: props.panelOperationTable,
+                          panelData: mapToObject(props.entries),
+                        };
+                      });
+                    if (_post !== undefined)
+                      _post()
+                        ?.then(res => {
+                          if (props.setSomeDatas !== undefined &&
+                            !apiDataArrayIsDuplicated(
+                              props.someDatas,
+                              (res as ApiResponse<ApiDataType>).data))
+                            props
+                              .setSomeDatas(
+                                props.someDatas
+                                  ?.concat((res as ApiResponse<ApiDataType>).data
+                                    || []));
+                        })
+                        .then(() => {props.confirmed.current = false;});
+
+
                   }}>
                   添加...
                   </Menu.Item>
@@ -180,11 +236,10 @@ const PanelPopupMenu:
  * export popup for control panel.
  * To export files into different formats.
  */
-const ExportOptionMenu: React.FC<{}> = (props) => {
+const ExportOptionMenu: React.FC<{}> = () => {
   const linkCss: React.CSSProperties = {
     textDecoration: 'none',
   };
-
   return (
     <Popover
       position={Position.BOTTOM_LEFT}

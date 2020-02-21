@@ -7,7 +7,7 @@ import {Link} from 'react-router-dom';
 import {IdempotentApis, Device, FeedBack} from '../../Data/data';
 import {grapName, dynamicHeightProperties, dynamicHeight} from '../../utils/utils';
 import {PanelOperationTable} from '../utils/utils'
-import {waitClickAndDelete, CallbackProps} from '../utils/callbacks';
+import {Wait, CallbackProps} from '../utils/callbacks';
 import {TableFC} from '../ContentCard';
 import ConfirmDialogue from '../ConfirmDialogue';
 
@@ -30,7 +30,6 @@ export const PopupMenu:
     const confirmed = useRef<boolean>(false);
     const [message, setMessage] = useState<string>("");
 
-
     const opCallbackProps: CallbackProps<Device> = {
       someid: deviceId,
       someDatas: props.devices,
@@ -42,10 +41,10 @@ export const PopupMenu:
       <>
         {
           React.createElement(ConfirmDialogue, {
-            confirmed: confirmed,
-            shown: shown,
-            setShown: setShown,
-            message: message
+            confirmed,
+            shown,
+            setShown,
+            message
           })
         }
 
@@ -73,19 +72,19 @@ export const PopupMenu:
                   intent="danger"
                   onSelect={
                     () => {
-                      waitClickAndDelete(confirmed, opCallbackProps)?.then(() => {
-                        if (props.setDevices)
-                          props.setDevices(
-                            props.devices.filter(e => e.device_id != deviceId));
-                      });
+                      Wait.delete(confirmed, opCallbackProps)
+                        ?.then(() => {
+                          if (props.setDevices)
+                            props.setDevices(
+                              props.devices.filter(e => e.device_id != deviceId));
+                        })
+                        .then(() => confirmed.current = false);
                       setMessage("确定要删除吗？");
                       setShown(true);
-
                     }
                   }>
-
                   删除...
-            </Menu.Item>
+                </Menu.Item>
               </Menu.Group>
             </Menu>
           }
@@ -97,7 +96,7 @@ export const PopupMenu:
   };
 
 
-export const tableFC: TableFC = (props) => (
+export const Tablefc: TableFC = (props) => (
   <Table background="tint2">
 
     <Table.Head height={70} elevation={1}>

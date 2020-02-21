@@ -1,3 +1,7 @@
+/*
+ * async call back executed after dialogues.
+ */
+
 import {
   waitClick, PanelOperationTable, Operation, OPDelete, OPUpdate, HTTPMethods,
   OPPost
@@ -15,13 +19,16 @@ export interface CallbackProps<T> {
   panelOperationTable?: PanelOperationTable
 }
 
+
 const feedBackMsg = (feedback: FeedBack) => feedback.message;
 
+function opCallback<T>
+  (props: CallbackProps<T>,
+    method: HTTPMethods): ReturnType<Operation> | undefined {
 
-export const opCallback =
-  <T>(props: CallbackProps<T>, method: HTTPMethods): Promise<void> | undefined => {
     const op = props.panelOperationTable?.get(method);
     if (method === undefined || op === undefined) return undefined;
+
     const showToaster = (feedback: FeedBack) => {
       if (feedback.status === 0)
         toaster.success(feedBackMsg(feedback));
@@ -33,43 +40,70 @@ export const opCallback =
       case "delete":
         if (props.someid !== undefined)
           return (op as OPDelete)(props.someid)
-            .then(res => showToaster((res as FeedBack)));
+            .then(res => {
+              showToaster((res as FeedBack));
+              return res;
+            });
         break;
 
       case "put":
         if (props.panelData !== undefined && props.someid !== undefined)
           return (op as OPUpdate<PanelDataType>)(props.panelData, props.someid)
-            .then(res => showToaster((res as FeedBack)));
+            .then(res => {
+              showToaster((res as FeedBack));
+              return res;
+            });
         break;
 
       case "post":
         if (props.panelData !== undefined)
           return (op as OPPost<PanelDataType>)(props.panelData)
-            .then(res => showToaster((res as FeedBack)));
+            .then(res => {
+              showToaster((res as FeedBack));
+              return res;
+            });
         break;
 
       default:
         return undefined;
     }
-
   };
 
-export const waitClickAndDelete =
-  <T>(clicked: React.MutableRefObject<boolean>,
-    props: CallbackProps<T>) =>
-    waitClick(clicked, () => opCallback(props, "delete"));
+// props callback can delay the creation of CallbackProps.
+export type CallbackPropsCb<T> = () => CallbackProps<T>;
+function waitClickAndDo<T>(
+  clicked: React.MutableRefObject<boolean>,
+  props: CallbackProps<T> | CallbackPropsCb<T>,
+  method: HTTPMethods
+): ReturnType<Operation> | undefined {
 
-export const waitClickAndUpdate =
-  <T>(clicked: React.MutableRefObject<boolean>,
-    props: CallbackProps<T>) =>
-    waitClick(clicked, () => opCallback(props, "put"));
+  return waitClick(clicked, () => {
+    if (typeof props === "function") return opCallback(props(), method);
+    return opCallback(props, method);
+  });
+}
 
-export const waitClickAndPost =
-  <T>(clicked: React.MutableRefObject<boolean>,
-    props: CallbackProps<T>) =>
-    waitClick(clicked, () => opCallback(props, "post"));
+export class Wait {
+  static delete<T>(
+    clicked: React.MutableRefObject<boolean>,
+    props: CallbackProps<T> | CallbackPropsCb<T>
+  ): ReturnType<Operation> | undefined {
+    return waitClickAndDo(clicked, props, "delete");
+  }
 
+  static post<T>
+    (clicked: React.MutableRefObject<boolean>,
+      props: CallbackProps<T> | CallbackPropsCb<T>
+    ): ReturnType<Operation> | undefined {
+    return waitClickAndDo(clicked, props, "post");
+  }
 
-
+  static update<T>(
+    clicked: React.MutableRefObject<boolean>,
+    props: CallbackProps<T> | CallbackPropsCb<T>
+  ): ReturnType<Operation> | undefined {
+    return waitClickAndDo(clicked, props, "put");
+  }
+}
 
 

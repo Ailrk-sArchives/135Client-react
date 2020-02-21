@@ -11,7 +11,7 @@ import {keys} from 'ts-transformer-keys';
 import {useTableParent, HTTPMethods, PanelOperationTable, Operation} from '../utils/utils';
 import * as DataAdaptor from '../../Data/dataAdaptor';
 
-import {tableFC} from './TableComponent';
+import {Tablefc} from './TableComponent';
 
 const RecordTable: React.FC<{}> = (props) => {
   const [spotRecords, setSpotRecords] = useState<Array<SpotRecord>>([]);
@@ -69,12 +69,12 @@ const RecordTable: React.FC<{}> = (props) => {
 
 
   const paginationProps: PaginationProps = {
-    useUpdate: useUpdate,
+    useUpdate,
     useChangePageSize: setPageSize,
-    totalElementCount: totalElementCount,
-    totalPage: totalPage,
-    pageSize: pageSize,
-    currentPage: currentPage,
+    totalElementCount,
+    totalPage,
+    pageSize,
+    currentPage,
     pageButtonLimit: totalPage > 6 ? 6 : totalPage
   };
 
@@ -104,16 +104,17 @@ const RecordTable: React.FC<{}> = (props) => {
             ]
           ) as PanelOperationTable),
 
-          tableParent: tableParent,
-          loaded: loaded,
+          tableParent,
+          loaded,
           data: spotRecords,
           dataTypeKeys: spotRecordKeys,
+          dataTypeTag: "SpotRecord",
           setData: setSpotRecords,
-          tableFC: tableFC,
-          tickAll: tickAll,
-          setTickAll: setTickAll,
-          itemCheckedList: itemCheckedList,
-          setItemCheckedList: setItemCheckedList,
+          tableFC: Tablefc,
+          tickAll,
+          setTickAll,
+          itemCheckedList,
+          setItemCheckedList,
         })
     )} />);
 };

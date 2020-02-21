@@ -26,13 +26,15 @@ export type DataTypeKeys =
     DataTypeInputHint]>;
 
 export interface Spot {
-  project_id?: number;
-  project_name?: string;
-  spot_id?: number;
-  spot_name?: string;
-  spot_type?: string;
-  number_of_device?: number;
-};
+  _kind: "Spot",
+  project_id?: number,
+  project_name?: string,
+  spot_id?: number,
+  spot_name?: string,
+  spot_type?: string,
+  number_of_device?: number,
+}
+
 export const spotKeys: DataTypeKeys = [
   ["project_id", "所在项目id", "若所在测点不存在请先创建"],
   ["spot_name", "测点名称", "任意测点名称"],
@@ -40,17 +42,20 @@ export const spotKeys: DataTypeKeys = [
 ];
 
 export interface Device {
-  create_time?: string;
-  device_id?: number;
-  device_name?: string;
-  device_type?: string;
-  modify_time?: string;
-  online?: boolean;
-  spot_id?: number;
-  spot_name?: string;
-  project_id?: string;
-  project_name?: string;
-};
+  _kind: "Device",
+}
+export interface Device {
+  create_time?: string,
+  device_id?: number,
+  device_name?: string,
+  device_type?: string,
+  modify_time?: string,
+  online?: boolean,
+  spot_id?: number,
+  spot_name?: string,
+  project_id?: string,
+  project_name?: string,
+}
 export const deviceKeys: DataTypeKeys = [
   ["create_time", "创建时间", "2000-01-30T10:10:10"],
   ["device_name", "设备名", "任意设备名称"],
@@ -60,42 +65,46 @@ export const deviceKeys: DataTypeKeys = [
   ["spot_id", "所在测点id", "若所在测点不存在请先创建"],
 ];
 
+export interface ClimateArea { _kind: "ClimateArea", }
 export interface ClimateArea {
-  area_name: string
-};
+  area_name: string,
+}
 
+export interface Location { _kind: "Location", }
 export interface Location {
-  city?: string;
-  climate_area?: ClimateArea;
-  province?: string;
-};
+  city?: string,
+  climate_area?: ClimateArea,
+  province?: string,
+}
 
 
-export interface Company {
-  company_name: string;
-};
+export interface Company { _kind: "Company", }
+export interface Company { company_name: string, }
 
 export interface Project {
-  area?: number;
-  building_height?: string;
-  building_type?: string;
-  construction_company?: Company;
-  demo_area?: string;
-  district?: string;
-  finished_time?: string;
-  floor?: string;
-  latitude: number;
-  location?: Location;
-  longitude: number;
-  outdoor_spot?: string;  // TODO outdoor is its own type too.
-  project_company?: Company;
-  project_id?: number;
-  project_name?: string;
-  record_started_from?: string;
-  started_time?: string;
-  tech_support_company?: Company;
-  description?: string;
-};
+  _kind: "Project",
+}
+export interface Project {
+  area?: number,
+  building_height?: string,
+  building_type?: string,
+  construction_company?: Company,
+  demo_area?: string,
+  district?: string,
+  finished_time?: string,
+  floor?: string,
+  latitude: number,
+  location?: Location,
+  longitude: number,
+  outdoor_spot?: string,  // TODO outdoor is its own type too.
+  project_company?: Company,
+  project_id?: number,
+  project_name?: string,
+  record_started_from?: string,
+  started_time?: string,
+  tech_support_company?: Company,
+  description?: string,
+}
 export const projectKeys: DataTypeKeys = [
   ["project_name", "项目名称", "任意项目名称"],
   ["area", "建筑面积", "10.3"],
@@ -122,16 +131,19 @@ export const projectKeys: DataTypeKeys = [
 ];
 
 export interface SpotRecord {
-  ac_power?: number;
-  co2?: number;
-  device_id?: number;
-  humidity?: number;
-  pm25?: number;
-  spot_record_id?: number;
-  spot_record_time?: number;
-  temperature?: number;
-  window_opened?: boolean;
-};
+  _kind: "SpotRecord",
+}
+export interface SpotRecord {
+  ac_power?: number,
+  co2?: number,
+  device_id?: number,
+  humidity?: number,
+  pm25?: number,
+  spot_record_id?: number,
+  spot_record_time?: number,
+  temperature?: number,
+  window_opened?: boolean,
+}
 export const spotRecordKeys: DataTypeKeys = [
   ["ac_power", "空调功耗", "0.0"],
   ["co2", "CO2", "0.0"],
@@ -143,50 +155,37 @@ export const spotRecordKeys: DataTypeKeys = [
   ["window_opened", "窗磁开关", "0 或 1"]
 ];
 
-export interface ApiResponse<T> {
-  status: number;
-  data?: T;
-  message: string;
+export interface ProjectDetail { _kind: "ProjectDetail", }
+export interface ProjectDetail {
+  project_id?: number,
+  image?: string,
+  image_description?: string,
 };
 
-export interface PagedData<T> {
-  totalElementCount: number;  // total elements in the db.
-  data: T;
-  currentPage: number;
-  pageSize: number;
+export interface ApiResponse<T>  extends WithData<T> {
+  status: number,
+  data?: T,
+  message: string,
+}
+
+export interface PagedData<T> extends WithData<T> {
+  totalElementCount: number,  // total elements in the db.
+  data: T,
+  currentPage: number,
+  pageSize: number,
 };
 
 export interface ApiRequest<T> {
-  request: T;
+  request: T,
 };
 
 export interface PaginationRequest {
-  size: number;
-  pageNo: number;
+  size: number,
+  pageNo: number,
 };
 
-export interface ProjectDetail {
-  project_id?: number;
-  image?: string;
-  image_description?: string;
-};
-
-
-export type ApiDataType = Spot | Device | Project | SpotRecord;
-
-export const apiDataTypeCheck = (data: ApiDataType):
-  | "Spot"
-  | "Device"
-  | "Project"
-  | "SpotRecord"
-  | undefined => {
-
-  if ((data as Project).location !== undefined) return "Project";
-  if ((data as Spot).spot_type !== undefined) return "Spot";
-  if ((data as Device).device_name !== undefined) return "Device";
-  if ((data as SpotRecord).window_opened !== undefined) return "SpotRecord";
-
-};
+export type ApiDataType = Spot | Device | Project | SpotRecord | ProjectDetail;
+export type ApiDataTypeTag = "Spot" | "Device" | "Project" | "SpotRecord" | "ProjectDetail";
 
 const makeRequest = <T>(params: T) => {
   return {"request": params};
@@ -204,7 +203,34 @@ export const makePaginationRequest =
       pageNo: pageNo
     };
     return paginationRequest;
+  };
+
+type PadTag = (tag: ApiDataTypeTag, e: ApiDataType) => ApiDataType;
+const padtag: PadTag = (tag, e) => {
+  e._kind = tag;
+  return e;
+};
+
+const padTagPagedData = (tag: ApiDataTypeTag, e: PagedData<Array<ApiDataType>>) => {
+  for (const n of e.data) (n as ApiDataType)._kind = tag;
+  return e;
+}
+
+// map operation to any structure contains data.
+interface WithData<T> { data?: T, }
+const fmapData =
+  <T, U>(f: (e: T) => U, m: WithData<T>): WithData<U | T> => {
+
+  if (m.data !== undefined) {
+    let {data, ...rest} = m;
+    return {
+      ...rest,
+      data: data ? f(data) : undefined,
+    } as WithData<U>;
   }
+  return m;
+};
+
 
 /* Server Response is wrapped in http response json
     it has structure like
@@ -233,8 +259,8 @@ export class IdempotentApis {
             .then(response => {
 
               if (good_response<Array<Project>>(response))
-                return response.data.data;
-
+                return (response.data.data as Array<Project>)
+                  .map(e => padtag("Project", e));
             })
             .catch(e => console.error(e));
         });
@@ -248,8 +274,8 @@ export class IdempotentApis {
             .then(response => {
 
               if (good_response<Array<Spot>>(response))
-                return response.data.data;
-
+                return (response.data.data as Array<Spot>)
+                  .map(e => padtag("Spot", e));
             })
             .catch(e => console.error(e));
 
@@ -262,7 +288,8 @@ export class IdempotentApis {
             .then(response => {
 
               if (good_response<Array<SpotRecord>>(response))
-                return response.data.data;
+                return (response.data.data as Array<SpotRecord>)
+                  .map(e => padtag("SpotRecord", e));
 
             })
             .catch(e => console.error(e));
@@ -276,7 +303,8 @@ export class IdempotentApis {
             .then(response => {
 
               if (good_response<Array<ProjectDetail>>(response))
-                return response.data.data;
+                return (response.data.data as Array<ProjectDetail>)
+                  .map(e => padtag("ProjectDetail", e));
 
             })
             .catch(e => console.error(e));
@@ -292,23 +320,26 @@ export class IdempotentApis {
               .then(response => {
 
                 if (good_response<PagedData<Array<Project>>>(response))
-                  return response.data.data;
-
+                  return fmapData(
+                    padTagPagedData.bind(null, "Project"), response.data).data;
               })
               .catch(e => console.error(e))
           },
           params);
 
-      static spotByProjectPaged =
+      static spotByProjectPaged =  // what is this?
         (params: PaginationRequest, pid: number): Promise<PagedData<Array<Spot>>> =>
           makeApi(concatPath(apiBaseUrl, `api/v1/project/${pid}/spot`),
             (url: string) => {
               return axios.post(url, makeRequest(params), makeJsonRequestHeader())
                 .then(response => {
+                  if (good_response<PagedData<Array<Spot>>>(response)) {
+                    return fmapData(
+                      padTagPagedData.bind(null, "Spot"), response.data).data;
+                  }
 
-                  if (good_response<PagedData<Array<Spot>>>(response))
-                    return response.data.data
-
+                  // (response.data.data as Array<Spot>)
+                  //     .map(e => padtag("Spot", e));
                 })
                 .catch(e => console.error(e))
             },
@@ -321,7 +352,8 @@ export class IdempotentApis {
               .then(response => {
 
                 if (good_response<PagedData<Array<Spot>>>(response))
-                  return response.data.data
+                  return fmapData(
+                    padTagPagedData.bind(null, "Spot"), response.data).data;
 
               })
               .catch(e => console.error(e))
@@ -332,16 +364,16 @@ export class IdempotentApis {
         (params: PaginationRequest, sid: number): Promise<PagedData<Array<Device>>> =>
           makeApi(concatPath(apiBaseUrl, `api/v1/spot/${sid}/device`),
             (url: string) => {
-              return axios.post(url, makeRequest(params), makeJsonRequestHeader())
-                .then(response => {
+            return axios.post(url, makeRequest(params), makeJsonRequestHeader())
+              .then(response => {
 
-                  if (good_response<PagedData<Array<Device>>>(response))
-                    return response.data.data
-
-                })
-                .catch(e => console.error(e))
-            },
-            params);
+                if (good_response<PagedData<Array<Device>>>(response))
+                  return (response.data.data as Array<Device>)
+                    .map(e => padtag("Device", e));
+              })
+              .catch(e => console.error(e))
+          },
+          params);
 
       static devicePaged = (params: PaginationRequest): Promise<PagedData<Array<Device>>> =>
         makeApi(concatPath(apiBaseUrl, `api/v1/device`),
@@ -350,8 +382,8 @@ export class IdempotentApis {
               .then(response => {
 
                 if (good_response<PagedData<Array<Device>>>(response))
-                  return response.data.data
-
+                  return fmapData(
+                    padTagPagedData.bind(null, "Device"), response.data).data;
               })
               .catch(e => console.error(e))
           },
@@ -365,8 +397,8 @@ export class IdempotentApis {
                 .then(response => {
 
                   if (good_response<PagedData<Array<SpotRecord>>>(response))
-                    return response.data.data
-
+                    return fmapData(
+                      padTagPagedData.bind(null, "SpotRecord"), response.data).data;
                 })
                 .catch(e => console.error(e))
             },
@@ -378,52 +410,56 @@ export class IdempotentApis {
   static Put = class {
 
     static updateProject =
-      (params: AdaptorTypes.PanelProject, pid: number): Promise<FeedBack> =>
+      (params: AdaptorTypes.PanelProject, pid: number): Promise<Project> =>
         makeApi(concatPath(apiBaseUrl, `api/v1/project/${pid}`),
           (url: string) => {
             return axios.put(url,
               AdaptorTypes.MakeServerData.makeProject(params))
               .then(response => {
-                return response.data as ApiResponse<any>;
+                return fmapData(
+                  padtag.bind(null, "Project"), response.data) as ApiResponse<Project>
               })
 
               .catch(e => console.error(e))
           });
 
     static updateSpot =
-      (params: AdaptorTypes.PanelSpot, sid: number): Promise<FeedBack> =>
+      (params: AdaptorTypes.PanelSpot, sid: number): Promise<Spot> =>
         makeApi(concatPath(apiBaseUrl, `api/v1/project/spot/${sid}`),
           (url: string) => {
             return axios.put(url,
               makeRequest(AdaptorTypes.MakeServerData.makeSpot(params)))
               .then(response => {
-                return response.data as ApiResponse<any>;
+                return fmapData(
+                  padtag.bind(null, "Project"), response.data) as ApiResponse<Spot>
               })
 
               .catch(e => console.error(e))
           });
 
     static updateDevice =
-      (params: AdaptorTypes.PanelDevice, did: number): Promise<FeedBack> =>
+      (params: AdaptorTypes.PanelDevice, did: number): Promise<Device> =>
         makeApi(concatPath(apiBaseUrl, `api/v1/project/device/${did}`),
           (url: string) => {
             return axios.put(url,
               makeRequest(AdaptorTypes.MakeServerData.makeDevice(params)))
               .then(response => {
-                return response.data as ApiResponse<any>;
+                return fmapData(
+                  padtag.bind(null, "Project"), response.data) as ApiResponse<Device>
               })
 
               .catch(e => console.error(e))
           });
 
     static updateSpotRecord =
-      (params: AdaptorTypes.PanelSpotRecord, rid: number): Promise<FeedBack> =>
+      (params: AdaptorTypes.PanelSpotRecord, rid: number): Promise<SpotRecord> =>
         makeApi(concatPath(apiBaseUrl, `api/v1/project/spotRecord/${rid}`),
           (url: string) => {
             return axios.put(url,
               makeRequest(AdaptorTypes.MakeServerData.makeSpotRecord(params)))
               .then(response => {
-                return response.data as ApiResponse<any>;
+                return fmapData(
+                  padtag.bind(null, "Project"), response.data) as ApiResponse<SpotRecord>
               })
 
               .catch(e => console.error(e))
@@ -474,10 +510,7 @@ export class IdempotentApis {
             .then(response => response.data as ApiResponse<any>)  // always return message from the server.
             .catch(e => console.error(e))
       );
-
-
   };
-
 };
 
 
@@ -486,7 +519,7 @@ export class NonIdempotentApis {
   static Post = class {
 
     static postProject =
-      (params: AdaptorTypes.PanelProject): Promise<FeedBack> =>
+      (params: AdaptorTypes.PanelProject): Promise<ApiResponse<Project>> =>
         makeApi(concatPath(apiBaseUrl, `api/v1/project/`),
 
           (url: string) => {
@@ -495,14 +528,16 @@ export class NonIdempotentApis {
               makeJsonRequestHeader())
 
               .then(response => {
-                return response.data as ApiResponse<any>
+                return fmapData(
+                  padtag.bind(null, "Project"), response.data) as ApiResponse<Project>
+
               })
               .catch(e => console.error(e));
           }
         );
 
     static postSpot =
-      (params: AdaptorTypes.PanelSpot): Promise<FeedBack> =>
+      (params: AdaptorTypes.PanelSpot): Promise<ApiResponse<Spot>> =>
         makeApi(concatPath(apiBaseUrl, `api/v1/spot/`),
           (url: string) => {
             return axios.post(url,
@@ -510,14 +545,16 @@ export class NonIdempotentApis {
               makeJsonRequestHeader())
 
               .then(response => {
-                return response.data as ApiResponse<any>
+                return fmapData(
+                  padtag.bind(null, "Spot"), response.data) as ApiResponse<Spot>
+
               })
               .catch(e => console.error(e));
           }
         );
 
     static postDevice =
-      (params: AdaptorTypes.PanelDevice): Promise<FeedBack> =>
+      (params: AdaptorTypes.PanelDevice): Promise<ApiResponse<Device>> =>
         makeApi(concatPath(apiBaseUrl, `api/v1/device/`),
 
           (url: string) => {
@@ -526,14 +563,16 @@ export class NonIdempotentApis {
               makeJsonRequestHeader())
 
               .then(response => {
-                return response.data as ApiResponse<any>
+                return fmapData(
+                  padtag.bind(null, "Device"), response.data) as ApiResponse<Device>
+
               })
               .catch(e => console.error(e));
           }
         );
 
     static postSpotRecord =
-      (params: AdaptorTypes.PanelSpotRecord): Promise<FeedBack> =>
+      (params: AdaptorTypes.PanelSpotRecord): Promise<ApiResponse<SpotRecord>> =>
         makeApi(concatPath(apiBaseUrl, `api/v1/spotRecord/`),
 
           (url: string) => {
@@ -542,12 +581,14 @@ export class NonIdempotentApis {
               makeJsonRequestHeader())
 
               .then(response => {
-                return response.data as ApiResponse<any>
+                return fmapData(
+                  padtag.bind(null, "SpotRecord"), response.data) as ApiResponse<SpotRecord>
+
               })
               .catch(e => console.error(e));
           }
         );
-    };
+  };
 
 
 };

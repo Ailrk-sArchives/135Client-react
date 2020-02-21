@@ -4,10 +4,9 @@ import {DialogProps} from './utils/dialogStateUtils';
 
 export interface ConfirmDialogueProps extends DialogProps {
   message: string,
-  setMessage: React.Dispatch<React.SetStateAction<string>>,
 };
 
-const ConfirmDialogue: React.FC<ConfirmDialogueProps> = (props) => {
+const ConfirmDialogue: React.FC<ConfirmDialogueProps> = props => {
 
   return (
     <Stack value={1100}>

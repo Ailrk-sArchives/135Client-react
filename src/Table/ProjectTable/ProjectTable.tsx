@@ -8,7 +8,8 @@ import ContentCard, {TableFC} from '../ContentCard';
 import {HTTPMethods, PanelOperationTable, Operation} from '../utils/utils';
 import * as DataAdaptor from '../../Data/dataAdaptor';
 
-import {tableFC} from './TableComponent';
+import {Tablefc} from './TableComponent';
+import {Tab} from 'evergreen-ui';
 
 
 const ProjectTable: React.FC<{}> = (props) => {
@@ -33,7 +34,7 @@ const ProjectTable: React.FC<{}> = (props) => {
       ContentCard(
         {
           titlename: "示范工程项目信息",
-          loaded: loaded,
+          loaded,
           panelOperationTable: (new Map(
             [
               [
@@ -48,7 +49,7 @@ const ProjectTable: React.FC<{}> = (props) => {
 
               [
                 "delete" as HTTPMethods,
-                IdempotentApis.Delete.deleteDevice as Operation
+                IdempotentApis.Delete.deleteProject as Operation
               ],
             ]
           ) as PanelOperationTable),
@@ -56,11 +57,12 @@ const ProjectTable: React.FC<{}> = (props) => {
           data: projects,
           setData: setProjects,
           dataTypeKeys: projectKeys,
-          tableFC: tableFC,
-          tickAll: tickAll,
-          setTickAll: setTickAll,
-          itemCheckedList: itemCheckedList,
-          setItemCheckedList: setItemCheckedList,
+          dataTypeTag: "Project",
+          tableFC: Tablefc,
+          tickAll,
+          setTickAll,
+          itemCheckedList,
+          setItemCheckedList,
         })
     )} />);
 

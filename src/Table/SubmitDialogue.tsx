@@ -48,14 +48,6 @@ const SubmitTable =
       }
     </Table>);
 
-const mapToObject = (map: Map<string, string | undefined>): any => {
-  let data: {[k: string]: any} = {};
-  map.forEach((v, k) => {
-    data[k] = v;
-  });
-
-  return data;
-};
 
 const SubmitDialogue =
   (props: SubmitDialogueProps) => {
@@ -69,7 +61,6 @@ const SubmitDialogue =
       props.dataTypeKeys?.map(
         e => setEntries(entries.set(e[0], undefined))
       );
-      console.log(entries);
     }, [entries]);
 
     return (
@@ -83,6 +74,7 @@ const SubmitDialogue =
               onCloseComplete={() => props.setShown(false)}
               onConfirm={close => {
                 props.confirmed.current = true;
+                console.log(entries);
                 close();
               }}>
               {

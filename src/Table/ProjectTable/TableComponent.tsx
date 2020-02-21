@@ -8,11 +8,11 @@ import {IdempotentApis, Project, ApiDataType, FeedBack} from '../../Data/data';
 import ContentCard, {TableFC} from '../ContentCard';
 import {Link} from 'react-router-dom';
 import {PanelOperationTable} from '../utils/utils'
-import {waitClickAndDelete, CallbackProps} from '../utils/callbacks';
+import {Wait, CallbackProps} from '../utils/callbacks';
 import ConfirmDialogue from '../ConfirmDialogue';
 
 
-export const tableFC: TableFC = (props) => (
+export const Tablefc: TableFC = (props) => (
   <Table background="tint2">
     <Table.Head height={70}
       elevation={1}>
@@ -159,13 +159,12 @@ export const PopupMenu:
       <>
         {
           React.createElement(ConfirmDialogue, {
-            confirmed: confirmed,
-            shown: shown,
-            setShown: setShown,
-            message: message
+            confirmed,
+            shown,
+            setShown,
+            message
           })
         }
-
 
         <Popover
           position={Position.BOTTOM_LEFT}
@@ -192,15 +191,18 @@ export const PopupMenu:
                   hoverElevation={2}
                   onSelect={
                     () => {
-                      waitClickAndDelete(confirmed, opCallbackProps)?.then(() => {
-                        if (props.setProjects)
-                          props.setProjects(
-                            props.projects.filter(e => e.project_id != projectId));
-                      });
+                      setShown(true);
+                      Wait.delete(confirmed, opCallbackProps)
+                        ?.then(() => {
+                          if (props.setProjects)
+                            props.setProjects(
+                              props.projects.filter(e => e.project_id != projectId));
+                        })
+                        .then(() => confirmed.current = false);
                     }
                   }>
                   删除...
-        </Menu.Item>
+                </Menu.Item>
               </Menu.Group>
             </Menu>
           }

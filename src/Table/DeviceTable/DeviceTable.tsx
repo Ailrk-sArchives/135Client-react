@@ -10,7 +10,7 @@ import Frame from '../../Frame';
 import {useTableParent, HTTPMethods, PanelOperationTable, Operation} from '../utils/utils';
 import * as DataAdaptor from '../../Data/dataAdaptor';
 
-import {tableFC} from './TableComponent';
+import {Tablefc} from './TableComponent';
 
 const DeviceTable: React.FC<{}> = (props) => {
 
@@ -111,12 +111,12 @@ const DeviceTable: React.FC<{}> = (props) => {
   };
 
   const paginationProps: PaginationProps = {  // set pagination control.
-    useUpdate: useUpdate,
+    useUpdate,
     useChangePageSize: setPageSize,
-    totalPage: totalPage,
-    pageSize: pageSize,
-    currentPage: currentPage,
-    totalElementCount: totalElementCount,
+    totalPage,
+    pageSize,
+    currentPage,
+    totalElementCount,
     pageButtonLimit: totalPage > 6 ? 6 : totalPage
   };
 
@@ -147,14 +147,15 @@ const DeviceTable: React.FC<{}> = (props) => {
           ) as PanelOperationTable),
 
           dataTypeKeys: deviceKeys,
-          loaded: loaded,
+          dataTypeTag: "Device",
+          loaded,
           data: devices,
           setData: setDevices,
-          tableFC: tableFC,
-          tickAll: tickAll,
-          setTickAll: setTickAll,
-          itemCheckedList: itemCheckedList,
-          setItemCheckedList: setItemCheckedList,
+          tableFC: Tablefc,
+          tickAll,
+          setTickAll,
+          itemCheckedList,
+          setItemCheckedList,
         })
     )} />);
 };
