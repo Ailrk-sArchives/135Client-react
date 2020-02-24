@@ -14,7 +14,9 @@ export interface PaginationProps {
 };
 
 const TablePaginationButton: React.FC<{
-  name: string | number,
+  name:
+  | string
+  | number,
   useUpdate: (paginationRequest: PaginationRequest) => void,
   pageNum: number,
   pageSize: number,
@@ -22,13 +24,20 @@ const TablePaginationButton: React.FC<{
   [moreProps: string]: any
 }> = (props) => {
 
-  const {name, ...rest} = props;
+  const {
+    name,
+    pageSize,
+    pageNum,
+    elevation,
+    ...rest
+  } = props;
+
   return (
     <Pane {...rest}
       onClick={
         () => {
           props.useUpdate(
-            makePaginationRequest(props.pageNum, props.pageSize));
+            makePaginationRequest(pageNum, pageSize));
         }
       }
       borderTop={"default"}
@@ -47,6 +56,13 @@ const TablePaginationButton: React.FC<{
 };
 
 const TablePaginationBar = (props: PaginationProps) => {
+  const {
+    pageSize,
+    useUpdate,
+    currentPage,
+    totalPage,
+    pageButtonLimit,
+  } = props;
 
   const inHead =
     (currentPage: number, limit: number): boolean =>
@@ -59,52 +75,53 @@ const TablePaginationBar = (props: PaginationProps) => {
   const BasicButton = (name: number | string, pageNum: number) =>
     <TablePaginationButton name={name}
       pageNum={pageNum}
-      pageSize={props.pageSize}
+      pageSize={pageSize}
       elevation={1}
-      useUpdate={props.useUpdate} />;
+      useUpdate={useUpdate} />;
 
   const goLeftButton =
-    BasicButton("<", (props.currentPage === 1) ?
+    BasicButton("<", (currentPage === 1) ?
       1
-      : props.currentPage - 1);
+      : currentPage - 1);
 
   const goRightButton =
-    BasicButton(">", (props.currentPage > props.totalPage) ?
+    BasicButton(">", (currentPage > totalPage) ?
       1
-      : props.currentPage + 1);
+      : currentPage + 1);
 
   const elipsisButtonLeft =
-    BasicButton("...", Math.floor((props.currentPage - 1) / 2));
+    BasicButton("...", Math.floor((currentPage - 1) / 2));
 
   const elipsisButtonRight =
-    BasicButton("...", Math.floor((props.totalPage + props.currentPage - 1) / 2));
+    BasicButton("...",
+      Math.floor((totalPage + currentPage - 1) / 2));
 
-  const lastPageButton = BasicButton(props.totalPage, props.totalPage)
-
+  const lastPageButton = BasicButton(totalPage, totalPage);
   const firstPageButton = BasicButton(1, 1);
 
   const numberList: Array<JSX.Element> =
     [
-      ...Array.from(Array(props.pageButtonLimit).keys())
-        .map(e => inHead(props.currentPage, props.pageButtonLimit) ?
+      ...Array.from(Array(pageButtonLimit).keys())
+        .map(e => inHead(currentPage, pageButtonLimit) ?
           e + 1
 
-          : inTail(props.currentPage, props.totalPage, props.pageButtonLimit) ?
-            e + 1 + props.totalPage - props.pageButtonLimit
+          : inTail(currentPage, totalPage, pageButtonLimit) ?
+            e + 1 + totalPage - pageButtonLimit
 
-            : e + props.currentPage - Math.floor(props.pageButtonLimit / 2))
+            : e + currentPage - Math.floor(pageButtonLimit / 2))
 
     ].map(index =>
       <TablePaginationButton
-        elevation={index === props.currentPage ? 3 : 1}
+        elevation={index === currentPage ? 3 : 1}
+        key={index}
         name={index}
         pageNum={index}
-        useUpdate={props.useUpdate}
-        pageSize={props.pageSize} />);
+        useUpdate={useUpdate}
+        pageSize={pageSize} />);
 
   const pagingList =
-    inHead(props.currentPage, props.pageButtonLimit) ||
-      inTail(props.currentPage, props.totalPage, props.pageButtonLimit) ?
+    inHead(currentPage, pageButtonLimit) ||
+      inTail(currentPage, totalPage, pageButtonLimit) ?
       [goLeftButton].concat(numberList).concat([goRightButton])
       :
       [goLeftButton]
@@ -155,6 +172,5 @@ const TablePaginationBar = (props: PaginationProps) => {
     </Pane>
   );
 };
-
 
 export default TablePaginationBar;

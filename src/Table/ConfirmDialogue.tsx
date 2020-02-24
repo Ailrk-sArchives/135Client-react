@@ -7,22 +7,36 @@ export interface ConfirmDialogueProps extends DialogProps {
 };
 
 const ConfirmDialogue: React.FC<ConfirmDialogueProps> = props => {
+  const {
+    shown,
+    setShown,
+    confirmed,
+    breakSig,
+    message,
+  } = props;
 
   return (
     <Stack value={1100}>
       {
         zindex =>
           <Dialog
-            isShown={props.shown}
+            isShown={shown}
             width={800}
             onCloseComplete={() => {
-              props.setShown(false);
+              setShown(false);
+              if (breakSig !== undefined) breakSig.current = false;
+              confirmed.current = false;
             }}
             hasHeader={false}
-            onConfirm={close => {
-              props.confirmed.current = true;
+            onCancel={close => {
+              if (breakSig !== undefined) breakSig.current = true;
               close();
-            }}>
+            }}
+            onConfirm={close => {
+              confirmed.current = true;
+              close();
+            }}
+          >
             {
               ({close}) => (
                 <Pane paddingTop={20}
@@ -32,7 +46,7 @@ const ConfirmDialogue: React.FC<ConfirmDialogueProps> = props => {
 
                   <Icon icon="warning-sign" color="danger" />
                   <Pane width={10} />
-                  <Heading size={400}> {props.message}</Heading>
+                  <Heading size={400}> {message}</Heading>
                 </Pane>
               )
             }

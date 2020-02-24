@@ -8,7 +8,6 @@ import {PaginationProps} from '../TablePagination';
 import ContentCard from '../ContentCard';
 import Frame from '../../Frame';
 import {useTableParent, HTTPMethods, PanelOperationTable, Operation} from '../utils/utils';
-import * as DataAdaptor from '../../Data/dataAdaptor';
 
 import {Tablefc} from './TableComponent';
 
@@ -16,14 +15,19 @@ const DeviceTable: React.FC<{}> = (props) => {
 
   //
   const [devices, setDevices] = useState<Array<Device>>([]);
+
   const [currentPage, setCurrentPage] = useState<number>(1);
+
   const [totalPage, setTotalPage] = useState<number>(5);
+
   const [totalElementCount, setTotalElementCount] = useState<number>(0);
 
   const [tickAll, setTickAll] = useState<boolean>(false);
+
   const [itemCheckedList, setItemCheckedList] = useState<Array<boolean>>([]);
 
   const [pageSize, setPageSize] = useState<number>(10);
+
   const [loaded, setLoaded] = useState<boolean>(false);
 
   const [tableParent, setTableParent] = useState<ApiDataType | undefined>();
@@ -50,6 +54,7 @@ const DeviceTable: React.FC<{}> = (props) => {
         );
 
       resposne.then(ds => {
+        console.log(ds);
         if ((ds as Array<Device>).length) {
           setDevices(ds as Array<Device>);
           setItemCheckedList((ds as Array<Device>).map(() => false));

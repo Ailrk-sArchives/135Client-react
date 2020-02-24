@@ -5,7 +5,6 @@ import React, {useState} from 'react';
 import {Pane, TabNavigation} from 'evergreen-ui';
 import TabContentResolver, {TabContentTriple} from '../utils/TabContentResolver';
 
-
 const Sidebar:
   React.FC<{
     sidebarWidth: number,

@@ -11,6 +11,7 @@ import React from 'react';
 // all dialogues has confirmed.
 export interface DialogConfirmedProps {
   confirmed: React.MutableRefObject<boolean>,
+  breakSig?: React.MutableRefObject<boolean>,
 }
 
 // need when a component need one dialog.

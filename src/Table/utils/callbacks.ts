@@ -8,7 +8,7 @@ import {
 } from './utils';
 import {PanelDataType} from '../../Data/dataAdaptor';
 import {FeedBack} from '../../Data/data';
-import React, {FormEvent, Props} from 'react';
+import React, {MutableRefObject} from 'react';
 import {toaster} from 'evergreen-ui';
 
 export interface CallbackProps<T> {
@@ -16,94 +16,100 @@ export interface CallbackProps<T> {
   someDatas?: Array<T>,
   panelData?: PanelDataType,
   setSomeData?: Function,
-  panelOperationTable?: PanelOperationTable
+  panelOperationTable: PanelOperationTable
 }
 
-
 const feedBackMsg = (feedback: FeedBack) => feedback.message;
+
+function showToaster(feedback: FeedBack) {
+  if (feedback.status === 0)
+    toaster.success(feedBackMsg(feedback));
+
+  else
+    toaster.danger(feedBackMsg(feedback));
+};
+
 
 function opCallback<T>
   (props: CallbackProps<T>,
     method: HTTPMethods): ReturnType<Operation> | undefined {
 
-    const op = props.panelOperationTable?.get(method);
-    if (method === undefined || op === undefined) return undefined;
+  const op = props.panelOperationTable?.get(method);
+  if (method === undefined || op === undefined) return undefined;
 
-    const showToaster = (feedback: FeedBack) => {
-      if (feedback.status === 0)
-        toaster.success(feedBackMsg(feedback));
-      else
-        toaster.danger(feedBackMsg(feedback));
-    };
-
+  const callop = () => {
     switch (method) {
       case "delete":
         if (props.someid !== undefined)
           return (op as OPDelete)(props.someid)
-            .then(res => {
-              showToaster((res as FeedBack));
-              return res;
-            });
         break;
 
       case "put":
         if (props.panelData !== undefined && props.someid !== undefined)
           return (op as OPUpdate<PanelDataType>)(props.panelData, props.someid)
-            .then(res => {
-              showToaster((res as FeedBack));
-              return res;
-            });
         break;
 
       case "post":
         if (props.panelData !== undefined)
           return (op as OPPost<PanelDataType>)(props.panelData)
-            .then(res => {
-              showToaster((res as FeedBack));
-              return res;
-            });
         break;
 
       default:
         return undefined;
-    }
-  };
+    };
+
+  }
+
+  return callop()?.then((res) => {
+      showToaster(res as FeedBack);
+      return res;
+    });
+
+};
 
 // props callback can delay the creation of CallbackProps.
 export type CallbackPropsCb<T> = () => CallbackProps<T>;
+
 function waitClickAndDo<T>(
-  clicked: React.MutableRefObject<boolean>,
-  props: CallbackProps<T> | CallbackPropsCb<T>,
-  method: HTTPMethods
+  clicked: MutableRefObject<boolean>,
+
+  props:
+  | CallbackProps<T>
+  | CallbackPropsCb<T>,
+
+  method: HTTPMethods,
+
+  breakSig?: MutableRefObject<boolean>,
+
 ): ReturnType<Operation> | undefined {
 
-  return waitClick(clicked, () => {
-    if (typeof props === "function") return opCallback(props(), method);
-    return opCallback(props, method);
-  });
+  return waitClick(clicked,
+    () => {
+      if (typeof props === "function") return opCallback(props(), method);
+      return opCallback(props, method);
+    },
+    breakSig);
 }
+
+// interface for waited operation.
+type WaitInterface =
+<T>(clicked: MutableRefObject<boolean>,
+
+  props:
+  | CallbackProps<T>
+  | CallbackPropsCb<T>,
+
+  breakSig?: MutableRefObject<boolean>,
+
+) => ReturnType<Operation> | undefined;
 
 export class Wait {
-  static delete<T>(
-    clicked: React.MutableRefObject<boolean>,
-    props: CallbackProps<T> | CallbackPropsCb<T>
-  ): ReturnType<Operation> | undefined {
-    return waitClickAndDo(clicked, props, "delete");
-  }
+  static delete: WaitInterface =
+    (clicked, props, breakSig?) => waitClickAndDo(clicked, props, "delete", breakSig);
 
-  static post<T>
-    (clicked: React.MutableRefObject<boolean>,
-      props: CallbackProps<T> | CallbackPropsCb<T>
-    ): ReturnType<Operation> | undefined {
-    return waitClickAndDo(clicked, props, "post");
-  }
+  static post: WaitInterface =
+    (clicked, props, breakSig?) => waitClickAndDo(clicked, props, "post", breakSig);
 
-  static update<T>(
-    clicked: React.MutableRefObject<boolean>,
-    props: CallbackProps<T> | CallbackPropsCb<T>
-  ): ReturnType<Operation> | undefined {
-    return waitClickAndDo(clicked, props, "put");
-  }
+  static update: WaitInterface =
+    (clicked, props, breakSig?) => waitClickAndDo(clicked, props, "put", breakSig);
 }
-
-

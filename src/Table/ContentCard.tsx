@@ -21,11 +21,17 @@ type TableFCParams =
   & ControlHub
   & {
     currentZoom: number,
+
     loaded: boolean,
+
     itemCheckedList: Array<boolean>,
+
     setItemCheckedList: Function
+
     tickAll: boolean,
+
     setTickAll: Function,
+
     tickone: Function;
   };
 
@@ -33,54 +39,71 @@ export type TableFC = React.FC<TableFCParams>;
 
 export interface ContentControlParams {
   titlename?: string,
+
   tableParent?: ApiDataType,
 
   paginationProps?: PaginationProps,
+
   tableFC: TableFC,
+
   loaded: boolean,
+
   data: Array<ApiDataType>,
+
   setData: Function,
+
   itemCheckedList: Array<boolean>,
+
   setItemCheckedList: Function,
 
   tickAll: boolean,
+
   setTickAll: Function,
+
   setShown?: Function,
 
   dataTypeKeys?: DataTypeKeys,
+
   dataTypeTag: ApiDataTypeTag,
 
-  panelOperationTable?: PanelOperationTable,
+  panelOperationTable: PanelOperationTable,
 
   resourceId?: number
 
 };
 
 const tableParentNameResolver = (props: {
+
   tableParent?: ApiDataType,
+
   setTableParentName: React.Dispatch<React.SetStateAction<string | undefined>>
+
 }) => {
+  const {
+    tableParent,
+    setTableParentName,
+  } = props;
 
-  if (props.tableParent !== undefined) {
+  if (tableParent !== undefined) {
 
-    switch (props.tableParent._kind) {
+    switch (tableParent._kind) {
       case "Spot":
-        props.setTableParentName((props.tableParent as Spot)?.spot_name);
+        setTableParentName((tableParent as Spot)?.spot_name);
         break;
 
       case "Project":
-        props.setTableParentName((props.tableParent as Project)?.project_name);
+        setTableParentName((tableParent as Project)?.project_name);
         break;
 
       case "SpotRecord":
-        props.setTableParentName(
-          (props.tableParent as SpotRecord)?.spot_record_time?.toString());
+        setTableParentName(
+          (tableParent as SpotRecord)?.spot_record_time?.toString());
         break;
 
       case "Device":
-        props.setTableParentName((() => {
-          const dt = (props.tableParent as Device)?.device_type;
-          const dn = (props.tableParent as Device)?.device_name;
+        setTableParentName((() => {
+          const dt = (tableParent as Device)?.device_type;
+          const dn = (tableParent as Device)?.device_name;
 
           if (dt !== undefined && dn !== undefined) {
             return `${dn} | ${dt} `;
@@ -89,7 +112,7 @@ const tableParentNameResolver = (props: {
         break;
 
       default:
-        props.setTableParentName("");
+        setTableParentName("");
         break;
     }
 
@@ -100,57 +123,70 @@ const tableParentNameResolver = (props: {
 const ContentCard =
   (props: ContentControlParams): React.FC<{currentZoom: number}> => {
 
-    const [tableParentName, setTableParentName] = useState<string | undefined>("");
+    const {
+      tableParent,
+      titlename,
+      itemCheckedList,
+      setItemCheckedList,
+      tickAll,
+      setTickAll,
+      dataTypeKeys,
+      dataTypeTag,
+      data,
+      setData,
+      loaded,
+      resourceId,
+      tableFC,
+      paginationProps,
+      panelOperationTable,
+    } = props;
+    const Tablefc = tableFC;
 
+    const [tableParentName, setTableParentName] = useState<string | undefined>("");
     // check table Parent types
     useEffect(() =>
       tableParentNameResolver({
-        tableParent: props.tableParent,
+        tableParent: tableParent,
         setTableParentName: setTableParentName
       }),
-      [tableParentName, props.tableParent]);
-
-
-    const titlename: string = `${props.titlename} > ${tableParentName} `;
-    const env = props;
+      [tableParentName, tableParent]);
 
     return (props: {currentZoom: number}) => {  // return FC of content
 
       const tickone = (index: number) => { // helper function.
 
-        env.setItemCheckedList(
-          env.itemCheckedList.slice(0, index)
+        setItemCheckedList(
+          itemCheckedList.slice(0, index)
             .concat([
-              !env.itemCheckedList[index]
+              !itemCheckedList[index]
             ])
-            .concat(env.itemCheckedList.slice(index + 1)))
+            .concat(itemCheckedList.slice(index + 1)))
       };
 
 
       const controlHub: ControlHub = {
-        titlename,
+        titlename: `${titlename} > ${tableParentName} `,
 
-        panelOperationTable: env.panelOperationTable,
-        dataTypeKeys: env.dataTypeKeys,
+        panelOperationTable,
+        dataTypeKeys,
 
-        dataTypeTag: env.dataTypeTag,
-        data: env.data,
-        setData: env.setData,
-        resourceId: env.resourceId
+        dataTypeTag,
+        data,
+        setData,
+        resourceId,
       };
 
-
-      const tableFCParams: TableFCParams = {
+      const tableFCParams: TableFCParams = {  // controlHub c TableFCParams
         ...controlHub,
         currentZoom: props.currentZoom,
-        loaded: env.loaded,
+        loaded,
 
-        tickAll: env.tickAll,
-        setTickAll: env.setTickAll,
+        tickAll,
+        setTickAll,
         tickone,
 
-        itemCheckedList: env.itemCheckedList,
-        setItemCheckedList: env.setItemCheckedList
+        itemCheckedList,
+        setItemCheckedList,
       }
 
       // dispatching data into different subcomponents.
@@ -162,17 +198,14 @@ const ContentCard =
           paddingBottom={2}
           width="100%"
           height="100%">
-
-          { React.createElement(TableControlPanel, controlHub) }
-          { React.createElement(env.tableFC,  tableFCParams) }
-
+          <TableControlPanel {...controlHub}/>
+          <Tablefc {...tableFCParams}/>
           {
-            env.paginationProps ?
-              React.createElement(TablePaginationBar, env.paginationProps)
+            paginationProps ?
+              React.createElement(TablePaginationBar, paginationProps)
               :
               null
           }
-
         </Card>);
 
     };

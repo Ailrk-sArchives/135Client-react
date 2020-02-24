@@ -6,23 +6,27 @@ import {
 } from '../../Data/data';
 import {useParams} from 'react-router-dom';
 import {PaginationProps} from '../TablePagination';
-import ContentCard, {TableFC} from '../ContentCard';
-import {keys} from 'ts-transformer-keys';
+import ContentCard from '../ContentCard';
 import {useTableParent, HTTPMethods, PanelOperationTable, Operation} from '../utils/utils';
-import * as DataAdaptor from '../../Data/dataAdaptor';
 
 import {Tablefc} from './TableComponent';
 
 const RecordTable: React.FC<{}> = (props) => {
+
   const [spotRecords, setSpotRecords] = useState<Array<SpotRecord>>([]);
+
   const [currentPage, setCurrentPage] = useState<number>(1);
+
   const [totalPage, setTotalPage] = useState<number>(1);
+
   const [totalElementCount, setTotalElementCount] = useState<number>(0);
 
   const [tickAll, setTickAll] = useState<boolean>(false);
+
   const [itemCheckedList, setItemCheckedList] = useState<Array<boolean>>([]);
 
   const [pageSize, setPageSize] = useState<number>(50);
+
   const [loaded, setLoaded] = useState<boolean>(false);
 
   const [tableParent, setTableParent] = useState<ApiDataType | undefined>();

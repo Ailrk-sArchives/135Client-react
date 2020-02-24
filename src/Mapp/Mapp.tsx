@@ -2,7 +2,7 @@
    Map components goes here.
  */
 import React, {useState, useEffect} from 'react';
-import {Pane, Text, Card, Tooltip, Table, Dialog, Stack} from 'evergreen-ui';
+import {Pane, Card, Table, Dialog, Stack} from 'evergreen-ui';
 import Frame from '../Frame';
 import {Map, Marker, TileLayer, Popup, GeoJSON} from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -66,9 +66,9 @@ const filterGeoJson =  // filter FeatureCollection type GeoJson.
     return data;
   };
 
-const Mapp: React.FC<{}> = (props) => {
+const Mapp: React.FC<{}> = () => {
   // zoom depth of the map
-  const [mapzoom, setMapzoom] = useState<number>(5);
+  const [mapzoom, _] = useState<number>(5);
   const [projects, setProjects] = useState<Array<Project>>([]);
   const chinaGeoJson: FeatureCollection = require('../static/china-province.json');
   const provinces: Array<string> =
@@ -112,6 +112,13 @@ const MapCanvas:
     geoJson: FeatureCollection,
   }> = (props) => {
 
+    const {
+      projects,
+      currentZoom,
+      mapzoom,
+      geoJson,
+    } = props;
+
     const [dialogueIsShown, setdialogueIsShown] = useState<boolean>(false);
     const [dialogueProject, setdialogueProject] = useState<Project | undefined>();
 
@@ -121,13 +128,13 @@ const MapCanvas:
         if (zoom >= 140) return window.innerHeight * 0.75;
         if (zoom >= 80) return window.innerHeight * 0.83;
         return window.innerHeight * 0.9;
-      })(props.currentZoom),
+      })(currentZoom),
       width: "100hv",
     };
 
     // create array of markers.
-    const projectMarkers: Array<any> = props.projects ?
-      props.projects.map((p) => p.latitude && p.longitude ?
+    const projectMarkers: Array<any> = projects ?
+      projects.map((p) => p.latitude && p.longitude ?
         (<Marker position={L.latLng(p.latitude, p.longitude)}
           key={p.project_id}
           icon={markerIcon}>
@@ -143,10 +150,10 @@ const MapCanvas:
       : [];
 
     return (
-      <Map center={pos} zoom={props.mapzoom} style={mapCss}>
+      <Map center={pos} zoom={mapzoom} style={mapCss}>
         <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           attribution="&copy; <a href=&quot;http://osm.org/copyright&quot;>OpenStreetMap</a> contributors" />
-        <GeoJSON data={props.geoJson}></GeoJSON>
+        <GeoJSON data={geoJson}></GeoJSON>
         {projectMarkers}
         <ProjectInfoDialogue isShown={dialogueIsShown}
           project={dialogueProject}
@@ -165,15 +172,21 @@ const MapPopup:
     setdialogueProject: Function,
     setdialogueIsShown: Function
   }> = (props) => {
+    const {
+      project,
+      setdialogueIsShown,
+      setdialogueProject,
+      projectInfosInCards,
+    } = props;
 
     return (
       <Pane width={300} height={470}
-        onClick={() => {props.setdialogueProject(props.project); props.setdialogueIsShown(true)}}>
-        <Pane> <h4>{props.project.project_name}</h4></Pane>
+        onClick={() => {setdialogueProject(project); setdialogueIsShown(true)}}>
+        <Pane> <h4>{project.project_name}</h4></Pane>
         <img src={placeholder} alt={placeholder} width={300} height={200} />
         {
-          Object.entries(props.project).map(
-            (e) => tableRow(e, props.projectInfosInCards))
+          Object.entries(project).map(
+            (e) => tableRow(e, projectInfosInCards))
         }
       </Pane>
     );
@@ -190,22 +203,30 @@ const ProjectInfoDialogue:
     projectInfosAll: ProjectInfosAll
   }> = (props) => {
 
+    const {
+      isShown,
+      project,
+      projectInfosAll,
+      setdialogueProject,
+      setdialogueIsShown,
+    } = props;
+
     return (
       <Stack value={1100}>
         {
           zindex =>
-            <Dialog isShown={props.isShown}
+            <Dialog isShown={isShown}
               width={700}
               hasFooter={false}
               topOffset="8vmin"
               title={
-                props.project ? props.project.project_name : ''
+                project ? project.project_name : ''
               }
 
               onCloseComplete={
                 () => {
-                  props.setdialogueProject(undefined);
-                  props.setdialogueIsShown(false);
+                  setdialogueProject(undefined);
+                  setdialogueIsShown(false);
                 }
               }
               preventBodyScrolling>
@@ -220,9 +241,9 @@ const ProjectInfoDialogue:
                 <br />
               </Pane>
               {
-                (props.project) ?
-                  Object.entries(props.project).map((e) =>
-                    tableRow(e, props.projectInfosAll))
+                (project) ?
+                  Object.entries(project).map((e) =>
+                    tableRow(e, projectInfosAll))
                   : null
               }
             </Dialog>

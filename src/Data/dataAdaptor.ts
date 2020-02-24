@@ -10,11 +10,10 @@ import {
 } from './data';
 import {DateString} from './datetieStringFormater';
 
-export interface PanelDataType {};
 
 /* Define PanelSpot */
-export interface PanelSpot extends PanelDataType {_kind: "PanelSpot", }
-export interface PanelSpot extends PanelDataType {
+export interface PanelSpot {_kind: "PanelSpot", }
+export interface PanelSpot {
   project_id: number,
   spot_name?: string,
   spot_type?: string,
@@ -22,18 +21,18 @@ export interface PanelSpot extends PanelDataType {
 
 
 /* Define PanelProject */
-export interface PanelProject extends PanelDataType {_kind: "PanelProject", }
-export interface PanelProject extends PanelDataType {
+export interface PanelProject {_kind: "PanelProject", }
+export interface PanelProject {
   started_time?: DateString,
   finished_time?: DateString,
   record_started_from?: DateString,
 }
-export interface PanelProject extends PanelDataType {
+export interface PanelProject {
   construction_company?: string,
   tech_support_company?: string,
   project_company?: string,
 }
-export interface PanelProject extends PanelDataType {
+export interface PanelProject {
   district?: string,
   latitude: number,
   longitude: number,
@@ -41,14 +40,14 @@ export interface PanelProject extends PanelDataType {
   city: string,
   area_name: string,
 }
-export interface PanelProject extends PanelDataType {
+export interface PanelProject {
   area?: number,
   demo_area?: number,
   building_height?: number,
   floor?: number,
   building_type?: string,
 }
-export interface PanelProject extends PanelDataType {
+export interface PanelProject {
   project_name: string,
   outdoor_spot?: number,
   description: string,
@@ -56,11 +55,11 @@ export interface PanelProject extends PanelDataType {
 
 
 /* Define PanelSpotRecord */
-export interface PanelSpotRecord extends PanelDataType {_kind: "PanelSpotRecord", }
-export interface PanelSpotRecord extends PanelDataType {
+export interface PanelSpotRecord {_kind: "PanelSpotRecord", }
+export interface PanelSpotRecord {
   spot_record_time: DateString,
 }
-export interface PanelSpotRecord extends PanelDataType {
+export interface PanelSpotRecord {
   ac_power?: number,
   co2?: number,
   pm25?: number,
@@ -73,29 +72,32 @@ export interface PanelSpotRecord extends PanelDataType {
 } /* End PanelSpotRecord */
 
 /* Define PanelDevice*/
-export interface PanelDevice extends PanelDataType {_kind: "PanelDevice", }
-export interface PanelDevice extends PanelDataType {
+export interface PanelDevice {_kind: "PanelDevice", }
+export interface PanelDevice {
   device_name?: string,
   device_type?: string,
 }
-export interface PanelDevice extends PanelDataType {
+export interface PanelDevice {
   create_time: DateString,
   modify_time: DateString,
   online?: boolean,
   spot_id: number,
 } /* End PanelDevice */
+export type PanelDataType =
+  | PanelSpot
+  | PanelProject
+  | PanelDevice
+  | PanelSpotRecord ;
 
 /*
  * data structures that are exactly the same as that the server.
  * will be send directly to the server to update or psot.
  */
-export interface ServerData {};
-
 
 /* Define PanelDevice*/
 
-export interface ServerProject extends ServerData {_kind: "ServerProject", }
-export interface ServerProject extends ServerData {
+export interface ServerProject {_kind: "ServerProject", }
+export interface ServerProject {
   location?: {
     province: string,
     city: string,
@@ -105,17 +107,17 @@ export interface ServerProject extends ServerData {
   latitude?: number,
   district?: string,
 }
-export interface ServerProject extends ServerData {
+export interface ServerProject {
   tech_support_company?: {company_name: string},
   project_company?: {company_name: string},
   construction_company?: {company_name: string},
 }
-export interface ServerProject extends ServerData {
+export interface ServerProject {
   started_time?: DateString,
   finished_time?: DateString,
   record_started_from?: DateString,
 }
-export interface ServerProject extends ServerData {
+export interface ServerProject {
   outdoor_spot?: null,  // TODO support later.
   project_name?: string,
   district?: string,
@@ -127,8 +129,8 @@ export interface ServerProject extends ServerData {
   description?: string,
 } /* End PanelDevice*/
 
-export interface ServerDevice extends ServerData {_kind: "ServerDevice", }
-export interface ServerDevice extends ServerData {
+export interface ServerDevice {_kind: "ServerDevice", }
+export interface ServerDevice {
   device_name: string,
   device_type?: string,
   online?: string,
@@ -137,18 +139,19 @@ export interface ServerDevice extends ServerData {
   modify_time?: DateString,
 }
 
-export interface ServerSpot extends ServerData {_kind: "ServerSpot", }
-export interface ServerSpot extends ServerData {
+export interface ServerSpot {_kind: "ServerSpot", }
+export interface ServerSpot {
   project?: number,  // project id
   spot_name?: string,
   spot_type?: string,
   image?: string,
 }
 
-interface ServerSpotRecord extends ServerData {_kind: "ServerSpotRecord", }
-interface ServerSpotRecord extends ServerData {
+export interface ServerSpotRecord {_kind: "ServerSpotRecord", }
+export interface ServerSpotRecord {
   spot_record_time: DateString,
   device: number,
+  spot_record_id?: number,
   window_opened: boolean,
   temperature: number,
   humidity: number,
@@ -156,6 +159,12 @@ interface ServerSpotRecord extends ServerData {
   pm25: number,
   co2: number,
 }
+
+export type ServerData =
+  | ServerDevice
+  | ServerSpot
+  | ServerSpotRecord
+  | ServerProject;
 
 
 export class MakeServerData {
@@ -224,4 +233,3 @@ export class MakeServerData {
   )
 }
 
-;

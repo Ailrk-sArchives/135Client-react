@@ -184,8 +184,19 @@ export interface PaginationRequest {
   pageNo: number,
 };
 
-export type ApiDataType = Spot | Device | Project | SpotRecord | ProjectDetail;
-export type ApiDataTypeTag = "Spot" | "Device" | "Project" | "SpotRecord" | "ProjectDetail";
+export type ApiDataType =
+  | Spot
+  | Device
+  | Project
+  | SpotRecord
+  | ProjectDetail;
+
+export type ApiDataTypeTag =
+  | "Spot"
+  | "Device"
+  | "Project"
+  | "SpotRecord"
+  | "ProjectDetail";
 
 const makeRequest = <T>(params: T) => {
   return {"request": params};
@@ -367,9 +378,10 @@ export class IdempotentApis {
             return axios.post(url, makeRequest(params), makeJsonRequestHeader())
               .then(response => {
 
+                console.log(response);
                 if (good_response<PagedData<Array<Device>>>(response))
-                  return (response.data.data as Array<Device>)
-                    .map(e => padtag("Device", e));
+                  return fmapData(
+                    padTagPagedData.bind(null, "Device"), response.data).data;
               })
               .catch(e => console.error(e))
           },
@@ -410,56 +422,79 @@ export class IdempotentApis {
   static Put = class {
 
     static updateProject =
-      (params: AdaptorTypes.PanelProject, pid: number): Promise<Project> =>
+      (params: AdaptorTypes.PanelProject, pid: number): Promise<ApiResponse<Project>> =>
         makeApi(concatPath(apiBaseUrl, `api/v1/project/${pid}`),
           (url: string) => {
             return axios.put(url,
-              AdaptorTypes.MakeServerData.makeProject(params))
+              {
+                // update need additional id of target to be updated
+                // which is not provided in PanelDataType
+                ...AdaptorTypes.MakeServerData.makeProject(params),
+                project_id: pid
+              })
               .then(response => {
+
                 return fmapData(
-                  padtag.bind(null, "Project"), response.data) as ApiResponse<Project>
+                  padtag.bind(null, "Project"), response.data)
               })
 
               .catch(e => console.error(e))
           });
 
     static updateSpot =
-      (params: AdaptorTypes.PanelSpot, sid: number): Promise<Spot> =>
-        makeApi(concatPath(apiBaseUrl, `api/v1/project/spot/${sid}`),
+      (params: AdaptorTypes.PanelSpot, sid: number): Promise<ApiResponse<Spot>> => {
+
+        return makeApi(concatPath(apiBaseUrl, `api/v1/spot/${sid}`),
           (url: string) => {
             return axios.put(url,
-              makeRequest(AdaptorTypes.MakeServerData.makeSpot(params)))
+              makeRequest({
+                ...AdaptorTypes.MakeServerData.makeSpot(params),
+                spot_id: sid,
+              }))
               .then(response => {
+                console.log(response);
                 return fmapData(
-                  padtag.bind(null, "Project"), response.data) as ApiResponse<Spot>
+                  padtag.bind(null, "Spot"), response.data)
               })
 
               .catch(e => console.error(e))
           });
 
+      };
     static updateDevice =
-      (params: AdaptorTypes.PanelDevice, did: number): Promise<Device> =>
-        makeApi(concatPath(apiBaseUrl, `api/v1/project/device/${did}`),
+      (params: AdaptorTypes.PanelDevice, did: number): Promise<ApiResponse<Device>> =>
+        makeApi(concatPath(apiBaseUrl, `api/v1/device/${did}`),
           (url: string) => {
             return axios.put(url,
-              makeRequest(AdaptorTypes.MakeServerData.makeDevice(params)))
+              makeRequest({
+                ...AdaptorTypes.MakeServerData.makeDevice(params),
+                device_id: did,
+              }))
               .then(response => {
                 return fmapData(
-                  padtag.bind(null, "Project"), response.data) as ApiResponse<Device>
+                  padtag.bind(null, "Device"), response.data)
               })
-
               .catch(e => console.error(e))
           });
 
     static updateSpotRecord =
-      (params: AdaptorTypes.PanelSpotRecord, rid: number): Promise<SpotRecord> =>
-        makeApi(concatPath(apiBaseUrl, `api/v1/project/spotRecord/${rid}`),
+      (params: AdaptorTypes.PanelSpotRecord, rid: number): Promise<ApiResponse<SpotRecord>> =>
+        makeApi(concatPath(apiBaseUrl, `api/v1/spotRecord/${rid}`),
           (url: string) => {
+            console.log(
+              makeRequest({
+                ...AdaptorTypes.MakeServerData.makeSpotRecord(params),
+                spot_record_id: rid
+              }));
+
             return axios.put(url,
-              makeRequest(AdaptorTypes.MakeServerData.makeSpotRecord(params)))
+              makeRequest({
+                ...AdaptorTypes.MakeServerData.makeSpotRecord(params),
+                spot_record_id: rid
+              }))
               .then(response => {
                 return fmapData(
-                  padtag.bind(null, "Project"), response.data) as ApiResponse<SpotRecord>
+                  padtag.bind(null, "SpotRecord"), response.data)
               })
 
               .catch(e => console.error(e))
@@ -497,7 +532,7 @@ export class IdempotentApis {
 
         (url: string) =>
           axios.delete(url)
-            .then(response => response.data as ApiResponse<any>)  // always return message from the server.
+            .then(response => response.data as ApiResponse<any>)
             .catch(e => console.error(e))
       );
 

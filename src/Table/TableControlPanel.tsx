@@ -28,6 +28,7 @@ const _ControlPanel = (controlHub: ControlHub) => {
    */
   const titlename: string = controlHub.titlename;
   const confirmed = useRef<boolean>(false);
+  const breakSig = useRef<boolean>(false);
   const [shownConfirmDialog, setShownConfirmDialog] = useState<boolean>(false);
   const [shownSubmitDialog, setShownSubmitDialog] = useState<boolean>(false);
   const [message, setMessage] = useState<string>("");
@@ -35,6 +36,7 @@ const _ControlPanel = (controlHub: ControlHub) => {
 
   const panelPopupMenuProps: PanelPopupMenuProps = {
     confirmed,
+    breakSig,
     dataTypeKeys: controlHub.dataTypeKeys,
     shownSubmitDialog,
     setShownSubmitDialog,
@@ -54,7 +56,10 @@ const _ControlPanel = (controlHub: ControlHub) => {
   };
 
   return (
-    <Pane height={50} width={"100hv"} display="flex" justifyContent="space-between">
+    <Pane height={50}
+      width={"100hv"}
+      display="flex"
+      justifyContent="space-between">
 
       <Pane
         className="leftTableHeadInfoGroup"
@@ -101,9 +106,12 @@ const TableControlPanel = (controlHub: ControlHub) => {
    * Handle the positioning and styling.
    */
   return (
-    <Pane background="tint2" paddingTop={10} paddingButton={10}
-      paddingRight={20} paddingLeft={20}>
-      { React.createElement(_ControlPanel, controlHub) }
+    <Pane background="tint2"
+      paddingTop={10}
+      paddingButton={10}
+      paddingRight={20}
+      paddingLeft={20}>
+      {React.createElement(_ControlPanel, controlHub)}
     </Pane>
   );
 };
@@ -114,122 +122,153 @@ const TableControlPanel = (controlHub: ControlHub) => {
  */
 const PanelPopupMenu: React.FC<PanelPopupMenuProps> = props => {
 
-    const submitDialogProps: SubmitDialogueProps = {
-      confirmed: props.confirmed,
-      dataTypeKeys: props.dataTypeKeys,
-      shown: props.shownSubmitDialog,
-      setShown: props.setShownSubmitDialog,
-      entries: props.entries,
-      setEntries: props.setEntries
-    };
+  const {
+    entries,
+    setEntries,
+    shownSubmitDialog,
+    setShownSubmitDialog,
+    shownConfirmDialog,
+    setShownConfirmDialog,
+    confirmed,
+    breakSig,
+    dataTypeKeys,
+    dataTypeTag,
 
-    const confirmDialogueProps: ConfirmDialogueProps = {
-      confirmed: props.confirmed,
-      shown: props.shownConfirmDialog,
-      setShown: props.setShownConfirmDialog,
-      message: props.message,
-    };
+    message,
+    setMessage,
 
-    const linkCss: React.CSSProperties = {
-      textDecoration: 'none',
-    };
+    panelOperationTable,
 
+    setSomeDatas,
+    someDatas,
+  } = props;
 
-    const post_wrapper = (callbackProps: {
-      panelOperationTable?: PanelDataType,
-      panelData: PanelDataType,
-    } | Function) => {
-      // wrap post operation with different types.
-      //
-      switch (props.dataTypeTag) {
-        case "Spot":
-          return () =>
-            Wait.post(props.confirmed, callbackProps as CallbackProps<Spot>);
-
-        case "SpotRecord":
-          return () =>
-            Wait.post(props.confirmed, callbackProps as CallbackProps<SpotRecord>);
-
-        case "Project":
-          return () =>
-            Wait.post(props.confirmed, callbackProps as CallbackProps<Project>);
-
-        case "Device":
-          return () =>
-            Wait.post(props.confirmed, callbackProps as CallbackProps<Device>);
-
-        default:
-          return undefined
-      }
-    };
-
-    return (
-      <>
-        {
-          React.createElement(SubmitDialogue, submitDialogProps)
-        }
-        {
-          React.createElement(ConfirmDialogue, confirmDialogueProps)
-        }
-        <Popover
-          position={Position.BOTTOM_LEFT}
-          content={
-            <Menu>
-              <Menu.Group>
-                <Menu.Item icon="symbol-cross"
-                  hoverElevation={1}
-                  activeElevation={2}
-                  onSelect={() => {
-                    props.setShownSubmitDialog(true);
-                    const _post = post_wrapper(
-                      () => {
-                        return {
-                          panelOperationTable: props.panelOperationTable,
-                          panelData: mapToObject(props.entries),
-                        };
-                      });
-                    if (_post !== undefined)
-                      _post()
-                        ?.then(res => {
-                          if (props.setSomeDatas !== undefined &&
-                            !apiDataArrayIsDuplicated(
-                              props.someDatas,
-                              (res as ApiResponse<ApiDataType>).data))
-                            props
-                              .setSomeDatas(
-                                props.someDatas
-                                  ?.concat((res as ApiResponse<ApiDataType>).data
-                                    || []));
-                        })
-                        .then(() => {props.confirmed.current = false;});
-
-
-                  }}>
-                  添加...
-                  </Menu.Item>
-
-              </Menu.Group>
-              <Menu.Divider />
-              <Menu.Group>
-                <Menu.Item icon="trash"
-                  intent="danger"
-                  hoverElevation={3}
-                  activeElevation={4}
-                  onSelect={() => {
-                    props.setShownConfirmDialog(true);
-                    props.setMessage("确定要删除所选项目吗？");
-                  }}>
-                  删除...
-              </Menu.Item>
-              </Menu.Group>
-            </Menu>
-          }>
-          <Icon icon="more" />
-        </Popover>
-
-      </>
-    );
+  const submitDialogProps: SubmitDialogueProps = {
+    confirmed,
+    breakSig,
+    dataTypeKeys,
+    shown: shownSubmitDialog,
+    setShown: setShownSubmitDialog,
+    entries,
+    setEntries,
   };
+
+  const confirmDialogueProps: ConfirmDialogueProps = {
+    confirmed,
+    breakSig,
+    shown: props.shownConfirmDialog,
+    setShown: props.setShownConfirmDialog,
+    message,
+  };
+
+  const linkCss: React.CSSProperties = {
+    textDecoration: 'none',
+  };
+
+
+  const post_wrapper = (callbackProps:
+    | {
+      panelOperationTable: PanelOperationTable,
+      panelData: PanelDataType,
+    }
+    | Function) => {
+    // wrap post operation with different types.
+    //
+    switch (dataTypeTag) {
+      case "Spot":
+        return () =>
+          Wait.post(
+            confirmed,
+            callbackProps as CallbackProps<Spot>,
+            breakSig);
+
+      case "SpotRecord":
+        return () =>
+          Wait.post(
+            confirmed,
+            callbackProps as CallbackProps<SpotRecord>,
+            breakSig);
+
+      case "Project":
+        return () =>
+          Wait.post(
+            confirmed,
+            callbackProps as CallbackProps<Project>,
+            breakSig);
+
+      case "Device":
+        return () =>
+          Wait.post(
+            confirmed,
+            callbackProps as CallbackProps<Device>,
+            breakSig);
+
+      default:
+        return undefined
+    }
+  };
+
+  return (
+    <>
+      <SubmitDialogue {...submitDialogProps} />
+      <ConfirmDialogue {...confirmDialogueProps} />
+      <Popover
+        position={Position.BOTTOM_LEFT}
+        content={
+          <Menu>
+            <Menu.Group>
+              <Menu.Item icon="symbol-cross"
+                hoverElevation={1}
+                activeElevation={2}
+                onSelect={() => {
+                  setShownSubmitDialog(true);
+                  const usepost = post_wrapper(() => {
+                    return {
+                      panelOperationTable: panelOperationTable,
+                      panelData: mapToObject(entries),
+                    };
+                  });
+                  if (usepost !== undefined)
+                    usepost()
+                      ?.then(res => {
+                        if (  // modify ui without reload.
+                          setSomeDatas !== undefined &&
+                          !apiDataArrayIsDuplicated(
+                            someDatas,
+                            (res as ApiResponse<ApiDataType>).data))
+                          setSomeDatas(
+                            someDatas
+                              ?.concat(
+                                (res as ApiResponse<ApiDataType>).data
+                                || []));
+                      }).catch(() => undefined);
+                }}>
+                添加...
+                  </Menu.Item>
+            </Menu.Group>
+            <Menu.Divider />
+            <Menu.Group>
+              <Menu.Item icon="trash"
+                intent="danger"
+                hoverElevation={3}
+                activeElevation={4}
+                onSelect={() => {
+                  setShownConfirmDialog(true);
+                  setMessage("确定要删除所选项目吗？");
+                }}
+              >
+                删除...
+              </Menu.Item>
+            </Menu.Group>
+          </Menu>
+        }
+      >
+        <Icon icon="more" />
+      </Popover>
+
+    </>
+  );
+};
 
 
 /*

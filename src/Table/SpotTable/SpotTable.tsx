@@ -1,29 +1,33 @@
 import React, {useState, useEffect} from 'react';
-import {Menu, Spinner, Text, Table, Position, Icon, Popover, Card, Tab} from 'evergreen-ui';
 import {
   IdempotentApis, NonIdempotentApis, Spot, makePaginationRequest, PaginationRequest, ApiDataType, spotKeys
 } from '../../Data/data';
 import Frame from '../../Frame';
 import {useParams} from 'react-router-dom';
 import ContentCard from '../ContentCard';
-import TablePaginationBar, {PaginationProps} from '../TablePagination';
+import {PaginationProps} from '../TablePagination';
 import {Tablefc} from './TableComponent';
 import {useTableParent, HTTPMethods, PanelOperationTable, Operation} from '../utils/utils';
-import * as DataAdaptor from '../../Data/dataAdaptor';
 
 
-const SpotTable: React.FC<{}> = (props) => {
+const SpotTable: React.FC<{}> = () => {
+
   const [spots, setSpots] = useState<Array<Spot>>([]);
+
   const [currentPage, setCurrentPage] = useState<number>(1);
 
   const [totalPage, setTotalPage] = useState<number>(5);
+
   const [totalElementCount, setTotalElementCount] = useState<number>(0);
 
   const [tickAll, setTickAll] = useState<boolean>(false);
+
   const [itemCheckedList, setItemCheckedList] = useState<Array<boolean>>([]);
 
   const [pageSize, setPageSize] = useState<number>(20);
+
   const [loaded, setLoaded] = useState<boolean>(false);
+
   const [tableParent, setTableParent] = useState<ApiDataType | undefined>();
 
   let { pid } = useParams();
@@ -40,7 +44,6 @@ const SpotTable: React.FC<{}> = (props) => {
         setCurrentPage(srs.currentPage);
         setTotalPage(Math.floor(srs.totalElementCount / srs.pageSize) + 1);
         setItemCheckedList(srs.data.map(() => false));
-
         setLoaded(true);
       })
       .catch(e => console.error(e))
@@ -62,10 +65,6 @@ const SpotTable: React.FC<{}> = (props) => {
       })
       .catch(e => console.error(e))
   });
-
-  const useChangePageSize = (pageSize: number) => {
-    setTotalPage(pageSize);
-  };
 
   const paginationProps: PaginationProps = {
     useUpdate,
@@ -89,17 +88,14 @@ const SpotTable: React.FC<{}> = (props) => {
                 "post" as HTTPMethods,
                 NonIdempotentApis.Post.postSpot as Operation
               ],
-
               [
                 "put" as HTTPMethods,
                 IdempotentApis.Put.updateSpot as Operation
               ],
-
               [
                 "delete" as HTTPMethods,
-                IdempotentApis.Delete.deleteSpot as Operation
-              ],
-
+                IdempotentApis.Delete.deleteSpot as Operation]
+              ,
             ]
           ) as PanelOperationTable),
           tableParent,
@@ -114,7 +110,8 @@ const SpotTable: React.FC<{}> = (props) => {
           itemCheckedList,
           setItemCheckedList,
         })
-    )} />);
+    )}
+  />);
 };
 
 

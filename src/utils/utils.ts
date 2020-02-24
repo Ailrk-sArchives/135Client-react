@@ -1,5 +1,3 @@
-import {Table} from 'evergreen-ui';
-
 const boolToVal = (b: boolean) => b ? 1 : 0;
 
 export const grapName = (val: string | boolean | number | object | undefined): string | null => {  // key => val

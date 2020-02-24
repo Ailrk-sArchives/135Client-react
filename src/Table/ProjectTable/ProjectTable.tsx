@@ -3,19 +3,18 @@
  */
 import React, {useState, useEffect} from 'react';
 import Frame from '../../Frame';
-import {IdempotentApis, NonIdempotentApis, Project, ApiDataType, projectKeys} from '../../Data/data';
-import ContentCard, {TableFC} from '../ContentCard';
+import {IdempotentApis, NonIdempotentApis, Project, projectKeys} from '../../Data/data';
+import ContentCard from '../ContentCard';
 import {HTTPMethods, PanelOperationTable, Operation} from '../utils/utils';
-import * as DataAdaptor from '../../Data/dataAdaptor';
-
 import {Tablefc} from './TableComponent';
-import {Tab} from 'evergreen-ui';
 
 
-const ProjectTable: React.FC<{}> = (props) => {
+const ProjectTable: React.FC<{}> = () => {
+
   const [projects, setProjects] = useState<Array<Project>>([]);
 
   const [tickAll, setTickAll] = useState<boolean>(false);
+
   const [itemCheckedList, setItemCheckedList] = useState<Array<boolean>>([]);
 
   const [loaded, setLoaded] = useState<boolean>(false);

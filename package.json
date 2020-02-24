@@ -16,6 +16,7 @@
     "axios": "^0.19.0",
     "evergreen": "^0.3.2",
     "evergreen-ui": "^4.21.5",
+    "glamor": "^2.20.40",
     "i": "^0.3.6",
     "install": "^0.13.0",
     "leaflet": "^1.6.0",

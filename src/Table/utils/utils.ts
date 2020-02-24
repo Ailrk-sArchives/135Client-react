@@ -20,7 +20,12 @@ export type Operation =
   | OPPost<PanelDataType>
   | OPDelete;
 
-export type HTTPMethods = "post" | "delete" | "put" | "get" | undefined;
+export type HTTPMethods =
+  | "post"
+  | "delete"
+  | "put"
+  | "get"
+  | undefined;
 export type PanelOperationTable = Map<HTTPMethods, Operation>;
 
 
@@ -28,7 +33,7 @@ export type PanelOperationTable = Map<HTTPMethods, Operation>;
 export interface ControlHub {
   data: Array<ApiDataType>,
   setData: Function,                         // useState ApiDataType
-  panelOperationTable?: PanelOperationTable,  // post, etc...
+  panelOperationTable: PanelOperationTable,  // post, etc...
   dataTypeTag: ApiDataTypeTag,
   itemCheckedList?: Array<boolean>,
   dataTypeKeys?: DataTypeKeys,
@@ -44,8 +49,8 @@ export type PanelPopupMenuProps =
   & {
     someDatas?: Array<ApiDataType>,
     setSomeDatas?: Function,
-    panelOperationTable?: PanelOperationTable,
-    dataTypeTag: ApiDataTypeTag,
+    panelOperationTable: PanelOperationTable,
+    dataTypeTag: ApiDataTypeTag
   };
 
 // table popup handels its own shown states.
@@ -71,14 +76,29 @@ export const useTableParent = (setTableParent: Function) => {
 
 
 // await for state change.
-export const timeout = async (ms: number) => new Promise(res => setTimeout(res, ms));
+export const timeout =
+  async (ms: number) => new Promise(res => setTimeout(res, ms));
+
+// await until clicked is set to true.
 export const waitClick =
-  async (clicked: React.MutableRefObject<boolean>, callback: Function) => {
-    while (clicked.current === false) {
-      await timeout(50);
-      console.log("here")
+  async (
+
+    clicked: React.MutableRefObject<boolean>,
+
+    callback: () => Promise<any> | undefined,
+
+    breakSig?: React.MutableRefObject<boolean>) => {
+
+    while (clicked.current === false && breakSig?.current !== true) {
+      await timeout(100);
     }
-    console.log("wait finished");
+
+    if (breakSig?.current === true) {
+      breakSig.current = false;
+      return undefined;
+    }
+
+    clicked.current = false;  // set click back.
     return callback();
   };
 
@@ -94,10 +114,15 @@ export function mapToObject (map: Map<string, string | undefined>): any {
 export function apiDataArrayIsDuplicated(list?: Array<ApiDataType>,
   checkData?: ApiDataType): boolean {
   const idDispatch = (e: ApiDataType) => {
-    return e._kind == "Spot" ? e.spot_id :
-      e._kind == "Device" ? e.device_id :
-        e._kind == "Project" ? e.project_id :
-          e._kind == "SpotRecord" ? e.spot_record_id : undefined
+    return (
+      e._kind == "Spot" ? e.spot_id
+        :
+        e._kind == "Device" ? e.device_id
+          :
+          e._kind == "Project" ? e.project_id
+            :
+            e._kind == "SpotRecord" ? e.spot_record_id
+              : undefined);
   };
 
   const id = checkData ? idDispatch(checkData) : undefined;

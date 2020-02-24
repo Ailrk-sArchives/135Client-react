@@ -1,64 +1,107 @@
-import React, {useState, useEffect, useRef} from 'react';
+import React, {useState, useRef} from 'react';
 import {
-  Table, Pane, Position, Menu, toaster, Stack, Spinner,
+  Table, Pane, Position, Menu, Spinner,
   Popover, Icon, Tooltip, Text
 } from 'evergreen-ui';
 import {Link} from 'react-router-dom';
-import {IdempotentApis, Device, FeedBack} from '../../Data/data';
+import {Device, ApiResponse} from '../../Data/data';
 import {grapName, dynamicHeightProperties, dynamicHeight} from '../../utils/utils';
-import {PanelOperationTable} from '../utils/utils'
+import {TablePopupMenuProps, mapToObject} from '../utils/utils'
 import {Wait, CallbackProps} from '../utils/callbacks';
 import {TableFC} from '../ContentCard';
-import ConfirmDialogue from '../ConfirmDialogue';
+import ConfirmDialogue, {ConfirmDialogueProps} from '../ConfirmDialogue';
+import SubmitDialogue, {SubmitDialogueProps} from '../SubmitDialogue';
 
 
 export const PopupMenu:
-  React.FC<{
-    device: Device,
-    devices: Array<Device>,
-    setDevices?: Function,
-    panelOperationTable?: PanelOperationTable,
-  }> = (props) => {
-    const deviceId = props.device.device_id || 1;
+  React.FC<TablePopupMenuProps & {data: Device}> = props => {
+
+    const {
+      confirmed,
+      breakSig,
+      dataTypeKeys,
+      entries,
+      setEntries,
+      message,
+      setMessage,
+      setSomeDatas,
+      someDatas,
+      data,
+      panelOperationTable,
+    } = props;
+
+    const deviceId = data.device_id || 1;
+    const [shownConfirmDialog, setShownConfirmDialog] = useState<boolean>(false);
+    const [shownSubmitDialog, setShownSubmitDialog] = useState<boolean>(false);
 
     const linkCss: React.CSSProperties = {
       textDecoration: 'none',
     };
 
-    const [shown, setShown] = useState<boolean>(false);
-    //const [confirmed, setConfirm] = useState<boolean>(false);
-    const confirmed = useRef<boolean>(false);
-    const [message, setMessage] = useState<string>("");
+    const submitDialogProps: SubmitDialogueProps = {
+      confirmed,
+      breakSig,
+      dataTypeKeys,
+      shown: shownSubmitDialog,
+      setShown: setShownSubmitDialog,
+      entries,
+      setEntries,
+    };
 
-    const opCallbackProps: CallbackProps<Device> = {
-      someid: deviceId,
-      someDatas: props.devices,
-      setSomeData: props.setDevices,
-      panelOperationTable: props.panelOperationTable
+    const confirmDialogueProps: ConfirmDialogueProps = {
+      confirmed,
+      breakSig,
+      shown: shownConfirmDialog,
+      setShown: setShownConfirmDialog,
+      message,
     };
 
     return (
       <>
         {
-          React.createElement(ConfirmDialogue, {
-            confirmed,
-            shown,
-            setShown,
-            message
-          })
+          React.createElement(SubmitDialogue, submitDialogProps)
         }
-
+        {
+          React.createElement(ConfirmDialogue, confirmDialogueProps)
+        }
         <Popover
           position={Position.BOTTOM_LEFT}
           content={
             <Menu>
               <Menu.Group>
-                <Menu.Item icon="edit">修改...</Menu.Item>
+                <Menu.Item icon="edit"
+                  onSelect={() => {
+                    entries.forEach((val, key) => {
+                      if (Object.keys(data).includes(key)) {
+                        const v = data[(key as keyof Device)];
+                        setEntries(entries.set(key, v ? v.toString() : undefined));
+                      }
+                    });
+                    Wait.update(confirmed,
+                      () => {
+                        return {
+                          panelOperationTable: panelOperationTable,
+                          panelData: mapToObject(entries),
+                          someid: deviceId,
+                        }
+                      },
+                      breakSig)?.then(res => {
+                        if (setSomeDatas && someDatas && res) {
+                          const updated = (res as ApiResponse<Device>).data;
+                          setSomeDatas(
+                            someDatas.map(
+                              e => (e as Device).device_id === updated?.device_id ?
+                                updated : e))
+                        }
+                      }).catch(() => undefined);
+                    setShownSubmitDialog(true);
+                  }}
+                >修改...</Menu.Item>
                 <Menu.Item icon="download">下载...</Menu.Item>
                 <Link to={
                   {
                     pathname: "/Device" + "/" + deviceId + "/" + "SpotRecords",
-                    state: {tableParent: props.device}
+                    state: {tableParent: props.data}
                   }
                 } style={linkCss}>
                   <Menu.Item icon="list-columns">
@@ -70,18 +113,30 @@ export const PopupMenu:
               <Menu.Group>
                 <Menu.Item icon="trash"
                   intent="danger"
-                  onSelect={
-                    () => {
-                      Wait.delete(confirmed, opCallbackProps)
-                        ?.then(() => {
-                          if (props.setDevices)
-                            props.setDevices(
-                              props.devices.filter(e => e.device_id != deviceId));
-                        })
-                        .then(() => confirmed.current = false);
-                      setMessage("确定要删除吗？");
-                      setShown(true);
-                    }
+                  onSelect={() => {
+                    entries.forEach((val, key) => {
+                      if (Object.keys(data).includes(key)) {
+                        const v = data[(key as keyof Device)];
+                        setEntries(entries.set(key, v ? v.toString() : undefined));
+                      }
+                    });
+                    Wait.update(confirmed,
+                      () => {
+                        return {
+                          panelOperationTable: panelOperationTable,
+                          panelData: mapToObject(entries),
+                          someid: deviceId,
+                        }
+                      },
+                      breakSig)?.then(res => {
+                        if (setSomeDatas && someDatas && res)
+                          setSomeDatas(
+                            someDatas
+                              .filter(e =>
+                                (e as Device).device_id != deviceId));
+                      }).catch(() => undefined);
+                    setShownSubmitDialog(true);
+                  }
                   }>
                   删除...
                 </Menu.Item>
@@ -95,140 +150,153 @@ export const PopupMenu:
     );
   };
 
+export const Tablefc: TableFC = (props) => {
 
-export const Tablefc: TableFC = (props) => (
-  <Table background="tint2">
+  const {
+    dataTypeKeys,
+    dataTypeTag,
+    setItemCheckedList,
+    itemCheckedList,
+    tickAll,
+    tickone,
+    setTickAll,
+    data,
+    setData,
+    loaded,
+    currentZoom,
+    panelOperationTable,
+  } = props;
 
-    <Table.Head height={70} elevation={1}>
+  const [message, setMessage] = useState<string>("");
+  const [entries, setEntries] =
+    useState<Map<string, string | undefined>>(new Map());
+  const confirmed = useRef<boolean>(false);
+  const breakSig = useRef<boolean>(false);
 
-      <Table.Cell flexBasis={50} flexShrink={0} flexGrow={0}
-        onClick={
-          () => {
-            props.setItemCheckedList(
-              props.itemCheckedList.map(() => !props.tickAll))
-            props.setTickAll(!props.tickAll);
+  const panelPopupMenuProps: TablePopupMenuProps = {
+    confirmed,
+    breakSig,
+    dataTypeKeys,
+    message,
+    setMessage,
+    entries,
+    setEntries,
+
+    someDatas: data,
+    setSomeDatas: setData,
+    panelOperationTable: panelOperationTable,
+
+    dataTypeTag: dataTypeTag,
+  };
+
+  return (
+    <Table background="tint2">
+      <Table.Head height={70} elevation={1}>
+        <Table.Cell flexBasis={50} flexShrink={0} flexGrow={0}
+          onClick={
+            () => {
+              setItemCheckedList(
+                itemCheckedList.map(() => !tickAll))
+              setTickAll(!tickAll);
+            }
           }
-        }>
-
-        <Pane>
-          {props.tickAll ?
-            <Icon icon="tick" />
-            : <Icon icon="square" />}
-        </Pane>
-      </Table.Cell>
-
-      <Table.Cell flexBasis={50} flexShrink={0} flexGrow={0}> ID </Table.Cell>
-      <Table.Cell> 设备名称 </Table.Cell>
-      <Table.Cell flexBasis={150} flexShrink={0} flexGrow={0}> 设备类型 </Table.Cell>
-      <Table.Cell flexBasis={200} flexShrink={0} flexGrow={0}> 测点名称 </Table.Cell>
-
-      <Table.Cell> 所属项目 </Table.Cell>
-
-      <Table.Cell flexBasis={100} flexShrink={0} flexGrow={0}> 创建时间 </Table.Cell>
-
-      <Table.Cell flexBasis={150} flexShrink={0} flexGrow={0}> 修改时间 </Table.Cell>
-      <Table.Cell flexBasis={100} flexShrink={0} flexGrow={0}> 在线 </Table.Cell>
-      <Table.Cell flexBasis={100} flexShrink={0} flexGrow={0}> 操作 </Table.Cell>
-
-    </Table.Head>
-
-    {
-      props.loaded ?
-
-        <Table.VirtualBody height={
-          dynamicHeight(
-            props.currentZoom,
-            {
-              largeScale: 0.35,
-              normalScale: 0.56,
-              smallScale: 0.65
-            } as dynamicHeightProperties
-          )
-        }>
-
-          {
-            props.data.length > 0 ?
-              props.data.map((d, index) => (
-                <Table.Row key={index} isSelectable height={80}>
-
-                  <Table.Cell flexBasis={50} flexShrink={0} flexGrow={0}
-                    onClick={() => props.tickone(index)} >
-                    <Pane>
-                      {!props.itemCheckedList[index] ?
-                        <Icon icon="square" />
-                        :
-                        <Icon icon="tick" />
-                      }
-                    </Pane>
-                  </Table.Cell>
-
-                  <Table.Cell flexBasis={50} flexShrink={0} flexGrow={0}
-                  >{grapName((d as Device).device_id)}</Table.Cell>
-
-                  <Table.Cell>{grapName((d as Device).device_name)}</Table.Cell>
-
-                  <Table.Cell flexBasis={150} flexShrink={0} flexGrow={0}
-                  >{grapName((d as Device).device_type)}</Table.Cell>
-
-                  <Table.Cell flexBasis={200} flexShrink={0} flexGrow={0}>
-                    {grapName((d as Device).spot_name)}
-                  </Table.Cell>
-
-                  <Table.Cell>{grapName((d as Device).project_name)}</Table.Cell>
-
-                  <Table.Cell flexBasis={150} flexShrink={0} flexGrow={0}>
-                    {grapName((d as Device).create_time)}</Table.Cell>
-
-                  <Table.Cell flexBasis={150} flexShrink={0} flexGrow={0}>
-                    {grapName((d as Device).modify_time)}</Table.Cell>
-
-                  <Table.Cell flexBasis={100} flexShrink={0} flexGrow={0}>
-                    <Tooltip content={(d as Device).online ? "online" : "offline"}>
-                      {
-                        (d as Device).online ?
-                          <Icon icon='dot' color='success' size={20} />
-                          :
-                          <Icon icon='dot' color="muted" size={20} />
-                      }
-                    </Tooltip>
-                  </Table.Cell>
-
-                  <Table.Cell flexBasis={100} flexShrink={0} flexGrow={0}
-                  >{
-                      <PopupMenu device={d as Device}
-                        devices={props.data as Array<Device>}
-                        setDevices={props.setData}
-                        panelOperationTable={props.panelOperationTable} />
-
-                    }</Table.Cell>
-
-                </Table.Row>
-              ))
-              :
-              <Pane display="flex"
-                alignItems="center"
-                justifyContent="center"> 暂无数据 </Pane>
-          }
-
-        </Table.VirtualBody>
-
-        :
-        <Pane display="flex"
-          alignItems="center"
-          justifyContent="center"
-          height={
+        >
+          <Pane>
+            {tickAll ?
+              <Icon icon="tick" />
+              : <Icon icon="square" />}
+          </Pane>
+        </Table.Cell>
+        <Table.Cell flexBasis={50} flexShrink={0} flexGrow={0}> ID </Table.Cell>
+        <Table.Cell> 设备名称 </Table.Cell>
+        <Table.Cell flexBasis={150} flexShrink={0} flexGrow={0}> 设备类型 </Table.Cell>
+        <Table.Cell flexBasis={200} flexShrink={0} flexGrow={0}> 测点名称 </Table.Cell>
+        <Table.Cell> 所属项目 </Table.Cell>
+        <Table.Cell flexBasis={100} flexShrink={0} flexGrow={0}> 创建时间 </Table.Cell>
+        <Table.Cell flexBasis={150} flexShrink={0} flexGrow={0}> 修改时间 </Table.Cell>
+        <Table.Cell flexBasis={100} flexShrink={0} flexGrow={0}> 在线 </Table.Cell>
+        <Table.Cell flexBasis={100} flexShrink={0} flexGrow={0}> 操作 </Table.Cell>
+      </Table.Head>
+      {
+        loaded ?
+          <Table.VirtualBody height={
             dynamicHeight(
-              props.currentZoom,
+              currentZoom,
               {
                 largeScale: 0.35,
                 normalScale: 0.56,
                 smallScale: 0.65
               } as dynamicHeightProperties
-            )}>
-          <Spinner />
-        </Pane>
-
-    }
-  </Table>
-);
-
+            )
+          }>
+            {
+              data.length > 0 ?
+                data.map((d, index) => (
+                  <Table.Row key={index} isSelectable height={80}>
+                    <Table.Cell flexBasis={50} flexShrink={0} flexGrow={0}
+                      onClick={() => tickone(index)} >
+                      <Pane>
+                        {!itemCheckedList[index] ?
+                          <Icon icon="square" />
+                          :
+                          <Icon icon="tick" />
+                        }
+                      </Pane>
+                    </Table.Cell>
+                    <Table.Cell>{grapName((d as Device).device_name)}</Table.Cell>
+                    <Table.Cell flexBasis={150} flexShrink={0} flexGrow={0}
+                    >{grapName((d as Device).device_type)}</Table.Cell>
+                    <Table.Cell flexBasis={200} flexShrink={0} flexGrow={0}>
+                      {grapName((d as Device).spot_name)}
+                    </Table.Cell>
+                    <Table.Cell>{grapName((d as Device).project_name)}</Table.Cell>
+                    <Table.Cell flexBasis={150} flexShrink={0} flexGrow={0}>
+                      {grapName((d as Device).create_time)}</Table.Cell>
+                    <Table.Cell flexBasis={150} flexShrink={0} flexGrow={0}>
+                      {grapName((d as Device).modify_time)}</Table.Cell>
+                    <Table.Cell flexBasis={100} flexShrink={0} flexGrow={0}>
+                      <Tooltip content={(d as Device).online ? "online" : "offline"}>
+                        {
+                          (d as Device).online ?
+                            <Icon icon='dot' color='success' size={20} />
+                            :
+                            <Icon icon='dot' color="muted" size={20} />
+                        }
+                      </Tooltip>
+                    </Table.Cell>
+                    <Table.Cell flexBasis={100} flexShrink={0} flexGrow={0}
+                    > {
+                        React.createElement(PopupMenu, {
+                          ...panelPopupMenuProps,
+                          data: (d as Device),
+                        })
+                      }
+                    </Table.Cell>
+                  </Table.Row>
+                ))
+                :
+                <Pane display="flex"
+                  alignItems="center"
+                  justifyContent="center"> 暂无数据 </Pane>
+            }
+          </Table.VirtualBody>
+          :
+          <Pane display="flex"
+            alignItems="center"
+            justifyContent="center"
+            height={
+              dynamicHeight(
+                currentZoom,
+                {
+                  largeScale: 0.35,
+                  normalScale: 0.56,
+                  smallScale: 0.65
+                } as dynamicHeightProperties
+              )}
+          >
+            <Spinner />
+          </Pane>
+      }
+    </Table>
+  );
+}
