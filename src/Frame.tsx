@@ -6,7 +6,7 @@ import getZoomRatio from './utils/winZoom';
 import {grapName} from './utils/utils';
 
 
-type FrameComponent = React.FunctionComponentElement<{currentZoom: number}>
+export type FrameComponent = React.FunctionComponentElement<{currentZoom: number}>
 
 const Frame: React.FC<{children: FrameComponent}> = (props) => {
 

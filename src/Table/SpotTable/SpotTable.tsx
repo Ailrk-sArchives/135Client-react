@@ -1,13 +1,21 @@
 import React, {useState, useEffect} from 'react';
 import {
-  IdempotentApis, NonIdempotentApis, Spot, makePaginationRequest, PaginationRequest, ApiDataType, spotKeys
+  IdempotentApis,
+  NonIdempotentApis,
+  Spot,
+  makePaginationRequest,
+  PaginationRequest,
+  ApiDataType,
+  spotKeys,
+  HTTPMethods,
+  PagedData,
 } from '../../Data/data';
 import Frame from '../../Frame';
 import {useParams} from 'react-router-dom';
 import ContentCard from '../ContentCard';
 import {PaginationProps} from '../TablePagination';
 import {Tablefc} from './TableComponent';
-import {useTableParent, HTTPMethods, PanelOperationTable, Operation} from '../utils/utils';
+import {useTableParent, PanelOperationTable, Operation} from '../utils/utils';
 
 
 const SpotTable: React.FC<{}> = () => {
@@ -36,13 +44,15 @@ const SpotTable: React.FC<{}> = () => {
   const useInit = (paginationRequest: PaginationRequest) => useEffect(() => {
     IdempotentApis
     .Get
-    .Paged
-    .spotByProjectPaged(paginationRequest, (pid ? Number.parseInt(pid) : 1))
+    .PostPayload
+    .fetchSpotByProject(paginationRequest, (pid ? Number.parseInt(pid) : 1))
       .then(srs => {
+        const pageSize = (srs as PagedData<Array<Spot>>).pageSize;
+        const currentPage = (srs as PagedData<Array<Spot>>).currentPage;
         setSpots(srs.data);
         setTotalElementCount(srs.totalElementCount);
-        setCurrentPage(srs.currentPage);
-        setTotalPage(Math.floor(srs.totalElementCount / srs.pageSize) + 1);
+        setCurrentPage(currentPage);
+        setTotalPage(Math.floor(srs.totalElementCount / pageSize) + 1);
         setItemCheckedList(srs.data.map(() => false));
         setLoaded(true);
       })
@@ -54,13 +64,15 @@ const SpotTable: React.FC<{}> = () => {
   const useUpdate = (paginationRequest: PaginationRequest) => useEffect(() => {
     IdempotentApis
     .Get
-    .Paged
-    .spotByProjectPaged(paginationRequest, (pid ? Number.parseInt(pid) : 1))
+    .PostPayload
+    .fetchSpotByProject(paginationRequest, (pid ? Number.parseInt(pid) : 1))
       .then(srs => {
+        const pageSize = (srs as PagedData<Array<Spot>>).pageSize;
+        const currentPage = (srs as PagedData<Array<Spot>>).currentPage;
         setSpots(srs.data);
         setTotalElementCount(srs.totalElementCount);
-        setCurrentPage(srs.currentPage);
-        setTotalPage(Math.floor(srs.totalElementCount / srs.pageSize));
+        setCurrentPage(currentPage);
+        setTotalPage(Math.floor(srs.totalElementCount / pageSize) + 1);
         setItemCheckedList(srs.data.map(() => false));
       })
       .catch(e => console.error(e))

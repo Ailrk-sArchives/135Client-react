@@ -2,11 +2,7 @@ import {
   Dialog, Heading, Stack, Table, TextInput, toaster, Autocomplete
 } from 'evergreen-ui';
 import React, {useRef, useEffect} from 'react';
-import {ApiDataType, DataTypeKeys, FeedBack} from '../Data/data';
-import {
-  Operation, PanelOperationTable, HTTPMethods,
-  OPPost, OPUpdate, OPDelete
-} from './utils/utils';
+import {DataTypeKeys} from '../Data/data';
 import {DialogProps} from './utils/dialogStateUtils';
 import MappedTextInput from './MappedTextInput';
 

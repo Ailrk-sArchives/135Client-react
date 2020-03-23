@@ -98,7 +98,6 @@ React.FC<TablePopupMenuProps & {data: SpotRecord}> = props => {
                   }
 
                   }>修改...</Menu.Item>
-                <Menu.Item icon="download">下载...</Menu.Item>
               </Menu.Group>
               <Menu.Divider />
               <Menu.Group>

@@ -3,9 +3,15 @@
  */
 import React, {useState, useEffect} from 'react';
 import Frame from '../../Frame';
-import {IdempotentApis, NonIdempotentApis, Project, projectKeys} from '../../Data/data';
+import {
+  IdempotentApis,
+  NonIdempotentApis,
+  Project,
+  projectKeys,
+  HTTPMethods,
+} from '../../Data/data';
 import ContentCard from '../ContentCard';
-import {HTTPMethods, PanelOperationTable, Operation} from '../utils/utils';
+import {PanelOperationTable, Operation} from '../utils/utils';
 import {Tablefc} from './TableComponent';
 
 

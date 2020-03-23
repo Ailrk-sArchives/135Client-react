@@ -72,13 +72,13 @@ export interface ContentControlParams {
 
 };
 
-const tableParentNameResolver = (props: {
+function tableParentNameResolver(props: {
 
   tableParent?: ApiDataType,
 
   setTableParentName: React.Dispatch<React.SetStateAction<string | undefined>>
 
-}) => {
+}) {
   const {
     tableParent,
     setTableParentName,
@@ -198,8 +198,8 @@ const ContentCard =
           paddingBottom={2}
           width="100%"
           height="100%">
-          <TableControlPanel {...controlHub}/>
-          <Tablefc {...tableFCParams}/>
+          <TableControlPanel {...controlHub} />
+          <Tablefc {...tableFCParams} />
           {
             paginationProps ?
               React.createElement(TablePaginationBar, paginationProps)

@@ -14,28 +14,28 @@ const test_apis = () => {
     console.log('spotViewGet');
     console.log(response)});
 
-  IdempotentApis.Get.Paged
-    .projectPaged(makePaginationRequest(1, 10))
+  IdempotentApis.Get.PostPayload
+    .fetchProject(makePaginationRequest(1, 10))
     .then((response) => {
       console.log('projectPaged');
       console.log(response);
     });
 
-  IdempotentApis.Get.Paged.spotPaged(makePaginationRequest(1, 10))
+  IdempotentApis.Get.PostPayload.fetchSpot(makePaginationRequest(1, 10))
     .then((response) => {
       console.log('spotPaged');
       console.log(response);
     });
 
-  IdempotentApis.Get.Paged
-    .spotRecordPaged(makePaginationRequest(10, 50), 4)
+  IdempotentApis.Get.PostPayload
+    .fetchSpotByProject(makePaginationRequest(10, 50), 4)
     .then((response) => {
       console.log('spotRecordPaged');
       console.log(response);
     });
 
-  IdempotentApis.Get.Paged
-    .devicePaged(makePaginationRequest(1, 10))
+  IdempotentApis.Get.PostPayload
+    .fetchDevice(makePaginationRequest(1, 10))
     .then((response) => {
       console.log('devicePaged');
       console.log(response);

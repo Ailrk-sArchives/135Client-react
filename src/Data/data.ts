@@ -3,14 +3,15 @@ import {apiBaseUrl} from '../config';
 import * as AdaptorTypes from './dataAdaptor';
 
 
-const makeApi =
-  <T>(url: string, api_func: ((url: string, params?: T) => any),
-    params?: T) => {
-    if (!params) return api_func(url);
-    return api_func(url, params);
-  };
+function makeApi<T>(
+  url: string,
+  api_func: ((url: string, params?: T) => any),
+  params?: T) {
+  if (!params) return api_func(url);
+  return api_func(url, params);
+};
 
-const concatPath = (base: string, path: string) => {
+function concatPath(base: string, path: string) {
   // handel with back slashFunction
   if (base.slice(-1) === '/') {base = base.slice(0, -1)};
   if (path.slice(0, 1) !== '/') {path = '/' + path};
@@ -24,6 +25,14 @@ export type DataTypeKeys =
   Array<[DataTypeKeyName,
     DataTypeDemonstrateName,
     DataTypeInputHint]>;
+
+export type HTTPMethods =
+  | "post"
+  | "delete"
+  | "put"
+  | "get"
+  | undefined
+  ;
 
 export interface Spot {
   _kind: "Spot",
@@ -65,21 +74,20 @@ export const deviceKeys: DataTypeKeys = [
   ["spot_id", "所在测点id", "若所在测点不存在请先创建"],
 ];
 
-export interface ClimateArea { _kind: "ClimateArea", }
+export interface ClimateArea {_kind: "ClimateArea", }
 export interface ClimateArea {
   area_name: string,
 }
 
-export interface Location { _kind: "Location", }
+export interface Location {_kind: "Location", }
 export interface Location {
   city?: string,
   climate_area?: ClimateArea,
   province?: string,
 }
 
-
-export interface Company { _kind: "Company", }
-export interface Company { company_name: string, }
+export interface Company {_kind: "Company", }
+export interface Company {company_name: string, }
 
 export interface Project {
   _kind: "Project",
@@ -155,48 +163,78 @@ export const spotRecordKeys: DataTypeKeys = [
   ["window_opened", "窗磁开关", "0 或 1"]
 ];
 
-export interface ProjectDetail { _kind: "ProjectDetail", }
+export interface ProjectDetail {_kind: "ProjectDetail", }
 export interface ProjectDetail {
   project_id?: number,
   image?: string,
   image_description?: string,
 };
 
-export interface ApiResponse<T>  extends WithData<T> {
+export interface ApiResponse<T> extends WithData<T> {
   status: number,
   data?: T,
   message: string,
 }
 
-export interface PagedData<T> extends WithData<T> {
+// --
+export interface FetchedData<T> extends WithData<T> {
   totalElementCount: number,  // total elements in the db.
   data: T,
+}
+
+export interface PagedData<T> extends FetchedData<T> {
   currentPage: number,
   pageSize: number,
-};
+}
 
+export interface FilteredData<T> extends FetchedData<T> {}
+
+// --
 export interface ApiRequest<T> {
   request: T,
-};
+}
 
 export interface PaginationRequest {
   size: number,
   pageNo: number,
-};
+}
+
+export interface FilterRequest {
+  startTime: string,
+  endTime: string,
+  keyword: string,
+}
+
+
+export type RequestParams =
+  | PaginationRequest
+  | Partial<FilterRequest>  // filter request doesn't need to be total.
+  ;
+
+// type guards for RequestParams
+export function isPaginationRequest(req: RequestParams): req is PaginationRequest {
+  return (req as PaginationRequest).pageNo !== undefined;
+}
+
+export function isFilterRequest(req: RequestParams): req is FilterRequest {
+  return (req as FilterRequest).keyword !== undefined;
+}
 
 export type ApiDataType =
   | Spot
   | Device
   | Project
   | SpotRecord
-  | ProjectDetail;
+  | ProjectDetail
+  ;
 
 export type ApiDataTypeTag =
   | "Spot"
   | "Device"
   | "Project"
   | "SpotRecord"
-  | "ProjectDetail";
+  | "ProjectDetail"
+  ;
 
 const makeRequest = <T>(params: T) => {
   return {"request": params};
@@ -207,14 +245,13 @@ const makeJsonRequestHeader = () => ({headers: {"Content-Type": "application/jso
 const good_response =
   <T>(response: AxiosResponse<ApiResponse<T>>): boolean => response.data.status === 0;
 
-export const makePaginationRequest =
-  (pageNo: number, size: number): PaginationRequest => {
-    const paginationRequest: PaginationRequest = {
-      size: size,
-      pageNo: pageNo
-    };
-    return paginationRequest;
+export function makePaginationRequest(pageNo: number, size: number): PaginationRequest {
+  const paginationRequest: PaginationRequest = {
+    size: size,
+    pageNo: pageNo
   };
+  return paginationRequest;
+};
 
 type PadTag = (tag: ApiDataTypeTag, e: ApiDataType) => ApiDataType;
 const padtag: PadTag = (tag, e) => {
@@ -222,15 +259,15 @@ const padtag: PadTag = (tag, e) => {
   return e;
 };
 
-const padTagPagedData = (tag: ApiDataTypeTag, e: PagedData<Array<ApiDataType>>) => {
-  for (const n of e.data) (n as ApiDataType)._kind = tag;
+function padTagFetchedData(tag: ApiDataTypeTag, e: PagedData<Array<ApiDataType>>) {
+  for (const n of e.data)
+    (n as ApiDataType)._kind = tag;
   return e;
 }
 
 // map operation to any structure contains data.
-interface WithData<T> { data?: T, }
-const fmapData =
-  <T, U>(f: (e: T) => U, m: WithData<T>): WithData<U | T> => {
+interface WithData<T> {data?: T, }
+function fmapData<T, U>(f: (e: T) => U, m: WithData<T>): WithData<U | T> {
 
   if (m.data !== undefined) {
     let {data, ...rest} = m;
@@ -257,7 +294,7 @@ const fmapData =
 */
 
 export type Message = string;
-export type FeedBack = { message: string, status: number };
+export type FeedBack = {message: string, status: number};
 
 export class IdempotentApis {
 
@@ -322,31 +359,31 @@ export class IdempotentApis {
         });
 
 
-    static Paged = class {
+    static PostPayload = class {
 
-      static projectPaged = (params: PaginationRequest): Promise<PagedData<Array<Project>>> =>
+      static fetchProject = (params: RequestParams): Promise<FetchedData<Array<Project>>> =>
         makeApi(concatPath(apiBaseUrl, `api/v1/project`),
           (url: string, params) => {
             return axios.post(url, makeRequest(params), makeJsonRequestHeader())
               .then(response => {
 
-                if (good_response<PagedData<Array<Project>>>(response))
+                if (good_response<FetchedData<Array<Project>>>(response))
                   return fmapData(
-                    padTagPagedData.bind(null, "Project"), response.data).data;
+                    padTagFetchedData.bind(null, "Project"), response.data).data;
               })
               .catch(e => console.error(e))
           },
           params);
 
-      static spotByProjectPaged =  // what is this?
-        (params: PaginationRequest, pid: number): Promise<PagedData<Array<Spot>>> =>
+      static fetchSpotByProject =  // what is this?
+        (params: RequestParams, pid: number): Promise<FetchedData<Array<Spot>>> =>
           makeApi(concatPath(apiBaseUrl, `api/v1/project/${pid}/spot`),
             (url: string) => {
               return axios.post(url, makeRequest(params), makeJsonRequestHeader())
                 .then(response => {
-                  if (good_response<PagedData<Array<Spot>>>(response)) {
+                  if (good_response<FetchedData<Array<Spot>>>(response)) {
                     return fmapData(
-                      padTagPagedData.bind(null, "Spot"), response.data).data;
+                      padTagFetchedData.bind(null, "Spot"), response.data).data;
                   }
 
                   // (response.data.data as Array<Spot>)
@@ -356,61 +393,65 @@ export class IdempotentApis {
             },
             params);
 
-      static spotPaged = (params: PaginationRequest): Promise<PagedData<Array<Spot>>> =>
+      static fetchSpot = (params: RequestParams): Promise<FetchedData<Array<Spot>>> =>
         makeApi(concatPath(apiBaseUrl, `api/v1/spot`),
           (url: string) => {
             return axios.post(url, makeRequest(params), makeJsonRequestHeader())
               .then(response => {
 
-                if (good_response<PagedData<Array<Spot>>>(response))
+                if (good_response<FetchedData<Array<Spot>>>(response))
                   return fmapData(
-                    padTagPagedData.bind(null, "Spot"), response.data).data;
+                    padTagFetchedData.bind(null, "Spot"), response.data).data;
 
               })
               .catch(e => console.error(e))
           },
           params);
 
-      static deviceBySpotPaged =
-        (params: PaginationRequest, sid: number): Promise<PagedData<Array<Device>>> =>
+      static fetchDeviceBySpot =
+        (params: RequestParams, sid: number): Promise<FetchedData<Array<Device>>> =>
           makeApi(concatPath(apiBaseUrl, `api/v1/spot/${sid}/device`),
             (url: string) => {
-            return axios.post(url, makeRequest(params), makeJsonRequestHeader())
-              .then(response => {
+              return axios.post(url, makeRequest(params), makeJsonRequestHeader())
+                .then(response => {
 
-                console.log(response);
-                if (good_response<PagedData<Array<Device>>>(response))
-                  return fmapData(
-                    padTagPagedData.bind(null, "Device"), response.data).data;
-              })
-              .catch(e => console.error(e))
-          },
-          params);
+                  console.log(response);
+                  if (good_response<FetchedData<Array<Device>>>(response))
+                    return fmapData(
+                      padTagFetchedData.bind(null, "Device"), response.data).data;
+                })
+                .catch(e => console.error(e))
+            },
+            params);
 
-      static devicePaged = (params: PaginationRequest): Promise<PagedData<Array<Device>>> =>
+      static fetchDevice = (params: RequestParams): Promise<FetchedData<Array<Device>>> =>
         makeApi(concatPath(apiBaseUrl, `api/v1/device`),
           (url: string) => {
             return axios.post(url, makeRequest(params), makeJsonRequestHeader())
               .then(response => {
 
-                if (good_response<PagedData<Array<Device>>>(response))
+                if (good_response<FetchedData<Array<Device>>>(response))
                   return fmapData(
-                    padTagPagedData.bind(null, "Device"), response.data).data;
+                    padTagFetchedData.bind(null, "Device"), response.data).data;
               })
               .catch(e => console.error(e))
           },
           params);
 
-      static spotRecordPaged =
-        (params: PaginationRequest, did: number): Promise<PagedData<Array<SpotRecord>>> =>
-          makeApi(concatPath(apiBaseUrl, `api/v1/device/${did}/spot_record`),
+      static fetchSpotRecord =
+        (params: RequestParams, did: number): Promise<FetchedData<Array<SpotRecord>>> =>
+          makeApi(
+            concatPath(apiBaseUrl,
+              isPaginationRequest(params)
+                ? `api/v1/device/${did}/spot_record`
+                : `api/v1/spotRecord/filter/${did}`),
             (url: string) => {
               return axios.post(url, makeRequest(params), makeJsonRequestHeader())
                 .then(response => {
 
-                  if (good_response<PagedData<Array<SpotRecord>>>(response))
+                  if (good_response<FetchedData<Array<SpotRecord>>>(response))
                     return fmapData(
-                      padTagPagedData.bind(null, "SpotRecord"), response.data).data;
+                      padTagFetchedData.bind(null, "SpotRecord"), response.data).data;
                 })
                 .catch(e => console.error(e))
             },
@@ -536,7 +577,7 @@ export class IdempotentApis {
             .catch(e => console.error(e))
       );
 
-    static deleteSpotRecord= (rid: number): Promise<FeedBack> =>
+    static deleteSpotRecord = (rid: number): Promise<FeedBack> =>
       makeApi(
         concatPath(apiBaseUrl, `api/v1/spotRecord/${rid}`),
 

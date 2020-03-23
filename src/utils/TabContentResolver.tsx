@@ -21,7 +21,6 @@ export interface TypedTriple<T extends TabName,
 };
 export type TabContentTriple = TypedTriple<TabName, TabIcon, TabHref, TabTip>;
 
-
 const TabContentResolver:
   React.FC<{
     contentList: TabContentTriple,

@@ -1,13 +1,21 @@
 import React, {useState, useEffect} from 'react';
 import {useParams} from 'react-router-dom';
 import {
-  IdempotentApis, NonIdempotentApis, Device, PagedData, makePaginationRequest, PaginationRequest,
-  ApiDataType, deviceKeys
+  IdempotentApis,
+  NonIdempotentApis,
+  Device,
+  PagedData,
+  makePaginationRequest,
+  PaginationRequest,
+  ApiDataType,
+  deviceKeys,
+  HTTPMethods,
+  FetchedData,
 } from '../../Data/data';
 import {PaginationProps} from '../TablePagination';
 import ContentCard from '../ContentCard';
 import Frame from '../../Frame';
-import {useTableParent, HTTPMethods, PanelOperationTable, Operation} from '../utils/utils';
+import {useTableParent, PanelOperationTable, Operation} from '../utils/utils';
 
 import {Tablefc} from './TableComponent';
 
@@ -38,19 +46,19 @@ const DeviceTable: React.FC<{}> = (props) => {
   // fetch
   const useInit =
     (paginationRequest: PaginationRequest) => useEffect(() => {
-      const resposne: Promise<Array<Device> | PagedData<Array<Device>>> =
+      const resposne: Promise<Array<Device> | FetchedData<Array<Device>>> =
         (sid ?
           IdempotentApis
             .Get
-            .Paged
-            .deviceBySpotPaged(
+            .PostPayload
+            .fetchDeviceBySpot(
               paginationRequest,
               (sid ? Number.parseInt(sid) : 1))
           :
           IdempotentApis
             .Get
-            .Paged
-            .devicePaged(paginationRequest)
+            .PostPayload
+            .fetchDevice(paginationRequest)
         );
 
       resposne.then(ds => {
@@ -79,19 +87,19 @@ const DeviceTable: React.FC<{}> = (props) => {
   const useUpdate = (paginationRequest: PaginationRequest) => {
 
     setLoaded(false);
-    const resposne: Promise<Array<Device> | PagedData<Array<Device>>> =
+    const resposne: Promise<Array<Device> | FetchedData<Array<Device>>> =
       (sid ?
         IdempotentApis
           .Get
-          .Paged
-          .deviceBySpotPaged(
+          .PostPayload
+          .fetchDeviceBySpot(
             paginationRequest,
             (sid ? Number.parseInt(sid) : 1))
         :
         IdempotentApis
           .Get
-          .Paged
-          .devicePaged(paginationRequest)
+          .PostPayload
+          .fetchDevice(paginationRequest)
       );
 
     resposne.then(ds => {

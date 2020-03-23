@@ -1,6 +1,8 @@
 import React, {useEffect} from 'react';
 import {useLocation} from 'react-router-dom';
-import {ApiDataType, DataTypeKeys, Message, FeedBack, ApiDataTypeTag, ApiResponse} from '../../Data/data';
+import {
+  ApiDataType, DataTypeKeys, Message, FeedBack, ApiDataTypeTag, ApiResponse, HTTPMethods
+} from '../../Data/data';
 import {PanelDataType} from '../../Data/dataAdaptor';
 import {SubmitDialogueProps} from '../SubmitDialogue';
 import {ConfirmDialogueProps} from '../ConfirmDialogue';
@@ -20,12 +22,6 @@ export type Operation =
   | OPPost<PanelDataType>
   | OPDelete;
 
-export type HTTPMethods =
-  | "post"
-  | "delete"
-  | "put"
-  | "get"
-  | undefined;
 export type PanelOperationTable = Map<HTTPMethods, Operation>;
 
 

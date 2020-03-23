@@ -69,6 +69,17 @@ export const PopupMenu:
           content={
             <Menu>
               <Menu.Group>
+                <Link to={
+                  {
+                    pathname: "/Device" + "/" + deviceId + "/" + "SpotRecords",
+                    state: {tableParent: props.data}
+                  }
+                } style={linkCss}>
+                  <Menu.Item icon="list-columns">
+                    <Text> 查看数据...</Text>
+                  </Menu.Item>
+                </Link>
+
                 <Menu.Item icon="edit"
                   onSelect={() => {
                     entries.forEach((val, key) => {
@@ -97,17 +108,6 @@ export const PopupMenu:
                     setShownSubmitDialog(true);
                   }}
                 >修改...</Menu.Item>
-                <Menu.Item icon="download">下载...</Menu.Item>
-                <Link to={
-                  {
-                    pathname: "/Device" + "/" + deviceId + "/" + "SpotRecords",
-                    state: {tableParent: props.data}
-                  }
-                } style={linkCss}>
-                  <Menu.Item icon="list-columns">
-                    <Text> 查看数据...</Text>
-                  </Menu.Item>
-                </Link>
               </Menu.Group>
               <Menu.Divider />
               <Menu.Group>

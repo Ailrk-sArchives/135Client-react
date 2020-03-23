@@ -67,7 +67,14 @@ export const PopupMenu: React.FC<TablePopupMenuProps & {data: Spot}> = props => 
         content={
           <Menu>
             <Menu.Group>
-
+              <Link to={
+                {
+                  pathname: "/Spot" + "/" + spotId + "/" + "Devices",
+                  state: {tableParent: data}
+                }
+              } style={linkCss}>
+                <Menu.Item icon="list-columns"> <Text>查看设备... </Text></Menu.Item>
+              </Link>
               <Menu.Item icon="edit"
                 onSelect={() => {
                   entries.forEach((val, key) => {
@@ -76,7 +83,6 @@ export const PopupMenu: React.FC<TablePopupMenuProps & {data: Spot}> = props => 
                       setEntries(entries.set(key, v ? v.toString() : undefined));
                     }
                   });
-
                   Wait.update(confirmed,
                     () => {
                       return {
@@ -94,21 +100,11 @@ export const PopupMenu: React.FC<TablePopupMenuProps & {data: Spot}> = props => 
                               updated : e))
                       }
                     }).catch(() => undefined);
-
                   setShownSubmitDialog(true);
                 }}>
                 修改...
               </Menu.Item>
-              <Menu.Item icon="download">下载...</Menu.Item>
             </Menu.Group>
-            <Link to={
-              {
-                pathname: "/Spot" + "/" + spotId + "/" + "Devices",
-                state: {tableParent: data}
-              }
-            } style={linkCss}>
-              <Menu.Item icon="list-columns"> <Text>查看设备... </Text></Menu.Item>
-            </Link>
             <Menu.Divider />
             <Menu.Group>
               <Menu.Item icon="trash" intent="danger"

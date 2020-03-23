@@ -26,6 +26,5 @@ export interface ShownDialogProps extends DialogConfirmedProps {
   setShownSubmitDialog: React.Dispatch<React.SetStateAction<boolean>>,
   shownConfirmDialog: boolean,
   setShownConfirmDialog: React.Dispatch<React.SetStateAction<boolean>>,
-
 }
 

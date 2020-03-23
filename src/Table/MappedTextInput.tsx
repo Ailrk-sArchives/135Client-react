@@ -3,7 +3,6 @@
  */
 import React, {useState, useCallback, useEffect} from 'react';
 import {TextInput} from 'evergreen-ui';
-import {DataTypeKeys} from '../Data/data';
 
 
 const MappedTextInput: React.FC<{

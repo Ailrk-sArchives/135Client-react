@@ -1,22 +1,24 @@
 import React, {useState, useRef, useEffect} from 'react';
 import {
   Pane, Menu, Popover, Position, Tab, SearchInput,
-  Text, Icon, toaster
+  Text, Icon,
 } from 'evergreen-ui';
 import {
-  ApiDataType, DataTypeKeys, Spot, SpotRecord, Project,
-  Device, ApiDataTypeTag, ApiResponse
+  ApiDataType, Spot, SpotRecord, Project,
+  Device, ApiResponse,
 } from '../Data/data';
 import {PanelDataType} from '../Data/dataAdaptor';
 import SubmitDialogue, {SubmitDialogueProps} from './SubmitDialogue';
 import ConfirmDialogue, {ConfirmDialogueProps} from './ConfirmDialogue';
 import {
-  Operation, PanelOperationTable, HTTPMethods, ControlHub,
-  mapToObject, apiDataArrayIsDuplicated
+  PanelOperationTable,
+  ControlHub,
+  mapToObject,
+  apiDataArrayIsDuplicated
 } from './utils/utils';
-import {Wait, CallbackProps, CallbackPropsCb} from './utils/callbacks';
-import {ShownDialogProps} from './utils/dialogStateUtils';
+import {Wait, CallbackProps} from './utils/callbacks';
 import {PanelPopupMenuProps} from './utils/utils';
+import {Export} from './utils/export';
 
 const _ControlPanel = (controlHub: ControlHub) => {
   /*
@@ -92,7 +94,8 @@ const _ControlPanel = (controlHub: ControlHub) => {
         </Tab>
 
         <Tab height={35} width={35}>
-          <ExportOptionMenu />
+          <ExportOptionMenu someDatas={controlHub.data}
+            titlename={titlename} />
         </Tab>
       </Pane>
 
@@ -275,10 +278,19 @@ const PanelPopupMenu: React.FC<PanelPopupMenuProps> = props => {
  * export popup for control panel.
  * To export files into different formats.
  */
-const ExportOptionMenu: React.FC<{}> = () => {
+const ExportOptionMenu: React.FC<{
+  someDatas?: Array<ApiDataType>,
+  titlename?: string,
+}> = props => {
+  const {
+    titlename,
+    someDatas,
+  } = props;
+
   const linkCss: React.CSSProperties = {
     textDecoration: 'none',
   };
+
   return (
     <Popover
       position={Position.BOTTOM_LEFT}
@@ -287,17 +299,42 @@ const ExportOptionMenu: React.FC<{}> = () => {
           <Menu.Group>
             <Menu.Item icon="download"
               hoverElevation={1}
-              activeElevation={2}>
+              activeElevation={2}
+              onSelect={
+                () => Export
+                  .downloadJson(someDatas, `${titlename ?? "data"}.json`)
+              }
+            >
               导出 JSON...
             </Menu.Item>
             <Menu.Item icon="download"
               hoverElevation={1}
-              activeElevation={2}>
+              activeElevation={2}
+              onSelect={
+                () => Export
+                  .downloadXml(someDatas, `${titlename ?? "data"}.xml`)
+              }
+            >
+              导出 XML...
+            </Menu.Item>
+            <Menu.Item icon="download"
+              hoverElevation={1}
+        activeElevation={2}
+              onSelect={
+                () => Export
+                  .downloadXlsx(someDatas, `${titlename ?? "data"}.xlsx`)
+              }
+            >
               导出 XLSX...
             </Menu.Item>
             <Menu.Item icon="download"
               hoverElevation={1}
-              activeElevation={2}>
+              activeElevation={2}
+              onSelect={
+                () => Export
+                  .downloadCsv(someDatas, `${titlename ?? "data"}.csv`)
+              }
+            >
               导出 CSV...
             </Menu.Item>
           </Menu.Group>

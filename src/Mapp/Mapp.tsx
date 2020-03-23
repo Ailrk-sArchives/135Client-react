@@ -17,7 +17,7 @@ import {
 import {grapName} from '../utils/utils';
 
 // remove default leaflet icon.
-delete L.Icon.Default.prototype._getIconUrl;
+//delete L.Icon.Default.prototype._getIconUrl;
 
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: require('leaflet/dist/images/marker.png'),
@@ -38,12 +38,13 @@ const markerIcon = new L.Icon({
   shadowAnchor: [0, 82],
 });
 
-const tableRow = <T extends any>(e: Array<any>, info: T) => {
+function tableRow<T extends any>(e: Array<any>, info: T) {
   /*
    *  generate row of key-val pairs
    *  @param e:    A tuple of key and value from Object.entries().
    *  @param info: projetInfo.
    */
+
   const [key, val] = e;
 
   if (Object.keys(info).includes(key)) {
@@ -56,15 +57,13 @@ const tableRow = <T extends any>(e: Array<any>, info: T) => {
   }
 };
 
-
-
-const filterGeoJson =  // filter FeatureCollection type GeoJson.
-  (data: FeatureCollection, propertyNames: Array<string>) => {
-    data.features = data.features
-      .filter((e: Feature) =>
-        e.properties ? propertyNames.includes(e.properties.NAME) : null);
-    return data;
-  };
+// filter FeatureCollection type GeoJson.
+function filterGeoJson(data: FeatureCollection, propertyNames: Array<string>) {
+  data.features = data.features
+    .filter((e: Feature) =>
+      e.properties ? propertyNames.includes(e.properties.NAME) : null);
+  return data;
+};
 
 const Mapp: React.FC<{}> = () => {
   // zoom depth of the map
@@ -78,8 +77,7 @@ const Mapp: React.FC<{}> = () => {
     IdempotentApis.Get.projectViewGet().then((ps) => setProjects(ps));
   }, []);
 
-
-  const contentFC: React.FC<{currentZoom: number}> = (props) => (
+  const contentFC: React.FC<{currentZoom: number}> = props => (
     <Pane>
       <Card background="overlay"
         paddingTop={5}
@@ -102,7 +100,6 @@ const Mapp: React.FC<{}> = () => {
 
   return <Frame children={React.createElement(contentFC)} />;
 };
-
 
 const MapCanvas:
   React.FC<{

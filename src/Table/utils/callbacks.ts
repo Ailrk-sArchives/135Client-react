@@ -3,11 +3,10 @@
  */
 
 import {
-  waitClick, PanelOperationTable, Operation, OPDelete, OPUpdate, HTTPMethods,
-  OPPost
+  waitClick, PanelOperationTable, Operation, OPDelete, OPUpdate, OPPost
 } from './utils';
 import {PanelDataType} from '../../Data/dataAdaptor';
-import {FeedBack} from '../../Data/data';
+import {FeedBack, HTTPMethods} from '../../Data/data';
 import React, {MutableRefObject} from 'react';
 import {toaster} from 'evergreen-ui';
 

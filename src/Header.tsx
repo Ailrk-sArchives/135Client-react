@@ -3,27 +3,22 @@
 import React, { useState } from 'react';
 import {Pane, Strong, Text, Icon, Tab, TabNavigation, IconName} from 'evergreen-ui';
 import TabContentResolver, {TabContentTriple} from './utils/TabContentResolver';
-import history from './history';
+import {css, StyleAttribute} from 'glamor';
 
 const Header: React.FC = (props) => {
-  const fixedHeaderCss: React.CSSProperties = {
+  const fixedHeader: StyleAttribute = css({
     position: "fixed",
     width: "100hv",
     right: 0,
     top: 0,
     left: 0,
-    zIndex: 1001
-  };
-
+    zIndex: 1001,
+  });
 
   // redirect to home
   return (
-    <div style={fixedHeaderCss}>
-      <Pane elevation={3}
-        hoverElevation={4}
-        activeElevation={4}
-        >
-
+    <div {...fixedHeader}>
+      <Pane elevation={1}>
         <Pane background="tint2"
           height={72}
           padding={24}
@@ -35,7 +30,7 @@ const Header: React.FC = (props) => {
             ['项目信息', 'office', '/', '项目信息汇总'],
             ['历史数据', 'join-table', '/DeviceTable', '设备列表历史汇总'],
             ['实时数据', 'timeline-line-chart', ,'实时设备数据汇总'] ,
-            ['数据分析', 'comparison', , '数据对比及可视化']
+            ['数据分析', 'comparison', '/Visualization', '数据对比及可视化']
           ]}/>
         </Pane>
 

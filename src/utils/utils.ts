@@ -14,13 +14,11 @@ export const grapName = (val: string | boolean | number | object | undefined): s
     : null);
 }
 
-
 export interface dynamicHeightProperties {
   smallScale: number;
   normalScale: number;
   largeScale: number;
 };
-
 
 export const dynamicHeight = (zoom: number, dynprop: dynamicHeightProperties) => {
   /*
@@ -33,8 +31,4 @@ export const dynamicHeight = (zoom: number, dynprop: dynamicHeightProperties) =>
   return window.innerHeight * dynprop.smallScale;
 };
 
-  /* if (zoom >= 180) return window.innerHeight * 0.35; */
-  /* if (zoom >= 120) return window.innerHeight * 0.56; */
-  /* if (zoom >= 80) return window.innerHeight * 0.65; */
-  /* return window.innerHeight * 0.65; */
 
