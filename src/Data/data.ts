@@ -148,7 +148,7 @@ export interface SpotRecord {
   humidity?: number,
   pm25?: number,
   spot_record_id?: number,
-  spot_record_time?: number,
+  spot_record_time?: string,
   temperature?: number,
   window_opened?: boolean,
 }

@@ -6,7 +6,6 @@ import { Router, Route, Switch } from 'react-router-dom';
 import Header from './Header';
 import Sidebar from './Sidebar/Sidebar';
 import history from './history';
-import Barchart from './Vis/Barchart';
 
 const Mapp: any = lazy(() => import('./Mapp/Mapp'));
 const DeviceTable: any = lazy(() => import('./Table/DeviceTable/DeviceTable'));

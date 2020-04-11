@@ -212,8 +212,8 @@ export const Tablefc: TableFC = (props) => {
         <Table.Cell flexBasis={150} flexShrink={0} flexGrow={0}> 设备类型 </Table.Cell>
         <Table.Cell flexBasis={200} flexShrink={0} flexGrow={0}> 测点名称 </Table.Cell>
         <Table.Cell> 所属项目 </Table.Cell>
-        <Table.Cell flexBasis={100} flexShrink={0} flexGrow={0}> 创建时间 </Table.Cell>
-        <Table.Cell flexBasis={150} flexShrink={0} flexGrow={0}> 修改时间 </Table.Cell>
+        <Table.Cell flexBasis={170} flexShrink={0} flexGrow={0}> 创建时间 </Table.Cell>
+        <Table.Cell flexBasis={170} flexShrink={0} flexGrow={0}> 修改时间 </Table.Cell>
         <Table.Cell flexBasis={100} flexShrink={0} flexGrow={0}> 在线 </Table.Cell>
         <Table.Cell flexBasis={100} flexShrink={0} flexGrow={0}> 操作 </Table.Cell>
       </Table.Head>
@@ -243,6 +243,7 @@ export const Tablefc: TableFC = (props) => {
                         }
                       </Pane>
                     </Table.Cell>
+                    <Table.Cell flexBasis={50} flexShrink={0} flexGrow={0}>{grapName((d as Device).device_id)}</Table.Cell>
                     <Table.Cell>{grapName((d as Device).device_name)}</Table.Cell>
                     <Table.Cell flexBasis={150} flexShrink={0} flexGrow={0}
                     >{grapName((d as Device).device_type)}</Table.Cell>
@@ -250,9 +251,9 @@ export const Tablefc: TableFC = (props) => {
                       {grapName((d as Device).spot_name)}
                     </Table.Cell>
                     <Table.Cell>{grapName((d as Device).project_name)}</Table.Cell>
-                    <Table.Cell flexBasis={150} flexShrink={0} flexGrow={0}>
+                    <Table.Cell flexBasis={170} flexShrink={0} flexGrow={0}>
                       {grapName((d as Device).create_time)}</Table.Cell>
-                    <Table.Cell flexBasis={150} flexShrink={0} flexGrow={0}>
+                    <Table.Cell flexBasis={170} flexShrink={0} flexGrow={0}>
                       {grapName((d as Device).modify_time)}</Table.Cell>
                     <Table.Cell flexBasis={100} flexShrink={0} flexGrow={0}>
                       <Tooltip content={(d as Device).online ? "online" : "offline"}>
