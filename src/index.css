@@ -13,6 +13,11 @@ body::-webkit-scrollbar {
   display: none;
 }
 
+/* toaster */
+.css-1sugtjn {
+  z-index: 1500 !important;
+}
+
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;

@@ -80,10 +80,10 @@ const Mapp: React.FC<{}> = () => {
   const contentFC: React.FC<{currentZoom: number}> = props => (
     <Pane>
       <Card background="overlay"
-        paddingTop={5}
-        paddingLeft={5}
-        paddingRight={5}
-        paddingBottom={40}
+        paddingTop={2}
+        paddingLeft={2}
+        paddingRight={2}
+        paddingBottom={5}
         width="100%"
         height="100%">
         <MapCanvas mapzoom={mapzoom}

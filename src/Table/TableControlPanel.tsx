@@ -90,7 +90,7 @@ const _ControlPanel = (controlHub: ControlHub) => {
         </Tab>
 
         <Tab height={35} width={35}>
-          { React.createElement(PanelPopupMenu, panelPopupMenuProps) }
+          {React.createElement(PanelPopupMenu, panelPopupMenuProps)}
         </Tab>
 
         <Tab height={35} width={35}>
@@ -319,7 +319,7 @@ const ExportOptionMenu: React.FC<{
             </Menu.Item>
             <Menu.Item icon="download"
               hoverElevation={1}
-        activeElevation={2}
+              activeElevation={2}
               onSelect={
                 () => Export
                   .downloadXlsx(someDatas, `${titlename ?? "data"}.xlsx`)

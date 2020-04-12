@@ -13,42 +13,42 @@ import SubmitDialogue, {SubmitDialogueProps} from '../SubmitDialogue';
 
 
 export const PopupMenu:
-React.FC<TablePopupMenuProps & {data: SpotRecord}> = props => {
-  const {
-    confirmed,
-    breakSig,
-    dataTypeKeys,
-    entries,
-    setEntries,
-    message,
-    setMessage,
-    setSomeDatas,
-    someDatas,
-    data,
-    panelOperationTable,
-  } = props;
+  React.FC<TablePopupMenuProps & {data: SpotRecord}> = props => {
+    const {
+      confirmed,
+      breakSig,
+      dataTypeKeys,
+      entries,
+      setEntries,
+      message,
+      setMessage,
+      setSomeDatas,
+      someDatas,
+      data,
+      panelOperationTable,
+    } = props;
 
-  const spotRecordId = data.spot_record_id || 1;
-  const [shownConfirmDialog, setShownConfirmDialog] = useState<boolean>(false);
-  const [shownSubmitDialog, setShownSubmitDialog] = useState<boolean>(false);
+    const spotRecordId = data.spot_record_id || 1;
+    const [shownConfirmDialog, setShownConfirmDialog] = useState<boolean>(false);
+    const [shownSubmitDialog, setShownSubmitDialog] = useState<boolean>(false);
 
-  const submitDialogProps: SubmitDialogueProps = {
-    confirmed,
-    breakSig,
-    dataTypeKeys,
-    shown: shownSubmitDialog,
-    setShown: setShownSubmitDialog,
-    entries,
-    setEntries,
-  };
+    const submitDialogProps: SubmitDialogueProps = {
+      confirmed,
+      breakSig,
+      dataTypeKeys,
+      shown: shownSubmitDialog,
+      setShown: setShownSubmitDialog,
+      entries,
+      setEntries,
+    };
 
-  const confirmDialogueProps: ConfirmDialogueProps = {
-    confirmed,
-    breakSig,
-    shown: shownConfirmDialog,
-    setShown: setShownConfirmDialog,
-    message,
-  };
+    const confirmDialogueProps: ConfirmDialogueProps = {
+      confirmed,
+      breakSig,
+      shown: shownConfirmDialog,
+      setShown: setShownConfirmDialog,
+      message,
+    };
 
     return (
       <>
@@ -63,7 +63,7 @@ React.FC<TablePopupMenuProps & {data: SpotRecord}> = props => {
           content={
             <Menu>
               <Menu.Group>
-            <Menu.Item icon="edit"
+                <Menu.Item icon="edit"
                   onSelect={() => {
                     entries.forEach((val, key) => {
                       if (Object.keys(data).includes(key)) {

@@ -293,8 +293,7 @@ export const Tablefc: TableFC = (props) => {
                   normalScale: 0.56,
                   smallScale: 0.65
                 } as dynamicHeightProperties
-              )}
-          >
+              )} >
             <Spinner />
           </Pane>
       }

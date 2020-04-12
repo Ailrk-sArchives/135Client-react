@@ -30,7 +30,6 @@ const App: React.FC = () => {
     <Pane className="Main" position="relative" height="100hv">
 
       <Router history={history}>
-
         <Header />
         <Suspense fallback={
           <Pane alignItems="center"

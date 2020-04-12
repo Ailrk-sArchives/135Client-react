@@ -78,7 +78,6 @@ export const timeout =
 // await until clicked is set to true.
 export const waitClick =
   async (
-
     clicked: React.MutableRefObject<boolean>,
 
     callback: () => Promise<any> | undefined,
