@@ -77,9 +77,13 @@ const DeviceTable: React.FC<{}> = (props) => {
           setItemCheckedList(data.map(() => false));
         }
 
-        setLoaded(true);
       })
-        .catch(e => console.error(e))
+        .catch(e => {
+          setDevices([]);
+          setTotalPage(0);
+          setTotalElementCount(0);
+        })
+        .finally(() => setLoaded(true));
     }, []);
   useInit(makePaginationRequest(1, pageSize));
 
@@ -116,11 +120,13 @@ const DeviceTable: React.FC<{}> = (props) => {
         setTotalPage(Math.floor(totalElementCount / pageSize));
         setItemCheckedList(data.map(() => false));
       }
-
-      setLoaded(true);
     })
-      .catch(e => console.error(e))
-
+      .catch(e => {
+        setDevices([]);
+        setTotalPage(0);
+        setTotalElementCount(0);
+      })
+      .finally(() => setLoaded(true));
   };
 
   const paginationProps: PaginationProps = {  // set pagination control.

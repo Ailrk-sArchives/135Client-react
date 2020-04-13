@@ -54,9 +54,13 @@ const SpotTable: React.FC<{}> = () => {
         setCurrentPage(currentPage);
         setTotalPage(Math.floor(srs.totalElementCount / pageSize) + 1);
         setItemCheckedList(srs.data.map(() => false));
-        setLoaded(true);
       })
-      .catch(e => console.error(e))
+      .catch(e => {
+        setSpots([]);
+        setTotalPage(0);
+        setTotalElementCount(0);
+      })
+      .finally(() => setLoaded(true));
   }, []);
 
   useInit(makePaginationRequest(1, pageSize));
@@ -75,7 +79,12 @@ const SpotTable: React.FC<{}> = () => {
         setTotalPage(Math.floor(srs.totalElementCount / pageSize) + 1);
         setItemCheckedList(srs.data.map(() => false));
       })
-      .catch(e => console.error(e))
+      .catch(e => {
+        setSpots([]);
+        setTotalPage(0);
+        setTotalElementCount(0);
+      })
+      .finally(() => setLoaded(true));
   });
 
   const paginationProps: PaginationProps = {

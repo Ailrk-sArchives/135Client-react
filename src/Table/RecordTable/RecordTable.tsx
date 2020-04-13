@@ -52,7 +52,6 @@ const RecordTable: React.FC<{}> = (props) => {
         setSpotRecords([]);
         setTotalPage(0);
         setTotalElementCount(0);
-        console.error(e);
       })
       .finally(() => setLoaded(true));
   }, []);
@@ -78,7 +77,6 @@ const RecordTable: React.FC<{}> = (props) => {
         setSpotRecords([]);
         setTotalPage(0);
         setTotalElementCount(0);
-        console.error(e);
       })
       .finally(() => setLoaded(true));
   };
