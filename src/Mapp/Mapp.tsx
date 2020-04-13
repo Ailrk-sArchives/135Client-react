@@ -20,8 +20,8 @@ import {grapName} from '../utils/utils';
 //delete L.Icon.Default.prototype._getIconUrl;
 
 L.Icon.Default.mergeOptions({
-  iconRetinaUrl: require('leaflet/dist/images/marker.png'),
-  iconUrl: require('leaflet/dist/images/marker.png'),
+  iconRetinaUrl: require('../marker.png'),
+  iconUrl: require('../marker.png'),
   shadowUrl: require('leaflet/dist/images/marker-shadow.png')
 });
 

@@ -1,10 +1,14 @@
-import React, {useState, Fragment, useEffect, forwardRef} from 'react'
-import {Pane, Button, Tab, Stack, Text, Strong, TextInput, toaster} from 'evergreen-ui'
+import React, {useState, Fragment, useEffect, useRef} from 'react'
+import {
+  Pane, Button, Tab, Icon, Stack, Text, Strong, TextInput,
+  toaster, SelectMenu, TagInput, Tooltip,
+} from 'evergreen-ui'
 import {Link, useLocation} from 'react-router-dom'
 import LineChart from './LineChart'
 import DatePicker from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker.css';
-import {SpotRecord} from '../Data/data'
+import {SpotRecord, spotRecordKeys} from '../Data/data'
+import {valid} from 'glamor'
 
 const chartCommonProperties = {
   width: 1300,
@@ -30,25 +34,38 @@ const ChartDatePicker = (props: {date: Date, setDate: Function}) => (
     onChange={d => props.setDate(d ?? new Date())}
     showTimeSelect
     timeFormat={"HH:mm"}
-    dateFormat={"yyyy/MM/d, h:mm aa"}
+    dateFormat={"yyyy-MM-d aa h:mm"}
     timeIntervals={5}
     customInput={<CustomInput />}
   />
 );
+
+const Sep = () => <Icon icon={"slash"} size={33} marginLeft={5} marginRight={5} />
 
 const HeaderTitle = (props: {
   did: number,
   setDid: React.Dispatch<React.SetStateAction<number>>
 }) => (
     <Pane className="chartHeader-title" display="flex">
-      <Strong paddingTop={5} marginRight={15} size={600}>设备ID:  </Strong>
-      <TextInput width={100}
-        fontSize={18}
-        placeholder={props.did.toString()}
-        onChange={
-          (e: React.ChangeEvent<HTMLInputElement>) =>
-            props.setDid(() => Number.parseInt(e.target.value))
-        } />
+      <Tooltip content="点击查看设备数据">
+        <Tab
+          paddingTop={7}
+          width={90}>
+          <Link to={{pathname: `/Device/${props.did}/SpotRecords`}}
+            style={{textDecoration: 'none'}}>
+            <Strong size={600}>设备ID:  </Strong>
+          </Link>
+        </Tab>
+      </Tooltip>
+      <Tooltip content="输入设备ID">
+        <TextInput width={80}
+          fontSize={18}
+          placeholder={props.did.toString()}
+          onChange={
+            (e: React.ChangeEvent<HTMLInputElement>) =>
+              props.setDid(() => Number.parseInt(e.target.value))
+          } />
+      </Tooltip>
     </Pane>
   );
 
@@ -58,18 +75,18 @@ const SelectDate = (props: {start: DateState, end: DateState}) => {
   const [endDate, setEndDate] = props.end;
   return (
     <Pane
-      display="flex"
-      marginLeft={30}>
-      <Text size={600} paddingTop={5} marginRight={20}>日期: </Text>
+      width={470}
+      display="flex">
+      <Strong size={600} paddingTop={4} marginRight={20}>日期: </Strong>
       <Pane
         className="charHeader-startdate">
         <ChartDatePicker
           date={startDate}
           setDate={setStartDate} />
       </Pane>
-      <Text size={600} paddingTop={5} marginLeft={10} marginRight={10}>至</Text>
+      <Text size={600} paddingTop={4} marginLeft={10} marginRight={10}>至</Text>
       <Pane
-        className="charHeader-enddate">
+        className="chartHeader-enddate">
         <ChartDatePicker
           date={endDate}
           setDate={setEndDate} />
@@ -81,20 +98,70 @@ const SelectDate = (props: {start: DateState, end: DateState}) => {
 interface ChartLocState {
   did: number,
   startDate: Date,
-  endDate: Date
+  endDate: Date,
+  keys: Array<RecordKeys>,
 }
 const SearchBtn = (props: ChartLocState) => {
   return (
     <Pane background="#66788A"
-      height={40} width={80}
-      paddingRight={10}
-      display="relative">
+      height={40} width={80}>
       <Link to={{pathname: "/Visualization", state: props}} style={{textDecoration: 'none'}}>
         <Tab height="100%"
+          paddingLeft={-10}
           width="100%">
-          <Strong color="#ffffff" fontSize={20} > 查询 </Strong>
+          <Strong color="#ffffff" fontSize={18} > 查询 </Strong>
         </Tab>
       </Link>
+    </Pane>
+  );
+}
+
+type RecordKeys = Exclude<keyof SpotRecord, "_kind" | "spot_record_time">;
+const KeySelector = (props: {
+  keys: Array<RecordKeys>,
+  setKeys: React.Dispatch<React.SetStateAction<Array<RecordKeys>>>,
+}) => {
+  const {keys, setKeys} = props;
+  const [selected, setSelected] = useState<string>(keys[0] ?? "ADD");
+  const ref = useRef<TagInput>(null);
+  useEffect(() => {
+    console.log(ref);
+  }, []);
+  return (
+    <Pane display="flex" height={40}>
+      <Tooltip content="点击按钮添加标签">
+        <TagInput width={450} height={40}
+          placeholder={"Add labels"}
+          ref={ref}
+          values={keys}
+          onChange={keys => setKeys(keys as Array<RecordKeys>)} />
+      </Tooltip>
+
+      <SelectMenu
+        title="select keys"
+        options={
+          spotRecordKeys
+            .filter(e =>
+              !["spot_record_time",
+                "spot_record_id",
+                "device_id"].includes(e[0]))
+            .map(label => ({label: label[1], value: label[0]}))}
+        selected={selected}
+        onSelect={item => {
+          if (keys.length < 3) {
+            setSelected(item.value as string);
+            setKeys(keys => keys.concat([item.value as RecordKeys]))
+            let rv = ref.current?.props.values;
+            if (rv !== undefined) rv = keys;
+          }
+          else {
+            toaster.warning("最多同时显示3个标签");
+          }
+        }}>
+        <Button height={40}>
+          <Icon icon="plus" />
+        </Button>
+      </SelectMenu>
     </Pane>
   );
 }
@@ -106,12 +173,11 @@ export const ChartFrame: React.FC<{currentZoom: number}> = props => {
   // 3. be able to show multiple entries for on device.
   // 4. be able to show one entry for multiple devices.
   let loc = useLocation<ChartLocState>();
+  console.log(loc);
   const [redraw, setRedraw] = useState<boolean>(false);
   const [did, setDid] = useState<number>(loc.state?.did ?? 1);
   const [keys, setKeys] =
-    useState<Array<Exclude<keyof SpotRecord, "_kind" | "spot_record_time">>>
-      (["temperature"]);
-
+    useState<Array<RecordKeys>>(loc.state?.keys ?? ["temperature"]);
   const [startDate, setStartDate] =
     useState<Date>(loc.state?.startDate ??
       (() => {
@@ -141,22 +207,30 @@ export const ChartFrame: React.FC<{currentZoom: number}> = props => {
   const ChartHeader = () => {
     return (
       <Pane className="chartHeader-container"
-        height="100px"
-        background="tint2"
+        paddingTop={30}
+        paddingLeft={20}
+        height={100}
         width="100hv"
         display="flex"
-        justifyContent="space-between"
-        paddingLeft={40}
-        paddingRight={30}
-        paddingTop={20}>
-        <Pane display="flex" marginRight={400}>
+        style={{flexDirection: "column", flexWrap: "wrap", }}
+        background="tint2">
+        <Pane
+          height="100px"
+          display="flex" >
           <HeaderTitle did={did} setDid={setDid} />
+          <Sep />
           <SelectDate start={[startDate, setStartDate]}
             end={[endDate, setEndDate]} />
+          <Sep />
+          <KeySelector keys={keys} setKeys={setKeys} />
+          <Sep />
+          <div onClick={onClickSearch}>
+            <SearchBtn did={did}
+              startDate={startDate}
+              endDate={endDate}
+              keys={keys} />
+          </div>
         </Pane>
-        <div onClick={onClickSearch}>
-          <SearchBtn did={did} startDate={startDate} endDate={endDate} />
-        </div>
       </Pane>
     );
   }

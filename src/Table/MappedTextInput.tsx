@@ -5,6 +5,21 @@ import React, {useState, useCallback, useEffect} from 'react';
 import {TextInput} from 'evergreen-ui';
 
 
+const normget = (e: any): string => {
+  // handle nested entry
+  let res: string;
+  if (typeof e == 'object' && Object.keys(e).length == 1) {
+    const k = Object.keys(e)[0];
+    res = e[k];
+  } else {
+    res = e as string;
+  }
+
+  console.log(res);
+  return res;
+}
+
+
 const MappedTextInput: React.FC<{
 
   entries: Map<string, string | undefined>,
@@ -33,6 +48,8 @@ const MappedTextInput: React.FC<{
   useEffect(() => {  // flush the most recent value into entries.
     setEntries(entries.set(name, value));
   }, [value]);
+
+  console.log(entries);
 
   return (
     <TextInput height={45}

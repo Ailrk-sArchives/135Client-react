@@ -33,14 +33,15 @@ export const toNivoData = (raw: NivoFeed, key: string, chart: ChartTypes): NivoD
 }
 
 const maxConstraintFilter = (data: Array<SpotRecord>) =>
-  data.length > 1000 ?
-    data.filter((e, idx) => idx % Math.floor(data.length / 1000) == 0) : data;
+  data.length > 600 ?
+    data.filter((e, idx) => idx % Math.floor(data.length / 600) == 0) : data;
+
 
 // TODO: pad dummy
 const zeroPadding = (data: Array<SpotRecord>) => {
   const msPerDay = 1000 * 60 * 60 * 24;
   const dummyRecord: SpotRecord = {
-    _kind: "SpotRecord",
+      _kind: "SpotRecord",
     ac_power: 0,
     co2: 0,
     device_id: 0,
@@ -52,7 +53,7 @@ const zeroPadding = (data: Array<SpotRecord>) => {
     window_opened: false,
   };
 
-  for (let i = 0; i < data.length; i++) {
+  for (let i = 0; i < data.length; ++i) {
     const current = new Date(data[i]?.spot_record_time ?? new Date());
     const next = new Date(data[i + 1]?.spot_record_time ?? new Date());
     const mkDummy = (d: Date) => {

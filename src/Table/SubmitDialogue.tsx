@@ -2,7 +2,7 @@ import {
   Dialog, Heading, Stack, Table, TextInput, toaster, Autocomplete
 } from 'evergreen-ui';
 import React, {useRef, useEffect} from 'react';
-import {DataTypeKeys} from '../Data/data';
+import {DataTypeKeys, Company} from '../Data/data';
 import {DialogProps} from './utils/dialogStateUtils';
 import MappedTextInput from './MappedTextInput';
 
@@ -69,6 +69,8 @@ const SubmitDialogue =
       );
     }, []);
 
+    console.log(entries);
+
     return (
       <Stack value={1100}>
         {
@@ -86,6 +88,7 @@ const SubmitDialogue =
                 if (breakSig !== undefined) breakSig.current = true;
                 close();
               }}
+
               onConfirm={close => {
                 confirmed.current = true;
                 close();

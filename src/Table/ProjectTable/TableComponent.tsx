@@ -4,7 +4,7 @@ import {
   Table, Pane, Position, Menu, Spinner,
   Popover, Text, Icon,
 } from 'evergreen-ui';
-import {Project, ApiResponse} from '../../Data/data';
+import {Project, ApiResponse, Company} from '../../Data/data';
 import {TableFC} from '../ContentCard';
 import {Link} from 'react-router-dom';
 import {TablePopupMenuProps, PanelOperationTable, mapToObject} from '../utils/utils'
@@ -159,10 +159,7 @@ export const Tablefc: TableFC = (props) => {
               )}>
             <Spinner />
           </Pane>
-
-
       }
-
     </Table>
   );
 }
@@ -170,6 +167,7 @@ export const Tablefc: TableFC = (props) => {
 
 export const PopupMenu:
   React.FC<TablePopupMenuProps & {data: Project}> = props => {
+    // pop up for one Project
     const {
       confirmed,
       breakSig,
@@ -182,7 +180,6 @@ export const PopupMenu:
       someDatas,
       data,
       panelOperationTable,
-
     } = props;
 
     const projectId = data.project_id || 1;
@@ -192,32 +189,37 @@ export const PopupMenu:
     const linkCss: React.CSSProperties = {
       textDecoration: 'none',
     };
-  const submitDialogProps: SubmitDialogueProps = {
-    confirmed,
-    breakSig,
-    dataTypeKeys,
-    shown: shownSubmitDialog,
-    setShown: setShownSubmitDialog,
-    entries,
-    setEntries,
-  };
+    const submitDialogProps: SubmitDialogueProps = {
+      confirmed,
+      breakSig,
+      dataTypeKeys,
+      shown: shownSubmitDialog,
+      setShown: setShownSubmitDialog,
+      entries,
+      setEntries,
+    };
 
-  const confirmDialogueProps: ConfirmDialogueProps = {
-    confirmed,
-    breakSig,
-    shown: shownConfirmDialog,
-    setShown: setShownConfirmDialog,
-    message,
-  };
+    const confirmDialogueProps: ConfirmDialogueProps = {
+      confirmed,
+      breakSig,
+      shown: shownConfirmDialog,
+      setShown: setShownConfirmDialog,
+      message,
+    };
+
+    // temporarily handld nested company oject bug. Need to fix later.
+    const handleNested = (o: any): string => {
+      if (typeof o == 'object' && Object.keys(o).length == 1) {
+        const k = Object.keys(o)[0];
+        return o[k] as string;
+      }
+      else return o as string;
+    }
 
     return (
       <>
-        {
-          React.createElement(SubmitDialogue, submitDialogProps)
-        }
-        {
-          React.createElement(ConfirmDialogue, confirmDialogueProps)
-        }
+        {React.createElement(SubmitDialogue, submitDialogProps)}
+        {React.createElement(ConfirmDialogue, confirmDialogueProps)}
         <Popover
           position={Position.BOTTOM_LEFT}
           content={
@@ -235,17 +237,37 @@ export const PopupMenu:
                 </Link>
                 <Menu.Item icon="edit"
                   onSelect={() => {
+                    // Handle data submitions.
+                    // Very specific. It might needs a refactor.
                     entries.forEach((val, key) => {
                       if (Object.keys(data).includes(key)) {
                         const v = data[(key as keyof Project)];
-                        setEntries(entries.set(key, v ? v.toString() : undefined));
+                        console.log(v);
+                        setEntries(
+                          entries.set(key, v ?
+                            handleNested(v).toString()
+                            :
+                            undefined));
                       }
                     });
                     Wait.update(confirmed,
                       () => {
                         return {
                           panelOperationTable: panelOperationTable,
-                          panelData: mapToObject(entries),
+                          panelData: (() => {
+                            // To handle flat company_name into Company object
+                            const obj = mapToObject(entries);
+                            for (const k of Object.keys(obj)) {
+                              if (["construction_company",
+                                "tech_support_company",
+                                "project_company"
+                              ].includes(k as string)) {
+                                const company_name = obj[k];
+                                obj[k] = {"company_name": company_name} as Company
+                              }
+                            }
+                            return obj;
+                          })(),
                           someid: projectId,
                         }
                       },
@@ -260,8 +282,7 @@ export const PopupMenu:
                         }
                       }).catch(() => undefined);
                     setShownSubmitDialog(true);
-                  }
-                  }
+                  }}
                 >修改...</Menu.Item>
               </Menu.Group>
               <Menu.Divider />
