@@ -1,8 +1,8 @@
 /* Entrance of the App
 */
-import React, { useState, Suspense, lazy } from 'react';
+import React, {useState, Suspense, lazy} from 'react';
 import {Pane, Text, Spinner, Icon} from 'evergreen-ui';
-import { Router, Route, Switch } from 'react-router-dom';
+import {Router, Route, Switch} from 'react-router-dom';
 import Header from './Header';
 import Sidebar from './Sidebar/Sidebar';
 import history from './history';
@@ -49,7 +49,7 @@ const App: React.FC = () => {
                 headerHeight={headerHeight} />
             </Route>
 
-              <Route path={["/Map", "/ProjectTable", "/Project/:sid/Spots"]} component={Mapp}>
+            <Route path={["/Map", "/ProjectTable", "/Project/:sid/Spots"]} component={Mapp}>
               <Sidebar sidebarButtons={
                 [
                   ['项目地图', 'map', '/', '展示项目所在地'],
@@ -130,13 +130,9 @@ const App: React.FC = () => {
             </Switch>
           </Suspense>
         </Router>
-
       </Pane>
-
     </Pane>
-
   );
-
 };
 
 export default App;

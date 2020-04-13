@@ -48,7 +48,13 @@ const RecordTable: React.FC<{}> = (props) => {
 
         setLoaded(true);
       })
-      .catch(e => console.error(e))
+      .catch(e => {
+        setSpotRecords([]);
+        setTotalPage(0);
+        setTotalElementCount(0);
+        console.error(e);
+      })
+      .finally(() => setLoaded(true));
   }, []);
   useInit(makePaginationRequest(1, pageSize));
 
@@ -67,10 +73,14 @@ const RecordTable: React.FC<{}> = (props) => {
         setTotalPage(Math.floor(srs.totalElementCount / pageSize));
         setCurrentPage(currentPage);
         setItemCheckedList(srs.data.map(() => false));
-
-        setLoaded(true);
       })
-      .catch(e => console.error(e))
+      .catch(e => {
+        setSpotRecords([]);
+        setTotalPage(0);
+        setTotalElementCount(0);
+        console.error(e);
+      })
+      .finally(() => setLoaded(true));
   };
 
 
