@@ -60,7 +60,7 @@ export const useTableParent = (setTableParent: Function) => {
    * that owns the current spotRecords to the spotRecords table.
    */
 
-  let location = useLocation();
+  let location = useLocation<{tableParent: ApiDataType}>();
 
   useEffect(() => {
     // it could be undefined.
