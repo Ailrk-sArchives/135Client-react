@@ -28,8 +28,8 @@ L.Icon.Default.mergeOptions({
 const pos: L.LatLng = L.latLng(31.544, 111.782);
 
 const markerIcon = new L.Icon({
-  iconRetinaUrl: require('leaflet/dist/images/marker.png'),
-  iconUrl: require('leaflet/dist/images/marker.png'),
+  iconRetinaUrl: require('../marker.png'),
+  iconUrl: require('../marker.png'),
   shadowUrl: require('leaflet/dist/images/marker-shadow.png'),
   iconAnchor: [5, 55],
   popupAnchor: [10, -44],
