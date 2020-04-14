@@ -1,11 +1,12 @@
 /* Entrance of the App
 */
 import React, {useState, useEffect, Suspense, lazy} from 'react';
-import {Pane, Text, Spinner, Icon} from 'evergreen-ui';
+import {Pane, Text, Spinner, Icon, Stack} from 'evergreen-ui';
 import {Router, Route, Switch} from 'react-router-dom';
 import Header from './Header';
 import Sidebar from './Sidebar/Sidebar';
 import history from './history';
+import './background.css';
 
 const Mapp: any = lazy(() => import('./Mapp/Mapp'));
 const DeviceTable: any = lazy(() => import('./Table/DeviceTable/DeviceTable'));
@@ -28,7 +29,22 @@ const App: React.FC = () => {
   const [logined, setLogined] = useState<boolean>(false); // login info
   return logined
     ? <LoginedSession />
-    : <LoginPageSession setLogined={setLogined} />;
+    :
+
+    <>
+      <Pane className="context">
+          <LoginPageSession setLogined={setLogined} />
+      </Pane>
+      <div className="area">
+        <ul className="circles">
+          <li></li>
+          <li></li>
+          <li></li>
+          <li></li>
+          <li></li>
+        </ul>
+      </div>
+    </>
 };
 
 const SessionSideBar = () =>
