@@ -52,7 +52,10 @@ const Login = (props: {
             () => {
               console.log("hi")
               loginVerify(uname, password)
-                .then(res => {setLogined(res);});
+              .then(res => {
+                if (!res) toaster.warning("用户名或密码错误");
+                setLogined(res);
+              });
             }
           }>
             Clicke me
