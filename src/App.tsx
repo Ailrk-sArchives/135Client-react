@@ -26,25 +26,24 @@ const mainStyle: React.CSSProperties = {
 };
 
 const App: React.FC = () => {
-  const [logined, setLogined] = useState<boolean>(false); // login info
+  const [logined, setLogined] =
+    useState<boolean>(localStorage.getItem('logined') === 'true' ?  true : false);
   return logined
     ? <LoginedSession />
-    :
-
-    <>
-      <Pane className="context">
+    : <>
+        <Pane className="context">
           <LoginPageSession setLogined={setLogined} />
-      </Pane>
-      <div className="area">
-        <ul className="circles">
-          <li></li>
-          <li></li>
-          <li></li>
-          <li></li>
-          <li></li>
-        </ul>
-      </div>
-    </>
+        </Pane>
+        <div className="area">
+          <ul className="circles">
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+          </ul>
+        </div>
+      </>
 };
 
 const SessionSideBar = () =>

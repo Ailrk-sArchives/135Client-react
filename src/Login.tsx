@@ -26,10 +26,10 @@ const Login = (props: {
           paddingTop={80}
           paddingBottom={80}
           background="tint2">
-          <Pane marginBottom={30}>
+          <Pane marginBottom={30} >
             <Strong size={600} >
               十三五长江流域建筑供暖解决方案云平台
-      </Strong>
+             </Strong>
 
           </Pane>
 
@@ -52,10 +52,11 @@ const Login = (props: {
             () => {
               console.log("hi")
               loginVerify(uname, password)
-              .then(res => {
-                if (!res) toaster.warning("用户名或密码错误");
-                setLogined(res);
-              });
+                .then(res => {
+                  if (!res) toaster.warning("用户名或密码错误");
+                  localStorage.setItem('logined', res.toString());
+                  setLogined(res);
+                });
             }
           }>
             Clicke me
