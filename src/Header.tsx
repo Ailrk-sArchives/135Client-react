@@ -27,9 +27,9 @@ const Header: React.FC = (props) => {
 
           <Title titlename={"十三五\"长江流域建筑供暖空调解决方案和相应系统\"云平台"}/>
           <Topnav tablists={[
-            ['项目信息', 'office', '/', '项目信息汇总'],
+            ['项目信息', 'office', '/Map', '项目信息汇总'],
             ['历史数据', 'join-table', '/DeviceTable', '设备列表历史汇总'],
-            ['实时数据', 'timeline-line-chart', ,'实时设备数据汇总'] ,
+            ['实时数据', 'timeline-line-chart', '/Map', '实时设备数据汇总'] ,
             ['数据分析', 'comparison', '/Visualization', '数据对比及可视化']
           ]}/>
         </Pane>

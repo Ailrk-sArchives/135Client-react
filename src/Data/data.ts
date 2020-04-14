@@ -293,6 +293,34 @@ function fmapData<T, U>(f: (e: T) => U, m: WithData<T>): WithData<U | T> {
   TODO: if return value is not 0, return message instead.
 */
 
+const hasher = (p: string) => {
+  let hash = 0;
+  for (let i = 0; i < p.length; ++i) {
+    let char = p.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & hash;
+  }
+  return hash;
+}
+
+export const loginVerify = (name: string, pw: string): Promise<boolean> => {
+  const loginInfo = {
+    name,
+    pwhash: hasher(pw).toString(),
+  }
+
+  return makeApi(concatPath(apiBaseUrl, '/api/v1/login'),
+    (url: string) => {
+      return axios.post(url, makeRequest(loginInfo), makeJsonRequestHeader())
+      .then((response: AxiosResponse<ApiResponse<void>>) => {
+        console.log(response.data)
+        return response.data.status == 0;
+      })
+      .catch(e => console.error(e))
+    }, loginInfo);
+}
+
+
 export type Message = string;
 export type FeedBack = {message: string, status: number};
 
