@@ -312,11 +312,11 @@ export const loginVerify = (name: string, pw: string): Promise<boolean> => {
   return makeApi(concatPath(apiBaseUrl, '/api/v1/login'),
     (url: string) => {
       return axios.post(url, makeRequest(loginInfo), makeJsonRequestHeader())
-      .then((response: AxiosResponse<ApiResponse<void>>) => {
-        console.log(response.data)
-        return response.data.status == 0;
-      })
-      .catch(e => console.error(e))
+        .then((response: AxiosResponse<ApiResponse<void>>) => {
+          console.log(response.data)
+          return response.data.status == 0;
+        })
+        .catch(e => console.error(e))
     }, loginInfo);
 }
 
@@ -385,7 +385,6 @@ export class IdempotentApis {
             })
             .catch(e => console.error(e));
         });
-
 
     static PostPayload = class {
 
@@ -485,6 +484,19 @@ export class IdempotentApis {
             },
             params);
     };
+
+    static RealTime = class {
+      static getRealtimeDevice = (): Promise<Array<Device>> =>
+        makeApi(concatPath(apiBaseUrl, '/api/v1/realtime/devices'),
+          (url: string) => {
+            return axios.get(url)
+              .then(response => {
+                return (response.data.data as Array<Device>)
+                  .map(e => padtag("Device", e));
+              })
+              .catch(e => console.error(e));
+          });
+    }
   };
 
 

@@ -3,12 +3,14 @@ import {
   Pane, Button, Tab, Icon, Stack, Text, Strong, TextInput,
   toaster, SelectMenu, TagInput, Tooltip,
 } from 'evergreen-ui'
+import {Route} from 'react-router-dom';
 import {Link, useLocation} from 'react-router-dom'
 import LineChart from './LineChart'
 import DatePicker from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker.css';
 import {SpotRecord, spotRecordKeys} from '../Data/data'
 import {valid} from 'glamor'
+import ComparisonChart from './ComparisonChart';
 
 const chartCommonProperties = {
   width: 1300,
@@ -250,11 +252,21 @@ export const ChartFrame: React.FC<{currentZoom: number}> = props => {
           paddingLeft={60}
           background="tint2"
           width="100hv" >
-          <LineChart
-            did={did}
-            keys={keys}
-            dateRange={[startDate, endDate]}
-            extraPros={chartCommonProperties} />
+          <Route path={"/Visualization/LineChart"}>
+            <LineChart
+              did={did}
+              keys={keys}
+              dateRange={[startDate, endDate]}
+              extraPros={chartCommonProperties} />
+          </Route>
+          <Route path={"/Visualization/Comparison"}>
+            <ComparisonChart
+              did={did}
+              keys={keys}
+              dateRange={[startDate, endDate]}
+              extraPros={chartCommonProperties} />
+          </Route>
+
         </Pane>
       </Pane>
     </Fragment>

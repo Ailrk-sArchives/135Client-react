@@ -29,7 +29,7 @@ const TabContentResolver:
     selectedTabIndex?: number,
     setSelectedTabIndex?: Function,
     index: number
-  }> = (props) => {
+  }> = props => {
 
     const [tabName, tabIcon, tabHref, tabTip] = props.contentList;
     const tabwidth = props.tabwidth ? props.tabwidth : 100;
@@ -43,7 +43,7 @@ const TabContentResolver:
 
     const ticon: React.ReactNode =
       typeof tabIcon === typeof Icon ? tabIcon as Icon
-      : (<Icon icon={tabIcon as IconName} marginLeft={"5%"} />) ;
+        : (<Icon icon={tabIcon as IconName} marginLeft={"5%"} />);
 
     const tab: React.ReactNode = (
       <Stack value={1001}>
@@ -73,7 +73,7 @@ const TabContentResolver:
         <Link to={tabHref} style={linkCss}>
           {tab}
         </Link>)
-        : (<Link to={"/"} style={linkCss}>
+        : (<Link to={"/Map"} style={linkCss}>
           {tab}
         </Link>);
     return content;

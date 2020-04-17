@@ -53,24 +53,6 @@ export type PanelPopupMenuProps =
 export type TablePopupMenuProps =
   Omit<PanelPopupMenuProps, keyof ShownDialogProps> & DialogConfirmedProps;
 
-export const useTableParent = (setTableParent: Function) => {
-  /*
-   * Pass the parent api data from previous route.
-   * The goal is to achieve the effect like pass the device
-   * that owns the current spotRecords to the spotRecords table.
-   */
-
-  let location = useLocation<{tableParent: ApiDataType}>();
-
-  useEffect(() => {
-    // it could be undefined.
-    const tableParent = location.state?.tableParent || {};
-    setTableParent(tableParent);
-
-  }, []);
-};
-
-
 // await for state change.
 export const timeout =
   async (ms: number) => new Promise(res => setTimeout(res, ms));

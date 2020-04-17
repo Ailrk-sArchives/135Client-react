@@ -29,7 +29,7 @@ const Header: React.FC = (props) => {
           <Topnav tablists={[
             ['项目信息', 'office', '/Map', '项目信息汇总'],
             ['历史数据', 'join-table', '/DeviceTable', '设备列表历史汇总'],
-            ['实时数据', 'timeline-line-chart', '/Map', '实时设备数据汇总'] ,
+            ['实时数据', 'timeline-line-chart', '/RealTime/Devices', '实时设备数据汇总'] ,
             ['数据分析', 'comparison', '/Visualization', '数据对比及可视化']
           ]}/>
         </Pane>

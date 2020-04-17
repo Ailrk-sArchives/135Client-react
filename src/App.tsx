@@ -26,24 +26,25 @@ const mainStyle: React.CSSProperties = {
 };
 
 const App: React.FC = () => {
+  document.title = "十三五长江流域建筑供暖解决方案云平台"
   const [logined, setLogined] =
-    useState<boolean>(localStorage.getItem('logined') === 'true' ?  true : false);
+    useState<boolean>(localStorage.getItem('logined') === 'true' ? true : false);
   return logined
     ? <LoginedSession />
     : <>
-        <Pane className="context">
-          <LoginPageSession setLogined={setLogined} />
-        </Pane>
-        <div className="area">
-          <ul className="circles">
-            <li></li>
-            <li></li>
-            <li></li>
-            <li></li>
-            <li></li>
-          </ul>
-        </div>
-      </>
+      <Pane className="context">
+        <LoginPageSession setLogined={setLogined} />
+      </Pane>
+      <div className="area">
+        <ul className="circles">
+          <li></li>
+          <li></li>
+          <li></li>
+          <li></li>
+          <li></li>
+        </ul>
+      </div>
+    </>
 };
 
 const SessionSideBar = () =>
@@ -76,10 +77,9 @@ const SessionSideBar = () =>
         }
           sidebarWidth={sidebarWidth}
           headerHeight={headerHeight} />
-
       </Route>
 
-      <Route path={["/DeviceTable", "/Device/:did/SpotRecords", "/Spot/:sid/Devices"]}
+      <Route path={["/DeviceTable", "/Device/:did/SpotRecords", "/Spot/:sid/Devices", "/RealTime/Devices"]}
         component={DeviceTable}>
         <Sidebar sidebarButtons={
           [
@@ -92,15 +92,16 @@ const SessionSideBar = () =>
           headerHeight={headerHeight} />
       </Route>
 
-      <Route path="/Visualization" component={Visualization}>
+      <Route path={["/Visualization", "/Visualization/LineChart", "/Visualization/ComparisionChart"]} component={Visualization}>
         <Sidebar sidebarButtons={
           [
-            ['折线图', '', '/Test', '显示数据折线图'],
-            //['柱状图', '', '/Test', '显示数据柱状图'],
+            ['折线图', '', '/Visualization/LineChart', '显示数据折线图'],
+            ['对比图', '', '/Visualization/ComparisionChart', '显示数据对比图'],
           ]
         }
           sidebarWidth={sidebarWidth}
           headerHeight={headerHeight} />
+
       </Route>
 
       <Route path="/Test" component={Test}>
@@ -130,13 +131,15 @@ const SessionContent = () =>
         component={Mapp} />
       <Route path="/ProjectTable"
         component={ProjectTable} />
-      <Route path="/DeviceTable"
+      <Route path="/DeviceTable" key={"/DeviceTable"}
         component={DeviceTable} />
       <Route path="/Device/:did/SpotRecords"
         component={RecordTable} />
       <Route path="/Project/:pid/Spots"
         component={SpotTable} />
-      <Route path="/Spot/:sid/Devices"
+      <Route path="/Spot/:sid/Devices" key={"/Spot/:sid/Devices"}
+        component={DeviceTable} />
+      <Route path="/RealTime/Devices" key={"/RealTime/Devices"}
         component={DeviceTable} />
       <Route path="/Visualization"
         component={Visualization} />

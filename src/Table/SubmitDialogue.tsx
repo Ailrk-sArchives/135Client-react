@@ -69,8 +69,6 @@ const SubmitDialogue =
       );
     }, []);
 
-    console.log(entries);
-
     return (
       <Stack value={1100}>
         {
@@ -92,8 +90,7 @@ const SubmitDialogue =
               onConfirm={close => {
                 confirmed.current = true;
                 close();
-              }}
-            >
+              }}>
               {
                 ({close}) =>
                   React.createElement(SubmitTable,

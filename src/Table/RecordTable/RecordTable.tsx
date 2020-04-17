@@ -1,5 +1,5 @@
-import React, {useState, useEffect} from 'react';
-import Frame from '../../Frame';
+import React, {useState, useEffect} from 'react'
+import Frame from '../../Frame'
 import {
   IdempotentApis,
   NonIdempotentApis,
@@ -10,13 +10,14 @@ import {
   HTTPMethods,
   spotRecordKeys,
   PagedData
-} from '../../Data/data';
-import {useParams} from 'react-router-dom';
-import {PaginationProps} from '../TablePagination';
-import ContentCard from '../ContentCard';
-import {useTableParent, PanelOperationTable, Operation} from '../utils/utils';
+} from '../../Data/data'
+import {useParams} from 'react-router-dom'
+import {PaginationProps} from '../TablePagination'
+import ContentCard from '../ContentCard'
+import {PanelOperationTable, Operation} from '../utils/utils'
+import {useTableParent} from '../utils/location'
 
-import {Tablefc} from './TableComponent';
+import {Tablefc} from './TableComponent'
 
 const RecordTable: React.FC<{}> = (props) => {
   const [spotRecords, setSpotRecords] = useState<Array<SpotRecord>>([]);

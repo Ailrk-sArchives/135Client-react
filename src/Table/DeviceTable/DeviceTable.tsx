@@ -1,5 +1,5 @@
-import React, {useState, useEffect} from 'react';
-import {useParams} from 'react-router-dom';
+import React, {useState, useEffect} from 'react'
+import {useParams, useRouteMatch} from 'react-router-dom'
 import {
   IdempotentApis,
   NonIdempotentApis,
@@ -11,73 +11,49 @@ import {
   deviceKeys,
   HTTPMethods,
   FetchedData,
-} from '../../Data/data';
-import {PaginationProps} from '../TablePagination';
-import ContentCard from '../ContentCard';
-import Frame from '../../Frame';
-import {useTableParent, PanelOperationTable, Operation} from '../utils/utils';
+} from '../../Data/data'
+import {PaginationProps} from '../TablePagination'
+import ContentCard from '../ContentCard'
+import Frame from '../../Frame'
+import {PanelOperationTable, Operation} from '../utils/utils'
+import {useTableParent} from '../utils/location'
 
-import {Tablefc} from './TableComponent';
+import {Tablefc} from './TableComponent'
 
 const DeviceTable: React.FC<{}> = (props) => {
 
-  //
   const [devices, setDevices] = useState<Array<Device>>([]);
-
   const [currentPage, setCurrentPage] = useState<number>(1);
-
   const [totalPage, setTotalPage] = useState<number>(5);
-
   const [totalElementCount, setTotalElementCount] = useState<number>(0);
-
   const [tickAll, setTickAll] = useState<boolean>(false);
-
   const [itemCheckedList, setItemCheckedList] = useState<Array<boolean>>([]);
-
   const [pageSize, setPageSize] = useState<number>(10);
-
   const [loaded, setLoaded] = useState<boolean>(false);
-
   const [tableParent, setTableParent] = useState<ApiDataType | undefined>();
 
-  let {sid} = useParams();
   useTableParent(setTableParent);
 
-  // fetch
-  const useInit =
-    (paginationRequest: PaginationRequest) => useEffect(() => {
-      const resposne: Promise<Array<Device> | FetchedData<Array<Device>>> =
-        (sid ?
-          IdempotentApis
-            .Get
-            .PostPayload
-            .fetchDeviceBySpot(
-              paginationRequest,
-              (sid ? Number.parseInt(sid) : 1))
-          :
-          IdempotentApis
-            .Get
-            .PostPayload
-            .fetchDevice(paginationRequest)
-        );
-
-      resposne.then(ds => {
-        console.log(ds);
-        if ((ds as Array<Device>).length) {
-          setDevices(ds as Array<Device>);
-          setItemCheckedList((ds as Array<Device>).map(() => false));
-        }
-
-        if ((ds as PagedData<Array<Device>>).data) {
-          const {totalElementCount, data, currentPage, pageSize} = ds as PagedData<Array<Device>>;
-          setDevices(data);
-          setCurrentPage(currentPage);
-          setTotalElementCount(totalElementCount);
-          setTotalPage(Math.floor(totalElementCount / pageSize) + 1);
-          setItemCheckedList(data.map(() => false));
-        }
-
-      })
+  const useUpdate = (paginationRequest: PaginationRequest) => {
+    const response = useResponseDispatcher(makePaginationRequest(1, pageSize))
+    useEffect(() => {
+      response
+        .then(ds => {
+          setLoaded(false);
+          if ((ds as Array<Device>).length) {
+            setDevices(ds as Array<Device>);
+            setItemCheckedList((ds as Array<Device>).map(() => false));
+          }
+          if ((ds as PagedData<Array<Device>>).data) {
+            const {totalElementCount, data, currentPage, pageSize} =
+              ds as PagedData<Array<Device>>;
+            setDevices(data);
+            setCurrentPage(currentPage);
+            setTotalElementCount(totalElementCount);
+            setTotalPage(Math.floor(totalElementCount / pageSize) + 1);
+            setItemCheckedList(data.map(() => false));
+          }
+        })
         .catch(e => {
           setDevices([]);
           setTotalPage(0);
@@ -85,49 +61,8 @@ const DeviceTable: React.FC<{}> = (props) => {
         })
         .finally(() => setLoaded(true));
     }, []);
-  useInit(makePaginationRequest(1, pageSize));
-
-  // useUpdate only happen in paged device query.
-  const useUpdate = (paginationRequest: PaginationRequest) => {
-
-    setLoaded(false);
-    const resposne: Promise<Array<Device> | FetchedData<Array<Device>>> =
-      (sid ?
-        IdempotentApis
-          .Get
-          .PostPayload
-          .fetchDeviceBySpot(
-            paginationRequest,
-            (sid ? Number.parseInt(sid) : 1))
-        :
-        IdempotentApis
-          .Get
-          .PostPayload
-          .fetchDevice(paginationRequest)
-      );
-
-    resposne.then(ds => {
-      if ((ds as Array<Device>).length) {
-        setDevices(ds as Array<Device>);
-        setItemCheckedList((ds as Array<Device>).map(() => false));
-      }
-
-      if ((ds as PagedData<Array<Device>>).data) {
-        const {totalElementCount, data, currentPage, pageSize} = ds as PagedData<Array<Device>>;
-        setDevices(data);
-        setCurrentPage(currentPage);
-        setTotalElementCount(totalElementCount);
-        setTotalPage(Math.floor(totalElementCount / pageSize));
-        setItemCheckedList(data.map(() => false));
-      }
-    })
-      .catch(e => {
-        setDevices([]);
-        setTotalPage(0);
-        setTotalElementCount(0);
-      })
-      .finally(() => setLoaded(true));
   };
+  useUpdate(makePaginationRequest(1, pageSize))
 
   const paginationProps: PaginationProps = {  // set pagination control.
     useUpdate,
@@ -179,5 +114,33 @@ const DeviceTable: React.FC<{}> = (props) => {
     )} />);
 };
 
+type APIPromise = Promise<Array<Device> | FetchedData<Array<Device>>>;
+const useResponseDispatcher =
+  (paginationRequest: PaginationRequest): APIPromise => {
+    const deviceTableMatch = useRouteMatch('/DeviceTable')
+    const spotDeviceMatch = useRouteMatch<{sid: string}>('/Spot/:sid/Devices')
+    const realtimeMatch = useRouteMatch('/RealTime/Devices')
+
+    if (deviceTableMatch) {
+      return IdempotentApis.Get
+        .PostPayload
+        .fetchDevice(paginationRequest)
+    }
+    else if (spotDeviceMatch) {
+      const {sid} = spotDeviceMatch.params;
+      return IdempotentApis.Get
+        .PostPayload
+        .fetchDeviceBySpot(
+          paginationRequest,
+          (sid ? Number.parseInt(sid) : 1))
+    }
+    else if (realtimeMatch) {
+      return IdempotentApis
+        .Get
+        .RealTime
+        .getRealtimeDevice()
+    }
+    return new Promise(() => [])
+  }
 
 export default DeviceTable;
