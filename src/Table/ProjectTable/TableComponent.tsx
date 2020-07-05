@@ -93,7 +93,6 @@ export const Tablefc: TableFC = (props) => {
                 smallScale: 0.65
               } as dynamicHeightProperties
             )
-
           }>
             {data ?
 

@@ -30,5 +30,3 @@ export const dynamicHeight = (zoom: number, dynprop: dynamicHeightProperties) =>
   if (zoom >= 80) return window.innerHeight * dynprop.smallScale;
   return window.innerHeight * dynprop.smallScale;
 };
-
-

@@ -1,6 +1,6 @@
 import React, {useState, Fragment, useEffect, useRef} from 'react'
 import {
-  Pane, Button, Tab, Icon, Stack, Text, Strong, TextInput,
+  Pane, Button, Tab, Icon, Text, Strong, TextInput,
   toaster, SelectMenu, TagInput, Tooltip,
 } from 'evergreen-ui'
 import {Route} from 'react-router-dom';
@@ -168,7 +168,7 @@ const KeySelector = (props: {
   );
 }
 
-export const ChartFrame: React.FC<{currentZoom: number}> = props => {
+export const ChartFrame: React.FC<{currentZoom: number}> = () => {
   // TODO: main jobs
   // 1. header with enough information,
   // 2. be able to change the digram with header setting.
@@ -272,4 +272,3 @@ export const ChartFrame: React.FC<{currentZoom: number}> = props => {
     </Fragment>
   );
 }
-

@@ -412,7 +412,6 @@ export class IdempotentApis {
                     return fmapData(
                       padTagFetchedData.bind(null, "Spot"), response.data).data;
                   }
-
                   // (response.data.data as Array<Spot>)
                   //     .map(e => padtag("Spot", e));
                 })
@@ -583,7 +582,6 @@ export class IdempotentApis {
 
   };
 
-
   static Delete = class {
     static deleteProject = (pid: number): Promise<FeedBack> =>
       makeApi(
@@ -631,13 +629,10 @@ export class IdempotentApis {
 
 
 export class NonIdempotentApis {
-
   static Post = class {
-
     static postProject =
       (params: AdaptorTypes.PanelProject): Promise<ApiResponse<Project>> =>
         makeApi(concatPath(apiBaseUrl, `api/v1/project/`),
-
           (url: string) => {
             return axios.post(url,
               makeRequest(AdaptorTypes.MakeServerData.makeProject(params)),
@@ -646,7 +641,6 @@ export class NonIdempotentApis {
               .then(response => {
                 return fmapData(
                   padtag.bind(null, "Project"), response.data) as ApiResponse<Project>
-
               })
               .catch(e => console.error(e));
           }

@@ -92,7 +92,7 @@ const Mapp: React.FC<{}> = () => {
           geoJson={filterGeoJson(chinaGeoJson, provinces)} />
         <Pane width="70hv" display="flex" />
         <p style={{color: "#66788A", height: 3, width: 20, fontSize: 6, cursor: "default"}}>
-          B y . j    i    m    m    y
+          j    i    m
               </p>
       </Card>
     </Pane>

@@ -51,6 +51,7 @@ const MappedTextInput: React.FC<{
 
   console.log(entries);
 
+
   return (
     <TextInput height={45}
       width={"95%"}
